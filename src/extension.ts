@@ -1,7 +1,8 @@
-import path = require("path");
-import { setFlagsFromString } from "v8";
 import * as vscode from "vscode";
 import { ConfigParser } from "./configparser";
+
+// {media_dir}/videos/{module_name}/{quality}
+
 
 const CONFIG_STATE_ID = "config_state_id";
 const DEFAULT_MEDIA_DIR = "videos/${fileName}/${sceneName}.mp4";

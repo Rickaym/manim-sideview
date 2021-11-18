@@ -37,7 +37,7 @@
         "manim-sideview.videoFilePath": {
           "type": "string",
           "scope": "application",
-          "default": "videos/${fileName}/480p15/${sceneName}.mp4",
+          "default": "videos/${fileName}/${resolution}/${sceneName}.mp4",
           "description": "The video media file path relative from the media folder. This is best left by default if you're not sure what this is."
         },
         "manim-sideview.runOnSave": {
