@@ -15,7 +15,8 @@
   "activationEvents": [
     "onCommand:manim-sideview.run",
     "onCommand:manim-sideview.refreshConfiguration",
-    "onCommand:manim-sideview.setConfigFile"
+    "onCommand:manim-sideview.setConfigFile",
+    "onCommand:manim-sideview.setRenderingScene"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -72,8 +73,12 @@
       {
         "command": "manim-sideview.setConfigFile",
         "title": "Tie a config file to the currently focused source file - this is as same as using --config-file flag."
+      },
+      {
+        "command": "manim-sideview.setRenderingScene",
+        "title": "Set a new rendering scene, this only registers when you're not using a configuration file."
       }
-    ],
+  ],
     "keybindings": [
       {
         "command": "manim-sideview.run",

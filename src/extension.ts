@@ -1,16 +1,11 @@
-import { readFile, readFileSync } from "fs";
-import path = require("path");
+import { readFileSync } from "fs";
 import * as vscode from "vscode";
-import { ConfigParser } from "./configparser";
+import { ConfigParser, Config } from "./configparser";
 
 // {media_dir}/videos/{module_name}/{quality}
-
-const CONFIG_STATE_ID = "config_state_id";
 const DEFAULT_MEDIA_DIR = "videos/${fileName}/${sceneName}.mp4";
-/**
- * TODO:
- *       2. Using Parsed results in extensions
- */
+const USER_DEF_CONFIGURATION = ["output", "sceneName"];
+const LOCATE = { section: "CLI", key: "media_dir" };
 
 /**
  * An object of context variables and their suppliers
@@ -28,6 +23,29 @@ const CONTEXT_VARIABLES: { [varName: string]: any } = {
   },
 };
 
+// Relevant config for running, not all are user provided
+type RunningConfig = {
+  exePath: string;
+  srcPath: string;
+  sceneName: string;
+  args: string;
+  output: string;
+  usingConfigFile: boolean;
+};
+
+// The key and value pairs here directly correlate to
+// USER_DEF_CONFIGURATION
+type ManimConfig = {
+  output: string;
+  sceneName: string;
+};
+
+type Job = {
+  config: RunningConfig;
+  /*  to be implemented */
+  flag: boolean;
+};
+
 // generalizes both directional slashes into a forward slash
 const generalizeUri = (uri: string) => uri.replace(/\\/g, "/");
 
@@ -38,32 +56,18 @@ const generalizeUri = (uri: string) => uri.replace(/\\/g, "/");
  * These should be changed accordingly if there are any changes to the
  * manim configuration.
  */
-const OUTPUT_LC = { section: "CLI", key: "media_dir" };
-
-// Relevant config for running
-type RunningConfig = {
-  path: string;
-  args: string;
-  output: string;
-  filepath: string;
-};
-
-// Fromatted manim config from .cfg
-type ManimConfig = {
-  output: string;
-};
 
 class ManimSideview {
   constructor(public readonly ctx: vscode.ExtensionContext) {
     this.ctx = ctx;
     this.manimCfgPath = "";
-    this.jobs = {};
+    this.jobs = [];
   }
   private manimCfgPath: string;
   // a list of running jobs tied to each file
   // starting a job will allow auto-save rendering
   // unless explicitely disabled
-  private jobs: { [sourcePath: string]: boolean };
+  private jobs: Job[];
 
   async run(onSave: boolean = false) {
     if (!vscode.window.activeTextEditor) {
@@ -73,21 +77,18 @@ class ManimSideview {
     }
     const srcPath = vscode.window.activeTextEditor.document.fileName;
 
-    if (onSave && !this.jobs[srcPath]) {
+    // we only want to engage rendering on save (if enabled)
+    // when the job was already first started by the user
+    if (onSave === true && !Object.keys(srcPath).includes(srcPath)) {
       return;
     }
 
     const conf = await this.getRunningConfig(srcPath);
-    let error: string | undefined;
 
-    if (!conf.path) {
-      error =
-        "You cannot run a manim sideview without supplying a valid manim executable path.";
-    } else if (!conf.output) {
-      error = "You haven't supplied a valid media output path.";
-    }
-    if (error) {
-      return await vscode.window.showErrorMessage(error);
+    // the top level run function does not directly report error messages and
+    // expects the lower level functions to do so
+    if (conf === false) {
+      return;
     }
 
     var terminal;
@@ -99,7 +100,7 @@ class ManimSideview {
     if (!terminal) {
       terminal = vscode.window.createTerminal(`Manim`);
     }
-    terminal.sendText(`${conf.path} ${conf.filepath} ${conf.args}`);
+    terminal.sendText(`${conf.exePath} ${conf.srcPath} ${conf.args}`);
 
     // formulate a decent system to understand when a command is executed
     const selects = await vscode.window.showInformationMessage(
@@ -110,8 +111,8 @@ class ManimSideview {
       return;
     }
     // Mpeg-4 cross extension dependency guard
-    const exists = (await vscode.commands.getCommands(false)).filter(
-      (c) => c === "preview-mp4.zoomIn"
+    const exists = (await vscode.commands.getCommands(false)).includes(
+      "preview-mp4.zoomIn"
     );
     if (!exists) {
       return await vscode.window.showErrorMessage(
@@ -121,7 +122,7 @@ class ManimSideview {
 
     try {
       this.openSideview(this.outputPathByContext(conf));
-      this.jobs[srcPath] = true;
+      this.jobs.push({ config: conf, flag: false });
     } catch (e) {
       console.log(e);
       await vscode.window.showErrorMessage(
@@ -130,9 +131,7 @@ class ManimSideview {
     }
   }
 
-  async refreshConfiguration() {
-    this.ctx.workspaceState.update(CONFIG_STATE_ID, undefined);
-  }
+  async refreshConfiguration() {}
 
   async setConfigFile() {
     const uri = await vscode.window.showOpenDialog({
@@ -144,7 +143,37 @@ class ManimSideview {
     if (uri) {
       const pth: string = generalizeUri(uri[0].path);
       this.manimCfgPath = pth.startsWith("/") ? pth.substring(1) : pth;
-      this.ctx.workspaceState.update(CONFIG_STATE_ID, true);
+    }
+  }
+
+  async setRenderingScene() {
+    try {
+      var job = this.getActiveJob();
+    } catch (e: any) {
+      return await vscode.window.showErrorMessage(e.message);
+    }
+    if (job) {
+      const sceneName = await vscode.window.showInputBox({
+        title: "Provide a scene name",
+      });
+      if (sceneName) {
+        job.config.sceneName = sceneName;
+      }
+    }
+  }
+
+  getActiveJob(): Job | undefined {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor || editor.document.languageId !== "python") {
+      throw TypeError(
+        "Active text editor or the document must not be None or incompatible"
+      );
+    } else {
+      return this.jobs.find(
+        (j) =>
+          generalizeUri(j.config.srcPath).toLowerCase() ===
+          generalizeUri(editor.document.fileName).toLowerCase()
+      );
     }
   }
 
@@ -179,47 +208,26 @@ class ManimSideview {
    * @param sourcePath
    * @returns ManimConfig
    */
-  async getManimConfig(sourcePath: string): Promise<ManimConfig | undefined> {
-    var chosen = this.ctx.workspaceState.get(CONFIG_STATE_ID);
-    var cfg = undefined;
-
-    // we must reload the config for every run unless explicitly cancelled
-    if (chosen !== false) {
-      var cfgPath: string;
-
-      if (this.manimCfgPath) {
-        cfgPath = this.manimCfgPath;
-      } else {
-        // user made manim.cfg files normally must remain on the
-        // same directory of the source path thus we can guess this as such
-        cfgPath = sourcePath.split("/").slice(0, -1).join("/") + "/manim.cfg";
-      }
-      try {
-        cfg = ConfigParser.parse(cfgPath);
-      } catch (e) {}
-
-      if (cfg) {
-        cfg = {
-          output: Object.keys(cfg).includes(OUTPUT_LC.section)
-            ? this.toAbsolutePath(cfg[OUTPUT_LC.section][OUTPUT_LC.key]) ||
-              DEFAULT_MEDIA_DIR
-            : DEFAULT_MEDIA_DIR,
-        };
-      } else {
-        return undefined;
-      }
+  async getManimConfig(sourcePath: string): Promise<ManimConfig | undefined | false> {
+    var cfg: ManimConfig | undefined;
+    // user made manim.cfg files normally must remain on the
+    // same directory of the source path thus we can guess this as such
+    var cfgPath = this.manimCfgPath
+      ? this.manimCfgPath
+      : sourcePath.split("/").slice(0, -1).join("/") + "/manim.cfg";
+    try {
+      var parsedRes = ConfigParser.parse(cfgPath);
+    } catch (e) {
+      return undefined;
     }
+    const hasAll = USER_DEF_CONFIGURATION.map((key) => Object.keys(parsedRes[LOCATE.section])
+                      .includes(key))
+                      .every((e) => e);
 
-    if (chosen === true) {
+    if (hasAll === true) {
       return cfg;
-    } else if (chosen === undefined) {
-      const selects = await vscode.window.showInformationMessage(
-        "I found a `manim.cfg` file in the source directory. Would you like to use the options for rendering the video preview? You can always get this dialog back when running by using the refresh Configuration command.",
-        "Yes",
-        "No"
-      );
-      this.ctx.workspaceState.update(CONFIG_STATE_ID, selects === "Yes");
-      return selects === "Yes" ? cfg : undefined;
+    } else {
+      return false;
     }
   }
 
@@ -227,7 +235,7 @@ class ManimSideview {
    * Get the configurations in a tightly packed
    * object relevant for running.
    */
-  async getRunningConfig(sourcePath: string): Promise<RunningConfig> {
+  async getRunningConfig(sourcePath: string): Promise<RunningConfig | false> {
     const conf = vscode.workspace.getConfiguration("manim-sideview");
 
     const exe: string = conf.get("defaultManimPath") || "";
@@ -239,28 +247,43 @@ class ManimSideview {
     var output: string = "";
 
     const runningCfg: RunningConfig = {
-      path: exe,
+      exePath: exe,
+      srcPath: sourcePath,
       args: args,
       output: output,
-      filepath: sourcePath,
+      usingConfigFile: false,
+      sceneName: "",
     };
-
     const cfg = await this.getManimConfig(sourcePath);
-    if (cfg) {
+
+    if (cfg === false) {
+      vscode.window.showErrorMessage(`Your configuration file found is incomplete! Please make sure you have all the following defined ${USER_DEF_CONFIGURATION.join(', ')}`);
+      return false;
+    } else if (cfg) {
+      runningCfg.usingConfigFile = true;
+      runningCfg.sceneName = cfg.sceneName;
       runningCfg.output =
         cfg.output + videoFP.startsWith("/") ? videoFP : "/" + videoFP;
+      // we'll let the user know that we're using the manim.cfg if the job had just started
+      if (!this.jobs.find((j) => j.config.srcPath === runningCfg.srcPath)) {
+        vscode.window.showInformationMessage(
+          "I found a mainm.cfg file in the source directory! The sideview is as configured appropriately."
+        );
+    }
     } else {
       await this.getInTimeConfiguration(runningCfg);
     }
     return runningCfg;
   }
 
-  async getInTimeConfiguration(runningCfg: RunningConfig | null) {
+  async getInTimeConfiguration(runningCfg: RunningConfig) {
     const _panel = vscode.window.createWebviewPanel(
       "inTimeConfiguration",
       "In Time Configurations",
       vscode.ViewColumn.Beside,
-      {}
+      {
+        enableScripts: true,
+      }
     );
     const htlmDiskPth = vscode.Uri.joinPath(
       this.ctx.extensionUri,
@@ -281,7 +304,11 @@ class ManimSideview {
       "%cspSource%": _panel.webview.cspSource,
     };
 
-    var htmlDoc = readFileSync(htlmDiskPth.path.startsWith("/") ? htlmDiskPth.path.substring(1) : htlmDiskPth.path).toString();
+    var htmlDoc = readFileSync(
+      htlmDiskPth.path.startsWith("/")
+        ? htlmDiskPth.path.substring(1)
+        : htlmDiskPth.path
+    ).toString();
     Object.keys(vars).forEach((k) => {
       if (htmlDoc.includes(k)) {
         htmlDoc = htmlDoc.replace(new RegExp(k, "g"), vars[k]);
@@ -289,6 +316,17 @@ class ManimSideview {
     });
     _panel.webview.html = htmlDoc;
 
+    _panel.webview.onDidReceiveMessage((message) => {
+      console.log(message);
+      switch (message.command) {
+        case "dispose":
+          _panel.dispose();
+        case "configure":
+          runningCfg.args = message.args;
+          runningCfg.output = message.video_dir;
+          runningCfg.sceneName = message.scene_name;
+      }
+    });
   }
 
   openSideview(mediaFp: string) {
@@ -308,11 +346,9 @@ class ManimSideview {
 
 export function activate(context: vscode.ExtensionContext) {
   const view = new ManimSideview(context);
-  // When registering commands, insert function calls into closures to persist "this"
-  view.getInTimeConfiguration(null);
+  // insert function calls into closures to persist "this"
   context.subscriptions.push(
-    vscode.commands.registerCommand("manim-sideview.run",
-    async function () {
+    vscode.commands.registerCommand("manim-sideview.run", async function () {
       await view.run();
     }),
     vscode.commands.registerCommand(
@@ -325,6 +361,12 @@ export function activate(context: vscode.ExtensionContext) {
       "manim-sideview.setConfigFile",
       async function () {
         await view.setConfigFile();
+      }
+    ),
+    vscode.commands.registerCommand(
+      "manim-sideview.setRenderingScene",
+      async function () {
+        await view.setRenderingScene();
       }
     )
   );

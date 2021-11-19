@@ -13,7 +13,7 @@ import { readFileSync } from "fs";
  *                            ||   } }
  */
 
-type Config = { [name: string]: { [name: string]: string } };
+export type Config = { [name: string]: { [name: string]: string } };
 
 // [title]
 const section = /^\[(?<title>\w+)\]$/g;
