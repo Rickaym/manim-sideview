@@ -15,8 +15,7 @@
   "activationEvents": [
     "onCommand:manim-sideview.run",
     "onCommand:manim-sideview.refreshConfiguration",
-    "onCommand:manim-sideview.setConfigFile",
-    "onCommand:manim-sideview.commandLineArgs"
+    "onCommand:manim-sideview.setConfigFile"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -63,20 +62,16 @@
         "title": "Runs a Sideview",
         "icon": {
           "light": "./images/rotation.png",
-          "dark":  "./images/rotation.png"
-		}
-      },
-      {
-        "command": "manim-sideview.commandLineArgs",
-        "title": "Set the command line arguments for Manim"
-      },
-      {
-        "command": "manim-sideview.setConfigFile",
-        "title": "Locates a manim.cfg file for use."
+          "dark": "./images/rotation.png"
+        }
       },
       {
         "command": "manim-sideview.refreshConfiguration",
         "title": "Refreshes the provided Configuration for the project workspace."
+      },
+      {
+        "command": "manim-sideview.setConfigFile",
+        "title": "Tie a config file to the currently focused source file - this is as same as using --config-file flag."
       }
     ],
     "keybindings": [
@@ -86,8 +81,8 @@
         "when": "editorFocus"
       },
       {
-        "command": "manim-sideview.commandLineArgs",
-        "key": "ctrl+' a"
+        "command": "manim-sideview.refreshConfiguration",
+        "key": "ctrl+' 2"
       },
       {
         "command": "manim-sideview.setConfigFile",
@@ -115,5 +110,8 @@
     "mocha": "^9.1.1",
     "typescript": "^4.4.3",
     "@vscode/test-electron": "^1.6.2"
+  },
+  "dependencies": {
+    "milligram": "^1.4.1"
   }
 }

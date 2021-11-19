@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--
+  The %name% notation is totally non-standard but it is the way we replace important context
+  variables into the document before loading. Other procedures are relatively buggy.
+-->
+<meta
+  http-equiv="Content-Security-Policy"
+  content="default-src 'none'; img-src %cspSource% https:; script-src %cspSource%; style-src %cspSource%;"
+/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="%styleSrc%" rel="stylesheet">
+<title>Manim Overview</title>
+</head>
+<body>
+  <div>
+    <h2>Reconfigure Due Time Configurations</h2>
+  </div>
+  <p><i>Note these configurations are due time and their default values stem from the default configurations,
+    this will only persists so long as you're still in the workspace unscaped. This is not so good if you
+    reload the application - therefore it is recommended to <a href="https://docs.manim.community/en/stable/tutorials/configuration.html?highlight=config%20#the-config-files"><b>
+    setup</b></a> a <code>manim.cfg</code> to avoid this step completely.</i></p>
+
+  <section class="container">
+    <form>
+        <div class="config-container">
+          <label for="args"><b>Command Line Arguments</b></label> <br>
+          <span>Command line arguments used with manim.</span> <br>
+          <input type="text" id="args" name="command-line-arguments">
+        </div> <br>
+
+        <div class="config-container">
+          <label for="media_dir"><b>Media Directory</b></label> <br>
+          <span>The root directory to save resources.</span> <br>
+          <input type="text" id="media_dir" name="media-directory">
+        </div> <br>
+
+        <div class="config-container">
+          <label for="video_dir"><b>Video Directory</b></label> <br>
+          <span>The subdirectory leading after the media directory that leads to the video.</span> <br>
+          <input type="text" id="video_dir" name="video-directory">
+        </div> <br>
+
+        <div class="config-container">
+          <label for="scene_names"><b>Scene Names</b></label> <br>
+          <span>The name of the scenes.</span> <br>
+          <input type="text" id="scene_names" name="scene-names">
+        </div> <br>
+      <div class="a-ok">
+        <button id="configure" class="button-primary">Configure</button>
+        <button id="cancel" class="button-secondary">Cancel</button>
+      </div>
+    </form>
+  </section>
+</body>
+</html

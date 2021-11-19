@@ -1,8 +1,9 @@
+import { readFile, readFileSync } from "fs";
+import path = require("path");
 import * as vscode from "vscode";
 import { ConfigParser } from "./configparser";
 
 // {media_dir}/videos/{module_name}/{quality}
-
 
 const CONFIG_STATE_ID = "config_state_id";
 const DEFAULT_MEDIA_DIR = "videos/${fileName}/${sceneName}.mp4";
@@ -71,13 +72,14 @@ class ManimSideview {
       );
     }
     const srcPath = vscode.window.activeTextEditor.document.fileName;
+
     if (onSave && !this.jobs[srcPath]) {
       return;
     }
 
     const conf = await this.getRunningConfig(srcPath);
-
     let error: string | undefined;
+
     if (!conf.path) {
       error =
         "You cannot run a manim sideview without supplying a valid manim executable path.";
@@ -126,16 +128,6 @@ class ManimSideview {
         "I'm unable to resolve the relative path due to the lack of workspace root folders, please provide an absolute path."
       );
     }
-  }
-
-  async commandLineArgs() {
-    const conf = vscode.workspace.getConfiguration("manim-sideview");
-    const newArgs = await vscode.window.showInputBox({
-      title: "Manim CLI Arguments",
-      value: conf.get("commandLinbeArgs"),
-      prompt: `Provide a set of manim command line arguments. This is the same effect through editing from the settings.`,
-    });
-    conf.update("args", newArgs);
   }
 
   async refreshConfiguration() {
@@ -202,7 +194,6 @@ class ManimSideview {
         // same directory of the source path thus we can guess this as such
         cfgPath = sourcePath.split("/").slice(0, -1).join("/") + "/manim.cfg";
       }
-
       try {
         cfg = ConfigParser.parse(cfgPath);
       } catch (e) {}
@@ -239,36 +230,65 @@ class ManimSideview {
   async getRunningConfig(sourcePath: string): Promise<RunningConfig> {
     const conf = vscode.workspace.getConfiguration("manim-sideview");
 
-    const path: string = conf.get("defaultManimPath") || "";
+    const exe: string = conf.get("defaultManimPath") || "";
     var args: string = conf.get("commandLineArgs") || "";
-
     var videoFP: string = conf.get("videoFilePath") || "";
     videoFP = generalizeUri(videoFP);
 
-    const fp: string = generalizeUri(sourcePath);
-
+    sourcePath = generalizeUri(sourcePath);
     var output: string = "";
-    const cfg = await this.getManimConfig(fp);
-    if (cfg) {
-      output = cfg.output + videoFP.startsWith("/") ? videoFP : "/" + videoFP;
-    } else {
-      const pth = await vscode.window.showInputBox({
-        title: "Command Line Arguments",
-        placeHolder: "./media/videos/${fileName}/480p15/${sceneName}.mp4",
-        prompt:
-          "Provide a static absolute media path. Please use a manim.cfg file for a better experience next time. Find the entire variable reference sheet in the extension readme or the marketplace page. ",
-      });
 
-      if (pth) {
-        output = pth;
-      }
-    }
-    return {
-      path: path,
+    const runningCfg: RunningConfig = {
+      path: exe,
       args: args,
       output: output,
-      filepath: fp,
+      filepath: sourcePath,
     };
+
+    const cfg = await this.getManimConfig(sourcePath);
+    if (cfg) {
+      runningCfg.output =
+        cfg.output + videoFP.startsWith("/") ? videoFP : "/" + videoFP;
+    } else {
+      await this.getInTimeConfiguration(runningCfg);
+    }
+    return runningCfg;
+  }
+
+  async getInTimeConfiguration(runningCfg: RunningConfig | null) {
+    const _panel = vscode.window.createWebviewPanel(
+      "inTimeConfiguration",
+      "In Time Configurations",
+      vscode.ViewColumn.Beside,
+      {}
+    );
+    const htlmDiskPth = vscode.Uri.joinPath(
+      this.ctx.extensionUri,
+      "webview",
+      "config.html"
+    );
+    const styleDiskPth = vscode.Uri.joinPath(
+      this.ctx.extensionUri,
+      "webview",
+      "config.css"
+    );
+    const styleSrc = _panel.webview.asWebviewUri(styleDiskPth);
+
+    // context variables we need to replace
+    const vars: { [k: string]: string } = {
+      "%styleSrc%": styleSrc.toString(),
+      '"%styleSrc%"': `"${styleSrc.toString()}"`,
+      "%cspSource%": _panel.webview.cspSource,
+    };
+
+    var htmlDoc = readFileSync(htlmDiskPth.path.startsWith("/") ? htlmDiskPth.path.substring(1) : htlmDiskPth.path).toString();
+    Object.keys(vars).forEach((k) => {
+      if (htmlDoc.includes(k)) {
+        htmlDoc = htmlDoc.replace(new RegExp(k, "g"), vars[k]);
+      }
+    });
+    _panel.webview.html = htmlDoc;
+
   }
 
   openSideview(mediaFp: string) {
@@ -289,16 +309,12 @@ class ManimSideview {
 export function activate(context: vscode.ExtensionContext) {
   const view = new ManimSideview(context);
   // When registering commands, insert function calls into closures to persist "this"
+  view.getInTimeConfiguration(null);
   context.subscriptions.push(
-    vscode.commands.registerCommand("manim-sideview.run", async function () {
+    vscode.commands.registerCommand("manim-sideview.run",
+    async function () {
       await view.run();
     }),
-    vscode.commands.registerCommand(
-      "manim-sideview.commandLineArgs",
-      async function () {
-        await view.commandLineArgs();
-      }
-    ),
     vscode.commands.registerCommand(
       "manim-sideview.refreshConfiguration",
       async function () {
