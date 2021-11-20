@@ -15,7 +15,7 @@ import { readFileSync } from "fs";
 
 export type Config = { [name: string]: { [name: string]: string } };
 
-// [title]
+// [title]`
 const section = /^\[(?<title>\w+)\]$/g;
 // key = value
 const keyValPair = /^(?<key>\w+)\s*=\s*(?<value>.+)$/g;

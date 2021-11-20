@@ -49,15 +49,15 @@ The case of variable names matter.
     <th>Description</th>
 </tr>
 <tr>
-    <td>${fileName}</td>
+    <td>{module_name}</td>
     <td>The name of the file being run.</td>
 </tr>
 <tr>
-    <td>${quality}</td>
+    <td>{quality}</td>
     <td>The quality of the render.</td>
 </tr>
 <tr>
-    <td>${sceneName}</td>
+    <td>{scene_name}</td>
     <td>The name of the scene being run. Using the -a flag in command line arguments will resolve this into a random scene.</td>
 </tr>
 </table>

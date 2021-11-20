@@ -8,11 +8,10 @@
 -->
 <meta
   http-equiv="Content-Security-Policy"
-  content="default-src 'none'; img-src %cspSource% https:; script-src %cspSource%; style-src %cspSource%;"
+  content="default-src 'none'; img-src %cspSource% https:; script-src 'nonce-%nonce%'; style-src %cspSource%;"
 />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="%styleSrc%" rel="stylesheet">
-<title>Manim Overview</title>
 </head>
 <body>
   <div>
@@ -24,17 +23,17 @@
     setup</b></a> a <code>manim.cfg</code> to avoid this step completely.</i></p>
 
   <section class="container">
-    <form>
+    <form id="config-form">
         <div class="config-container">
           <label for="args"><b>Command Line Arguments</b></label> <br>
           <span>Command line arguments used with manim.</span> <br>
-          <input type="text" id="args" name="command-line-arguments">
+          <input type="text" id="args" value="%args%" name="command-line-arguments">
         </div> <br>
 
         <div class="config-container">
-          <label for="video_dir"><b>Video File Path</b></label> <br>
-          <span>The relative path to the video file given as output.</span> <br>
-          <input type="text" id="video_dir" name="video-directory">
+          <label for="video_dir"><b>Video Directory</b></label> <br>
+          <span>The relative path to the directory where we can find the video.</span> <br>
+          <input type="text" id="video_dir" value="%video_dir%" name="video-directory">
         </div> <br>
 
         <div class="config-container">
@@ -44,30 +43,10 @@
         </div> <br>
       <div class="a-ok">
         <button type="submit" id="configure" class="button-primary">Configure</button>
-        <button id="cancel" class="button-secondary">Cancel</button>
+        <button id="cancel" class="button-secondary" formnovalidate>Cancel</button>
       </div>
     </form>
   </section>
-  <script>
-    const vscode = acquireVsCodeApi();
-
-    const buttConfigure = document.getElementById("configure");
-    const buttCancel = document.getElementById("cancel");
-
-    buttConfigure.addEventListener("click", function() {
-      vscode.postMessage({
-        command: "configure",
-        args: document.getElementById("args").textContent,
-        video_dir: document.getElementById("video_dir").textContent,
-        scene_name: document.getElementById("scene_name").textContent
-      })
-    })
-
-    buttCancel.addEventListener("click", function() {
-      vscode.postMessage({
-        command: "dispose"
-      })
-    })
-  </script>
+  <script nonce="%nonce%" src="%scriptSrc%"></script>
 </body>
 </html

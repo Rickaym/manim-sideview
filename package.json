@@ -16,7 +16,8 @@
     "onCommand:manim-sideview.run",
     "onCommand:manim-sideview.refreshConfiguration",
     "onCommand:manim-sideview.setConfigFile",
-    "onCommand:manim-sideview.setRenderingScene"
+    "onCommand:manim-sideview.setRenderingScene",
+    "onCommand:manim-sideview.setInTimeConfiguration"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -31,14 +32,20 @@
         "manim-sideview.commandLineArgs": {
           "type": "string",
           "scope": "application",
-          "default": "-ql -a",
+          "default": "-ql",
           "description": "The command line arguments in running manim. Refer to manim documentation if you're unaware of existing arugments."
         },
-        "manim-sideview.videoFilePath": {
+        "manim-sideview.videoDirectory": {
           "type": "string",
           "scope": "application",
-          "default": "videos/${fileName}/${resolution}/${sceneName}.mp4",
-          "description": "The video media file path relative from the media folder. This is best left by default if you're not sure what this is."
+          "default": "{media_dir}/videos/{module_name}/{quality}",
+          "description": "The video output directory. We can use context variables here to place them under the media directory."
+        },
+        "manim-sideview.mediaDirectory": {
+          "type": "string",
+          "scope": "application",
+          "default": "media",
+          "description": "The root folder for all media output."
         },
         "manim-sideview.runOnSave": {
           "type": "boolean",
@@ -68,15 +75,19 @@
       },
       {
         "command": "manim-sideview.refreshConfiguration",
-        "title": "Refreshes the provided Configuration for the project workspace."
+        "title": "Refresh all configurations"
       },
       {
         "command": "manim-sideview.setConfigFile",
-        "title": "Tie a config file to the currently focused source file - this is as same as using --config-file flag."
+        "title": "Set a config file"
       },
       {
         "command": "manim-sideview.setRenderingScene",
-        "title": "Set a new rendering scene, this only registers when you're not using a configuration file."
+        "title": "Set a new rendering scene"
+      },
+      {
+        "command": "manim-sideview.setInTimeConfiguration",
+        "title": "Set an in time configuration"
       }
   ],
     "keybindings": [
@@ -87,7 +98,7 @@
       },
       {
         "command": "manim-sideview.refreshConfiguration",
-        "key": "ctrl+' 2"
+        "key": "ctrl+' a"
       },
       {
         "command": "manim-sideview.setConfigFile",
