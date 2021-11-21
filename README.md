@@ -34,7 +34,7 @@ You can also in certain cases render a single file under a specific set of confi
 
 ### Requirements
 
-* For your information this extension relies on `analytic-signal.preview-mp4` for media preview. This is automatically installed alongside the extension.
+* This extension needs no external dependencies.
 
 ### Context Variables
 
@@ -111,4 +111,4 @@ Initial release of Manim Sideview.
 
 ### Credits
 
-Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>

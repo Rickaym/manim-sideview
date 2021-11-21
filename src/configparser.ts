@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import * as vscode from "vscode";
 
 /**
  * A minimal implementation to parse a toml subset like config files.
@@ -13,7 +13,7 @@ import { readFileSync } from "fs";
  *                            ||   } }
  */
 
-export type Config = { [name: string]: { [name: string]: string } };
+type Config = { [name: string]: { [name: string]: string } };
 
 // [title]`
 const section = /^\[(?<title>\w+)\]$/g;
@@ -21,9 +21,12 @@ const section = /^\[(?<title>\w+)\]$/g;
 const keyValPair = /^(?<key>\w+)\s*=\s*(?<value>.+)$/g;
 
 export class ConfigParser {
-  static parse(uri: string): Config {
+  static async parse(uri: string): Promise<Config> {
     var result: Config = {};
-    const contents = readFileSync(uri).toString();
+
+    const contents = (
+      await vscode.workspace.fs.readFile(vscode.Uri.file(uri))
+    ).toString();
     var curSection = "OUTCAST";
     contents
       .split("\n")
@@ -36,6 +39,7 @@ export class ConfigParser {
         keyValPair.exec("skip");
         if (!res) {
           const sec = section.exec(ln.trim());
+          section.exec("skip");
           if (sec && sec.groups) {
             curSection = sec.groups.title;
           }

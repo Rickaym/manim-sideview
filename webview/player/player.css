@@ -1,0 +1,102 @@
+.video-container {
+  display: flex;
+  background: transparent;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.video {
+  height: 100%;
+  width: 100%;
+}
+
+.player {
+  width: 100%;
+  height: 100%;
+  max-width: 800px;
+  overflow: hidden;
+  position: relative;
+}
+
+.player:hover .controls {
+  transform: translateY(0) translateY(-3px);
+}
+
+.controls {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  flex-wrap: wrap;
+  background-color: rgba(0, 0, 0, 0.3);
+  transform: translateY(100%) translateY(-5px);
+  transition: 0.2s;
+}
+
+.buttons button {
+  background: none;
+  border: 0;
+  outline: 0;
+  color: white;
+  cursor: pointer;
+}
+
+.buttons button#pip:before {
+  content: "\f2d2";
+  font-family: "Font Awesome 5 Free";
+  width: 30px;
+  height: 20px;
+  display: inline-block;
+  color: white;
+}
+
+.buttons button#play-pause:before {
+  width: 30px;
+  height: 20px;
+
+  display: inline-block;
+  color: white;
+}
+
+.buttons button.play:before {
+  content: "▶";
+}
+
+.buttons button.pause:before {
+  content: "\f28b";
+  font-family: "Font Awesome 5 Free";
+}
+
+:picture-in-picture {
+  background-color: black;
+}
+
+.status-bar {
+  left: 0;
+  top: 0;
+  height: 10px;
+  width: 100%;
+}
+
+.status-bar:hover {
+  cursor: pointer;
+}
+
+.status-bar:hover .demo-fill {
+  background-color: rgba(0, 255, 255, 0.4);
+}
+
+.color-fill,
+.demo-fill {
+  position: absolute;
+  height: 5px;
+  margin-bottom: 3px;
+  width: 0%;
+  background-color: aquamarine;
+  transition: 0.3s;
+}
+
+.demo-fill {
+  background-color: transparent;
+}

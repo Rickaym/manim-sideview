@@ -9,9 +9,6 @@
   "categories": [
     "Other"
   ],
-  "extensionDependencies": [
-    "analytic-signal.preview-mp4"
-  ],
   "activationEvents": [
     "onCommand:manim-sideview.run",
     "onCommand:manim-sideview.refreshConfiguration",
@@ -38,7 +35,7 @@
         "manim-sideview.videoDirectory": {
           "type": "string",
           "scope": "application",
-          "default": "{media_dir}/videos/{module_name}/{quality}",
+          "default": "media/videos/ep1/480p15",
           "description": "The video output directory. We can use context variables here to place them under the media directory."
         },
         "manim-sideview.mediaDirectory": {
@@ -69,8 +66,8 @@
         "command": "manim-sideview.run",
         "title": "Runs a Sideview",
         "icon": {
-          "light": "./images/rotation.png",
-          "dark": "./images/rotation.png"
+          "light": "assets/images/rotation.png",
+          "dark": "assets/images/rotation.png"
         }
       },
       {

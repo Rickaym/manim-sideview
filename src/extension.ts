@@ -1,45 +1,29 @@
-import { readFileSync } from "fs";
-import path = require("path");
 import * as vscode from "vscode";
+import * as path from "path";
+import { DueTimeConfiguration } from "./config";
 import { ConfigParser } from "./configparser";
 
+import {
+  ContextVars,
+  DEFAULT_ARGS,
+  DEFAULT_MEDIA_DIR,
+  DEFAULT_VIDEO_DIR,
+  getRootPath,
+  insertContext,
+  RunningConfig,
+} from "./globals";
+import { VideoPlayer } from "./player";
+
 /**
- * TODO: Make  working
+ * ENTRY POINT OF THE EXTENSION
  */
 
-// System Defaults that overarches application defaults
-const DEFAULT_VIDEO_DIR = "media/videos/ep1/480p15";
-const DEFAULT_MEDIA_DIR = "media";
-const DEFAULT_ARGS = "-ql";
+/**
+ * TODO: executeCommandInoutputChannel needs to be fixed to resolve ENONET
+ */
 
 const USER_DEF_CONFIGURATION = ["scene_names"];
 const LOCATE = { section: "CLI", key: "media_dir" };
-
-/**
- * A configuration necessary to run a render.
- *
- * exePath: the absolute path to the manim.exe executable
- * srcPath: the absolute path to the source.py file
- * sceneName: the name of the scene to be rendered
- * moduleName: the module name of the source file
- * args: the command line arguments
- * output: the relative path to the video file
- * mediaDir: the root folder for all media output
- * videoDir: the directory where the video is output
- * usingConfigFile: whether if this is running using a configuration file
- */
-type RunningConfig = {
-  exePath: string;
-  srcPath: string;
-  sceneName: string;
-  moduleName: string;
-  args: string;
-  output: string;
-  document: vscode.TextDocument;
-  mediaDir: string;
-  videoDir: string;
-  usingConfigFile: boolean;
-};
 
 // The key and value pairs here directly correlate to
 // USER_DEF_CONFIGURATION
@@ -52,17 +36,27 @@ type ManimConfig = {
 
 type Job = {
   config: RunningConfig;
-  /*  to be implemented */
   flag: boolean;
 };
 
 /**
- * Location mapping of where certain details are stored inside the
- * manim config.
+ * Changes a given path to an absolute path if it's a relative
+ * path.
  *
- * These should be changed accordingly if there are any changes to the
- * manim configuration.
+ * @param path relative path
+ * @returns absolute path
  */
+function toAbsolutePath(pth: string): string {
+  if (!path.isAbsolute(pth)) {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders) {
+      throw TypeError("Workspace folders cannot be empty.");
+    }
+    var rootPath = folders[0].uri.fsPath + "/";
+    pth = path.join(rootPath, pth);
+  }
+  return pth;
+}
 
 class ManimSideview {
   constructor(public readonly ctx: vscode.ExtensionContext) {
@@ -73,6 +67,12 @@ class ManimSideview {
       this.ctx.extensionUri,
       this.ctx.subscriptions
     );
+    this.player = new VideoPlayer(
+      this.ctx.extensionUri,
+      this.ctx.subscriptions
+    );
+    this.outputChannel = vscode.window.createOutputChannel("Manim");
+    this.isRunning = false;
   }
   private manimCfgPath: string;
   // a list of running jobs tied to each file
@@ -80,6 +80,9 @@ class ManimSideview {
   // unless explicitely disabled
   private jobs: Job[];
   private prompt: DueTimeConfiguration;
+  private player: VideoPlayer;
+  private outputChannel: vscode.OutputChannel;
+  private isRunning: boolean;
 
   /**
    * The command for running a manim sideview.
@@ -88,19 +91,15 @@ class ManimSideview {
    * @returns
    */
   async run(routine: boolean) {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
       return await vscode.window.showErrorMessage(
         "Hey! You need a valid Python file to run the sideview."
       );
     } else {
       if (
         routine === true &&
-        !this.jobs.find(
-          (j) =>
-            j.config.srcPath ===
-            editor.document.fileName
-        )
+        !this.jobs.find((j) => j.config.srcPath === editor.document.fileName)
       ) {
         return;
       }
@@ -131,7 +130,8 @@ class ManimSideview {
     });
     if (uri) {
       const pth: string = path.normalize(uri[0].path);
-      this.manimCfgPath = pth.startsWith("\\") ? pth.substring(1) : pth;
+      this.manimCfgPath =
+        pth.startsWith("\\") || pth.startsWith("/") ? pth.substring(1) : pth;
     }
   }
 
@@ -139,22 +139,29 @@ class ManimSideview {
    * The command for setting the name of a rendering scene.
    * This only works when you're using an in time configuration.
    */
-  async setRenderingScene(conf?: RunningConfig) {
+  async setRenderingScene(conf?: RunningConfig): Promise<boolean> {
     if (!conf) {
       var job = this.getActiveJob();
-        if (!job) {
-          return await vscode.window.showErrorMessage(
-            "You do not have an active job to set a scene for."
-          );
-        }
-        conf = job.config;
+      if (!job) {
+        await vscode.window.showErrorMessage(
+          "You do not have an active job to set a scene for."
+        );
+        return false;
+      }
+      conf = job.config;
     }
     const sceneName = await vscode.window.showInputBox({
       title: "Scenes",
-      prompt: "Provide the name of the scene you would like to render"
+      prompt: "Provide the name of the scene you would like to render",
     });
     if (sceneName) {
       conf.sceneName = sceneName;
+      return true;
+    } else {
+      vscode.window.showErrorMessage(
+        "You provided an invalid rendering scene."
+      );
+      return false;
     }
   }
 
@@ -164,35 +171,70 @@ class ManimSideview {
    *
    * @param conf running configuration.
    */
-  async doRun(conf: RunningConfig) {
-    var terminal: vscode.Terminal | undefined;
-    vscode.window.terminals.forEach((t) => {
-      if (t.name === "Manim") {
-        terminal = t;
+  private async doRun(conf: RunningConfig) {
+    const root = getRootPath();
+    if (!root) {
+      return;
+    }
+    var args = [];
+    if (!conf.usingConfigFile) {
+      args.push(conf.args.trim());
+    }
+    args.push(conf.sceneName.trim());
+    this.executeCommandInoutputChannel(
+      `${conf.exePath} ${conf.srcPath}`,
+      args,
+      path.normalize(root),
+      conf
+    );
+  }
+
+  private async executeCommandInoutputChannel(
+    command: string,
+    args: string[],
+    cwd: string,
+    conf: RunningConfig
+  ) {
+    this.isRunning = true;
+
+    this.outputChannel.clear();
+    this.outputChannel.appendLine("[Executing] " + command);
+
+    const spawn = require("child_process").spawn;
+    const startTime = new Date();
+    process = spawn(command, args, { cwd: cwd, shell: true });
+
+    process.stdout.on("data", (data) => {
+      this.outputChannel.append(data.toString());
+    });
+
+    process.stderr.on("data", (data) => {
+      this.outputChannel.append(data.toString());
+    });
+
+    process.on("exit", (code: number) => {
+      this.isRunning = false;
+      const endTime = new Date();
+      const elapsedTime = (endTime.getTime() - startTime.getTime()) / 1000;
+      this.outputChannel.appendLine(
+        "\n[Done] rendered within code=" +
+          code +
+          " in " +
+          elapsedTime +
+          " seconds\n"
+      );
+      if (code === 0) {
+        const CONTEXT_VARIABLES: ContextVars = {
+          "{media_dir}": conf.mediaDir,
+          "{module_name}": conf.moduleName,
+          "{quality}": "480p15",
+          "{scene_name}": conf.sceneName,
+        };
+        this.openSideview(
+          insertContext(CONTEXT_VARIABLES, toAbsolutePath(conf.output))
+        ).then(() => this.jobs.push({ config: conf, flag: false }));
       }
     });
-    if (!terminal) {
-      terminal = vscode.window.createTerminal(`Manim`);
-    }
-    // --video_dir "${conf.videoDir}"
-    terminal.sendText(
-      `${conf.exePath} ${conf.srcPath} ${
-        !conf.usingConfigFile ? conf.args : ""
-      } ${conf.sceneName}`
-    );
-
-    // Mpeg-4 cross extension dependency guard
-    const exists = (await vscode.commands.getCommands(false)).includes(
-      "preview-mp4.zoomIn"
-    );
-    if (!exists) {
-      return await vscode.window.showErrorMessage(
-        "You have a cross extension dependency missing, please install it here: https://marketplace.visualstudio.com/items?itemName=analytic-signal.preview-mp4"
-      );
-    }
-
-    await this.openSideview(this.insertContext(conf));
-    this.jobs.push({ config: conf, flag: false });
   }
 
   /**
@@ -202,55 +244,19 @@ class ManimSideview {
    * @param srcPath
    * @returns Job | undefined
    */
-  getActiveJob(srcPath?: string): Job | undefined {
+  private getActiveJob(srcPath?: string): Job | undefined {
     var path: string;
     if (!srcPath) {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "python") {
         return undefined;
       }
-      path = editor.document.fileName.toLowerCase();
+      path = editor.document.fileName;
     } else {
       path = srcPath;
     }
 
     return this.jobs.find((j) => j.config.srcPath === path);
-  }
-
-  /**
-   * Changes a given path to an absolute path if it's a relative
-   * path.
-   *
-   * @param path relative path
-   * @returns absolute path
-   */
-  toAbsolutePath(pth: string): string {
-    if (!path.isAbsolute(pth)) {
-      const folders = vscode.workspace.workspaceFolders;
-      if (!folders) {
-        throw TypeError("Workspace folders cannot be empty.");
-      }
-      var rootPath = folders[0].uri.fsPath + "/";
-      pth = path.join(rootPath, pth);
-    }
-    return pth;
-  }
-
-  insertContext(conf: RunningConfig): string {
-    const CONTEXT_VARIABLES: { [k: string]: string } = {
-      "{media_dir}": conf.mediaDir,
-      "{module_name}": conf.moduleName,
-      "{quality}": "1080p60",
-      "{scene_name}": conf.sceneName,
-    };
-    var path = this.toAbsolutePath(conf.output);
-    Object.keys(CONTEXT_VARIABLES).forEach((k) => {
-      if (path.includes(k)) {
-        path = path.replace(new RegExp(k, "g"), CONTEXT_VARIABLES[k]);
-      }
-    });
-
-    return path;
   }
 
   /**
@@ -263,7 +269,7 @@ class ManimSideview {
    * @param sourcePath
    * @returns ManimConfig | undefined | false
    */
-  async getManimConfig(
+  private async getManimConfig(
     sourcePath: string
   ): Promise<ManimConfig | undefined | false> {
     // user made manim.cfg files normally must remain on the
@@ -272,13 +278,15 @@ class ManimSideview {
       ? this.manimCfgPath
       : path.join(sourcePath, "../manim.cfg");
     try {
-      var parsedRes = ConfigParser.parse(cfgPath);
+      var parsedRes = await ConfigParser.parse(cfgPath);
     } catch (e) {
       return undefined;
     }
 
     if (!Object.keys(parsedRes).includes(LOCATE.section)) {
-      vscode.window.showErrorMessage(`Your config file has no [${LOCATE.section}] section.`);
+      vscode.window.showErrorMessage(
+        `Your config file has no [${LOCATE.section}] section.`
+      );
       return false;
     } else {
       var dict = parsedRes[LOCATE.section];
@@ -332,9 +340,13 @@ class ManimSideview {
   /**
    * Get the appropriate configurations and run when configured.
    */
-  async runWhenConfigured(doc: vscode.TextDocument) {
+  private async runWhenConfigured(doc: vscode.TextDocument) {
     var sourcePath = doc.fileName;
-    const moduleName = sourcePath.split("\\").slice(-1).join().replace(".py", "");
+    const moduleName = sourcePath
+      .split("\\")
+      .slice(-1)
+      .join()
+      .replace(".py", "");
 
     const activeJob = this.getActiveJob(sourcePath);
     var runningCfg: RunningConfig;
@@ -374,16 +386,16 @@ class ManimSideview {
     } else if (cfg === undefined) {
       await this.runWithInTimeConfiguration(activeJob, runningCfg);
     } else {
-      runningCfg.usingConfigFile = true;
       runningCfg.sceneName = cfg.sceneName;
       runningCfg.output = cfg.output;
       // cfg.output + videoFP.startsWith("/") ? videoFP : "/" + videoFP;
       // we'll let the user know that we're using the manim.cfg if the job had just started
-      if (!activeJob) {
+      if (!activeJob || !runningCfg.usingConfigFile) {
         vscode.window.showInformationMessage(
-          "I found a mainm.cfg file in the source directory! The sideview is as configured appropriately."
+          "I found a mainm.cfg file in the source directory. The sideview is as configured appropriately."
         );
       }
+      runningCfg.usingConfigFile = true;
       this.doRun(runningCfg);
     }
   }
@@ -401,169 +413,40 @@ class ManimSideview {
     this.prompt.showInput(conf);
   }
 
-  async runWithInTimeConfiguration(activeJob: Job | undefined, runningCfg: RunningConfig) {
+  private async runWithInTimeConfiguration(
+    activeJob: Job | undefined,
+    runningCfg: RunningConfig
+  ) {
     if (!activeJob) {
       runningCfg.args = DEFAULT_ARGS;
       runningCfg.videoDir = DEFAULT_VIDEO_DIR;
       runningCfg.mediaDir = DEFAULT_MEDIA_DIR;
-      await this.setRenderingScene(runningCfg);
-      runningCfg.output = path.join(DEFAULT_VIDEO_DIR, runningCfg.sceneName+".mp4");
+      if (!(await this.setRenderingScene(runningCfg))) {
+        return;
+      }
+      runningCfg.output = path.join(
+        DEFAULT_VIDEO_DIR,
+        runningCfg.sceneName + ".mp4"
+      );
     }
     runningCfg.usingConfigFile = false;
     this.doRun(runningCfg);
   }
 
-  async openSideview(mediaFp: string) {
+  private async openSideview(mediaFp: string) {
     const res = vscode.Uri.file(mediaFp);
     if (!res) {
       vscode.window.showErrorMessage("The output file couldn't be found.");
     } else {
+      this.player.show(res);
+      /*
       await vscode.commands.executeCommand(
         "vscode.openWith",
         res,
         "analyticsignal.preview-mp4",
         vscode.ViewColumn.Beside
-      );
+      );*/
     }
-  }
-}
-
-class DueTimeConfiguration {
-  constructor(
-    public readonly extensionUri: vscode.Uri,
-    public readonly disposables: any[]
-  ) {
-    this.extensionUri = extensionUri;
-    this.disposables = disposables;
-  }
-  private panel: vscode.WebviewPanel | undefined;
-
-  showInput(conf: RunningConfig) {
-    if (this.panel) {
-      vscode.window.showErrorMessage(
-        "You cannot open multiple configuration panels at the same time."
-      );
-      return;
-    }
-    this.panel = vscode.window.createWebviewPanel(
-      "inTimeConfiguration",
-      "In Time Configurations",
-      vscode.ViewColumn.Beside,
-      {
-        enableScripts: true,
-      }
-    );
-    this.panel.webview.html = this.loadHtml(
-      this.panel,
-      this.extensionUri,
-      conf
-    );
-
-    this.panel.webview.onDidReceiveMessage(
-      (message) => {
-        switch (message.command) {
-          case "dispose":
-            if (this.panel) {
-              this.panel.dispose();
-            }
-            return;
-          case "configure":
-            if (this.panel) {
-              conf.args = message.args;
-              conf.sceneName = message.sceneName;
-              conf.output = path.join(
-                message.videoDir,
-                message.sceneName + ".mp4"
-              );
-              this.panel.dispose();
-              vscode.window.showInformationMessage(
-                "Success, I've configured the running configurations to the details provided for now!"
-              );
-            }
-            return;
-        }
-      },
-      undefined,
-      this.disposables
-    );
-    this.panel.onDidDispose(
-      () => {
-        this.panel = undefined;
-      },
-      undefined,
-      this.disposables
-    );
-  }
-
-  /**
-   * Provide a nonce for inline scripts inside webviews, this is necessary for
-   * script execution.
-   * @returns nonce
-   */
-  getNonce(): string {
-    let text = "";
-    const possible =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (let i = 0; i < 32; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-  }
-
-  loadHtml(
-    panel: vscode.WebviewPanel,
-    extensionUri: vscode.Uri,
-    conf: RunningConfig
-  ): string {
-    const loads: { [k: string]: vscode.Uri } = {
-      "config.css": extensionUri,
-      "config.js": extensionUri,
-      "config.html": extensionUri,
-    };
-    Object.keys(loads).forEach((k) => {
-      loads[k] = vscode.Uri.joinPath(extensionUri, "webview", k);
-    });
-
-    const styleSrc = panel.webview.asWebviewUri(loads["config.css"]);
-    const nonce = this.getNonce();
-
-    const vars: { [k: string]: string } = {
-      "%styleSrc%": styleSrc.toString(),
-      "%cspSource%": panel.webview.cspSource,
-      "%nonce%": nonce,
-      "%scriptSrc%": loads["config.js"]
-        .with({ scheme: "vscode-resource" })
-        .toString(),
-      "%args%":
-        conf.args ||
-        vscode.workspace
-          .getConfiguration("manim-sideview")
-          .get("commandLineArgs") ||
-        DEFAULT_ARGS,
-      "%video_dir%":
-        conf.output ||
-        vscode.workspace
-          .getConfiguration("manim-sideview")
-          .get("videoDirectory") ||
-        DEFAULT_VIDEO_DIR,
-      "%media_dir%":
-        conf.mediaDir ||
-        vscode.workspace
-          .getConfiguration("manim-sideview")
-          .get("mediaDirectory") ||
-        DEFAULT_MEDIA_DIR,
-    };
-    const htmlPth = loads["config.html"].path.toString();
-    var htmlDoc = readFileSync(
-      htmlPth.startsWith("/") ? htmlPth.substring(1) : htmlPth
-    ).toString();
-
-    Object.keys(vars).forEach((k) => {
-      if (htmlDoc.includes(k)) {
-        htmlDoc = htmlDoc.replace(new RegExp(k, "g"), vars[k]);
-      }
-    });
-    return htmlDoc;
   }
 }
 
