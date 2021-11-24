@@ -11,7 +11,8 @@
   ],
   "activationEvents": [
     "onCommand:manim-sideview.run",
-    "onCommand:manim-sideview.refreshConfiguration",
+    "onCommand:manim-sideview.refreshAllConfiguration",
+    "onCommand:manim-sideview.refreshCurrentConfiguration",
     "onCommand:manim-sideview.setConfigFile",
     "onCommand:manim-sideview.setRenderingScene",
     "onCommand:manim-sideview.setInTimeConfiguration"
@@ -35,8 +36,8 @@
         "manim-sideview.videoDirectory": {
           "type": "string",
           "scope": "application",
-          "default": "media/videos/ep1/480p15",
-          "description": "The video output directory. We can use context variables here to place them under the media directory."
+          "default": "media/videos/{module_name}/480p15",
+          "description": "The video output directory. We can use context variables here to place them under the media directory. This does not include the .mp4 file itself."
         },
         "manim-sideview.mediaDirectory": {
           "type": "string",
@@ -47,8 +48,14 @@
         "manim-sideview.runOnSave": {
           "type": "boolean",
           "scope": "application",
+          "default": "false",
+          "description": "Whether to run on save for a file that has been run before."
+        },
+        "manim-sideview.focusOutputOnRun": {
+          "type": "boolean",
+          "scope": "application",
           "default": "true",
-          "description": "Whether to run on save for a started file."
+          "description": "Whether to focus on the output when run."
         }
       }
     },
@@ -71,20 +78,24 @@
         }
       },
       {
-        "command": "manim-sideview.refreshConfiguration",
-        "title": "Refresh all configurations"
+        "command": "manim-sideview.refreshAllConfiguration",
+        "title": "Refreshs All Active Configurations"
+      },
+      {
+        "command": "manim-sideview.refreshCurrentConfiguration",
+        "title": "Refreshes Selected File Configuration"
       },
       {
         "command": "manim-sideview.setConfigFile",
-        "title": "Set a config file"
+        "title": "Set A Config File"
       },
       {
         "command": "manim-sideview.setRenderingScene",
-        "title": "Set a new rendering scene"
+        "title": "Set A New SceneName"
       },
       {
         "command": "manim-sideview.setInTimeConfiguration",
-        "title": "Set an in time configuration"
+        "title": "Set A Configuration"
       }
   ],
     "keybindings": [
@@ -94,7 +105,7 @@
         "when": "editorFocus"
       },
       {
-        "command": "manim-sideview.refreshConfiguration",
+        "command": "manim-sideview.refreshAllConfiguration",
         "key": "ctrl+' a"
       },
       {

@@ -1,10 +1,8 @@
-var source = document.createElement("source");
-var video = document.querySelector(".video");
-video.appendChild(source);
-
 var timestatus = document.querySelector(".color-fill");
 var demostatus = document.querySelector(".demo-fill");
 var statusbar = document.querySelector(".status-bar");
+
+var video = document.getElementById("preview");
 var button = document.getElementById("play-pause");
 var pipButton = document.getElementById("pip");
 
@@ -60,12 +58,13 @@ statusbar.addEventListener("click", function (e) {
   const seek = (e.clientX - brc.left) / brc.width;
 });
 
-window.addEventListener("message", (event) => {
-  const message = event.data;
+window.addEventListener("message", function (e) {
+  const message = e.data;
+  console.log(message);
   switch (message.command) {
     case "reload":
-      source.setAttribute("src", message.resource);
-      source.setAttribute("type", "video/mp4");
+      video.setAttribute("src", message.resource);
+      console.log("Set source to ", message.resource);
       video.load();
       video.play();
   }

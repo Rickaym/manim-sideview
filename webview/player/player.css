@@ -6,7 +6,7 @@
   height: 100%;
 }
 
-.video {
+video {
   height: 100%;
   width: 100%;
 }
@@ -85,6 +85,10 @@
 
 .status-bar:hover .demo-fill {
   background-color: rgba(0, 255, 255, 0.4);
+}
+
+video.four0four .color-fill {
+  background-color: red;
 }
 
 .color-fill,

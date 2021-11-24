@@ -68,7 +68,7 @@ export class DueTimeConfiguration {
           .get("commandLineArgs") ||
         DEFAULT_ARGS,
       "%video_dir%":
-        conf.output ||
+        conf.videoDir ||
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("videoDirectory") ||
@@ -96,7 +96,8 @@ export class DueTimeConfiguration {
             if (this.panel) {
               conf.args = message.args;
               conf.sceneName = message.sceneName;
-              conf.output = join(message.videoDir, message.sceneName + ".mp4");
+              conf.videoDir = message.videoDir;
+              conf.output = join(message.videoDir, conf.sceneName+".mp4");
               this.panel.dispose();
               vscode.window.showInformationMessage(
                 "Success, I've configured the running configurations to the details provided for now!"

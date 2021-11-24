@@ -45,15 +45,14 @@ export class VideoPlayer {
   };
 
   async show(videoUri: vscode.Uri) {
-    const resource = videoUri.with({ scheme: "vscode-resource" }).toString();
-    const pip: boolean | undefined = vscode.workspace
-      .getConfiguration("manim-sideview")
-      .get("pictureInPictureOnStart");
+    const resource = videoUri.with({ scheme: "vscode-resource" }).toString().replace(/vscode-resource:/g, "https://file%2B.vscode-resource.vscode-webview.net");
     if (this.panel) {
       return this.panel.webview.postMessage({
         command: "reload",
         resource: resource,
-        pictureInPicture: pip,
+        pictureInPicture: vscode.workspace
+          .getConfiguration("manim-sideview")
+          .get("pictureInPictureOnStart"),
       });
     }
     if (!this.htmlDoc) {
@@ -66,7 +65,7 @@ export class VideoPlayer {
       "Video Player",
       {
         viewColumn: vscode.ViewColumn.Beside,
-        preserveFocus: false,
+        preserveFocus: true,
       },
       {
         enableScripts: true,
@@ -113,10 +112,5 @@ export class VideoPlayer {
       undefined,
       this.disposables
     );
-    this.panel.webview.postMessage({
-      command: "reload",
-      resource: resource,
-      pictureInPicture: pip,
-    });
   }
 }

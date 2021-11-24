@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 
 /**
- * A minimal implementation to parse a toml subset like config files.
+ * A minimal implementation to parse a toml subset of config files without any
+ * type concern.
  * Only supports sectionalized key = value pairs and no type persistance.
  * The aim here is to parse out only necessary string type details.
  *
@@ -15,7 +16,7 @@ import * as vscode from "vscode";
 
 type Config = { [name: string]: { [name: string]: string } };
 
-// [title]`
+// [title]
 const section = /^\[(?<title>\w+)\]$/g;
 // key = value
 const keyValPair = /^(?<key>\w+)\s*=\s*(?<value>.+)$/g;
@@ -54,7 +55,6 @@ export class ConfigParser {
           result[curSection][r.groups.key] = r.groups.value;
         }
       });
-    console.log(result);
     return result;
   }
 }

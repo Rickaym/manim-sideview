@@ -41,9 +41,10 @@ export type WebviewResources = {
   css: vscode.Uri;
 };
 
-export const DEFAULT_VIDEO_DIR = "media/videos/ep1/480p15";
+export const DEFAULT_VIDEO_DIR = "media/videos/{module_name}/480p15";
 export const DEFAULT_MEDIA_DIR = "media";
 export const DEFAULT_ARGS = "-ql";
+export const DEFAULT_MANIM_EXE = "manim";
 
 /**
  * Provide a nonce for inline scripts inside webviews, this is necessary for
