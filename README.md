@@ -8,28 +8,29 @@ Before you can start a live preview you'll have to setup a few configuration set
 ## Index
 
 1. [Rendering](#rendering)
-2. [Preview](#Preview)
-3. [Context Variables](#context-variables)
-4. [Extension Settings](#extension-settings)
-5. [Status Bar Item](#utilities)
-6. [Credits](#credits)
+2. [Context Variables](#context-variables)
+3. [Extension Settings](#extension-settings)
+4. [Status Bar Item](#utilities)
+5. [Credits](#credits)
 
 ### Rendering
 
 Upon opening any Python files, you'll see an icon pop up in the menu bar that looks like this
-<image src="./assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*
+<image src="./assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.
 
-Configuration can be done in two ways.
+Whenever a file is run successfully for the first time, the extension creates a dedicated job tied to the source file, you can look at [this](#utilities) to make sure - as long as this job is active, all your settings will persist. Note that run on save does not get activated on files that don't have jobs.
 
+#### Configuration
+
+It can be done in two ways.
 
  <image src="./assets/images/settings.png" height="100%" width= "20px"></image> The first option is to provide in a runtime/in time (can be used interchangeably) configuration - where we'll ask you a few questions to tweak the settings on run time
 
 **HOTKEY** - `ctrl + '` `s` *press, release and then press s, this is not simultaneous*
 
-<hr></hr>
 <image src="./assets/images/dark_logo.png" height="100%" width= "20px"></image> For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the same directory as the source file.
 
-### Preview
+#### Preview
 
 To serve a live preview, the extension needs a relative path to the media file (it can be absolute for an intime configuration).
 
@@ -39,6 +40,10 @@ For those using the runtime configurations, you'll have to provide the media pat
 
 <image src="./assets/video_dir.png"></image>
 * *figure taken from the in time configuration menu*
+
+#### On Save
+
+Configuring your manim projects to execute on save is very easy, just enable the `manim-sideview.runOnSave` settings inside vscode `File -> Preferences -> Settings` menu. This is disabled by default.
 
 ### Context Variables
 
