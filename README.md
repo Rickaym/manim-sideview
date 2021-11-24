@@ -13,7 +13,7 @@ Before you can start a live preview you'll have to setup a few configuration set
 4. [Status Bar Item](#utilities)
 5. [Credits](#credits)
 
-### Rendering
+## Rendering
 
 Upon opening any Python files, you'll see an icon pop up in the menu bar that looks like this
 <image src="./assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.
@@ -45,7 +45,7 @@ For those using the runtime configurations, you'll have to provide the media pat
 
 Configuring your manim projects to execute on save is very easy, just enable the `manim-sideview.runOnSave` settings inside vscode `File -> Preferences -> Settings` menu. This is disabled by default.
 
-### Context Variables
+## Context Variables
 
 Sometimes we don't want to set an absolute path to the media file. Context Variables can only be used in:
 * Configuration of `manim-sideview.videoFilePath`
@@ -121,7 +121,7 @@ Using unset variables will result in default values being used.
 </tr>
 </table>
 
-### Utilities
+## Utilities
 
 You can find a status bar item inside the status bar (the one at the very bottom) an icon that looks like:
 
@@ -139,7 +139,7 @@ Initial release of Manim Sideview.
 
 ---
 
-### Credits
+## Credits
 
 Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> and ofcourse the logo by the [manim](https://github.com/3b1b/manim)/[community](https://github.com/ManimCommunity/manim/) project themselves!
 
