@@ -27,8 +27,7 @@ Configuration can be done in two ways.
 **HOTKEY** - `ctrl + '` `s` *press, release and then press s, this is not simultaneous*
 
 <hr></hr>
-<image src="./assets/images/dark_logo.png" height="100%" width= "20px"></image>
- For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the same directory as the source file.
+<image src="./assets/images/dark_logo.png" height="100%" width= "20px"></image> For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the same directory as the source file.
 
 ### Preview
 
