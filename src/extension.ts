@@ -100,6 +100,7 @@ class ManimSideview {
   private outputChannel: vscode.OutputChannel;
   private process: ChildProcess | undefined;
   private jobStatus: vscode.StatusBarItem;
+  private lastChosenSceneName: string | undefined;
 
   /**
    * The command for running a manim sideview.
@@ -188,26 +189,38 @@ class ManimSideview {
       .match(SCENE_CLASSES)
       ?.map((m) => "$(run-all) " + m.substr(5).replace("(Scene):", "").trim());
     const askMore = "I'll provide it myself!";
-    sceneClasses?.push(askMore);
 
     var sceneName;
     if (sceneClasses) {
+      if (this.lastChosenSceneName) {
+        sceneClasses.push(`$(refresh) ${this.lastChosenSceneName}`);
+      }
+      sceneClasses.push(askMore);
       var choice = await vscode.window.showQuickPick(sceneClasses, {
         title: "Pick The Name Of Your Scene",
         placeHolder: "Search..",
       });
       if (!choice) {
         return false;
-      } else if (choice === askMore) {
-        choice = await vscode.window.showInputBox({
-          prompt: "Input the name of your scene",
-        });
       }
-      sceneName = choice?.replace("$(run-all)", "").trim();
+    }
+    const customInp = choice === askMore;
+    if (customInp) {
+      choice = await vscode.window.showInputBox({
+        prompt: "Input the name of your scene",
+      });
     }
 
+    sceneName = choice
+      ?.replace("$(run-all)", "")
+      .replace("$(refresh)", "")
+      .trim();
     if (sceneName) {
       conf.sceneName = sceneName;
+      // we'll cache the last provided custom input for better accessibility
+      if (customInp) {
+        this.lastChosenSceneName = sceneName;
+      }
       const mediaFile = conf.sceneName + ".mp4";
       conf.output = path.join(conf.videoDir, mediaFile);
       vscode.window.showInformationMessage(
@@ -222,9 +235,14 @@ class ManimSideview {
     }
   }
 
-  updateJobStatus() {
+  updateJobStatus(color?: vscode.ThemeColor) {
     if (this.getActiveJob()) {
       this.jobStatus.show();
+      if (color) {
+        this.jobStatus.color = color;
+      } else {
+        this.jobStatus.color = new vscode.ThemeColor("textLink.foreground");
+      }
     } else {
       this.jobStatus.hide();
     }
@@ -357,11 +375,17 @@ class ManimSideview {
             // we'll open a side view if we can find the file
             this.openSideview(mediaFp);
             this.jobs.push({ config: conf, flag: false });
-            this.updateJobStatus();
+            this.updateJobStatus(
+              new vscode.ThemeColor("minimapGutter.addedBackground")
+            );
           },
           (res) => {
             vscode.window.showErrorMessage(`${res}`);
           }
+        );
+      } else {
+        this.updateJobStatus(
+          new vscode.ThemeColor("minimap.errorHighlight")
         );
       }
     });

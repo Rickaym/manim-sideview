@@ -13,7 +13,6 @@
     "onCommand:manim-sideview.run",
     "onCommand:manim-sideview.refreshAllConfiguration",
     "onCommand:manim-sideview.refreshCurrentConfiguration",
-    "onCommand:manim-sideview.setConfigFile",
     "onCommand:manim-sideview.setRenderingScene",
     "onCommand:manim-sideview.setInTimeConfiguration"
   ],
@@ -105,12 +104,12 @@
         "when": "editorFocus"
       },
       {
-        "command": "manim-sideview.refreshAllConfiguration",
-        "key": "ctrl+' a"
+        "command": "manim-sideview.setInTimeConfiguration",
+        "key": "ctrl+' s"
       },
       {
-        "command": "manim-sideview.setConfigFile",
-        "key": "ctrl+' s"
+        "command": "manim-sideview.setRenderingScene",
+        "key": "ctrl+' c"
       }
     ]
   },

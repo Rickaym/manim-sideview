@@ -11,13 +11,24 @@ Before you can start a live preview you'll have to setup a few configuration set
 2. [Preview](#Preview)
 3. [Context Variables](#context-variables)
 4. [Extension Settings](#extension-settings)
-5. [Credits](#credits)
+5. [Status Bar Item](#utilities)
+6. [Credits](#credits)
 
 ### Rendering
 
-Rendering a scene can be done in two ways.
-*  The first option is to proivde a runtime/in time (i will use them interchangeably) configuration - where we'll ask you a few questions to tweak the settings on run time
-* For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the same directory as the source file.
+Upon opening any Python files, you'll see an icon pop up in the menu bar that looks like this
+<image src="./assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*
+
+Configuration can be done in two ways.
+
+
+ <image src="./assets/images/settings.png" height="100%" width= "20px"></image> The first option is to provide in a runtime/in time (can be used interchangeably) configuration - where we'll ask you a few questions to tweak the settings on run time
+
+**HOTKEY** - `ctrl + '` `s` *press, release and then press s, this is not simultaneous*
+
+<hr></hr>
+<image src="./assets/images/dark_logo.png" height="100%" width= "20px"></image>
+ For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the same directory as the source file.
 
 ### Preview
 
@@ -27,11 +38,14 @@ Those using a `manim.cfg` file can skip this part as we derive programmatically 
 
 For those using the runtime configurations, you'll have to provide the media path in the same dialog. When doing so, you can use a few context variables with as privillege as you can when changing the settings as provided [here](#variables).
 
+<image src="./assets/video_dir.png"></image>
+* *figure taken from the in time configuration menu*
+
 ### Context Variables
 
 Sometimes we don't want to set an absolute path to the media file. Context Variables can only be used in:
 * Configuration of `manim-sideview.videoFilePath`
-* In time configurations
+* In time configurations `Video Directory` option
 
 The case of variable names matter.
 #### Variables
@@ -54,10 +68,17 @@ The case of variable names matter.
 </tr>
 </table>
 
+Using unset variables will result in default values being used.
+
 ## Extension Settings
 
-The scope of each settings signifies the level at which they can be changed. All the settings are application scoped therefore will remain as default settings when single-file execution is not configured.
+**Contemporary settings**
 
+1. After starting a job, you can change the scene name between executions. This can be done by using the command `manim-sideview.setRenderingScene` through pressing `F1` and searching it up - or use the hotkey by default set to `ctrl + '` `c`. This prompt looks exactly like the one shown whenever you start an execution process.
+
+2. When running a job using in time configurations you can change it anytime by resetting it. You can reset it by calling the command `manim-sideview.setInTimeConfiguration` through pressing `F1` and searching it up. This will bring up a webview if you have an active job that allows resetting.
+
+**Application or default settings**
 <table>
 <tr>
     <th>Identifier</th>
@@ -95,6 +116,14 @@ The scope of each settings signifies the level at which they can be changed. All
     <td>true</td>
 </tr>
 </table>
+
+### Utilities
+
+You can find a status bar item inside the status bar (the one at the very bottom) an icon that looks like:
+
+<image src="./assets/statusbaritem.png"></image>
+
+Note that this is a visual reminder that the file in current focus has an active job. Relevantly, this icon will change colors to either green or red depending on the results of an execution at times.
 
 ### Known Issues
 
