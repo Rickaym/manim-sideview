@@ -1,14 +1,18 @@
 {
   "name": "manim-sideview",
   "displayName": "Manim Sideview",
+  "icon": "https://github.com/Rickaym/Manim-Sideview/tree/master/assets/logo.png",
   "description": "A video sideview for the Python animations library manim.",
+  "repository": {"url": "https://github.com/Rickaym/Manim-Sideview", "directory": "src"},
+  "author": {"name": "Ricky", "url": "https://github.com/Rickaym"},
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.62.0"
   },
   "categories": [
-    "Other"
+    "Visualization"
   ],
+  "keywords": ["manim", "animations", "manim sideview"],
   "activationEvents": [
     "onCommand:manim-sideview.run",
     "onCommand:manim-sideview.refreshAllConfiguration",
