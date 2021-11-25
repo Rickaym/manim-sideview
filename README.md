@@ -1,6 +1,6 @@
 # Manim Sideview
 
-A utility extension that provides a live video preview of the rendering scene in working with the **[mainm](https://github.com/ManimCommunity/manim)** framework.
+A utility extension that provides a live video preview of the rendering scene in working with the **[mainm](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
 
 
 Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
@@ -16,7 +16,7 @@ Before you can start a live preview you'll have to setup a few configuration set
 ## Rendering
 
 Upon opening any Python files, you'll see an icon pop up in the menu bar that looks like this
-<image src="https://github.com/Rickaym/Manim-Sideview/blob/master/assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/blob/master/assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.
 
 Whenever a file is run successfully for the first time, the extension creates a dedicated job tied to the source file, you can look at [this](#utilities) to make sure - as long as this job is active, all your settings will persist. Note that run on save does not get activated on files that don't have jobs.
 
@@ -24,11 +24,11 @@ Whenever a file is run successfully for the first time, the extension creates a 
 
 It can be done in two ways.
 
-<image src="https://github.com/Rickaym/Manim-Sideview/blob/master/assets/images/settings.png" height="100%" width= "20px"></image> The first option is to provide in a runtime/in time (can be used interchangeably) configuration - where we'll ask you a few questions to tweak the settings on run time
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/blob/master/assets/images/settings.png" height="100%" width= "20px"></image> The first option is to provide in a runtime/in time (can be used interchangeably) configuration - where we'll ask you a few questions to tweak the settings on run time
 
 **HOTKEY** - `ctrl + '` `s` *press, release and then press s, this is not simultaneous*
 
-<image src="https://github.com/Rickaym/Manim-Sideview/blob/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the same directory as the source file.
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/blob/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the same directory as the source file.
 
 #### Preview
 
@@ -38,7 +38,7 @@ Those using a `manim.cfg` file can skip this part as we derive programmatically 
 
 For those using the runtime configurations, you'll have to provide the media path in the same dialog. When doing so, you can use a few context variables with as privillege as you can when changing the settings as provided [here](#variables).
 
-<image src="https://github.com/Rickaym/Manim-Sideview/blob/master/assets/video_dir.png"></image>
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/blob/master/assets/video_dir.png"></image>
 * *figure taken from the in time configuration menu*
 
 #### On Save
@@ -125,7 +125,7 @@ Using unset variables will result in default values being used.
 
 You can find a status bar item inside the status bar (the one at the very bottom) an icon that looks like:
 
-<image src="https://github.com/Rickaym/Manim-Sideview/blob/master/assets/statusbaritem.png"></image>
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/blob/master/assets/statusbaritem.png"></image>
 
 Note that this is a visual reminder that the file in current focus has an active job. Relevantly, this icon will change colors to either green or red depending on the results of an execution at times.
 
@@ -141,6 +141,6 @@ Initial release of Manim Sideview.
 
 ## Credits
 
-Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> and ofcourse the logo by the [manim](https://github.com/3b1b/manim)/[community](https://github.com/ManimCommunity/manim/) project themselves!
+Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> and ofcourse the logo by the [manim](https://raw.githubusercontent.com/3b1b/manim)/[community](https://raw.githubusercontent.com/ManimCommunity/manim/) project themselves!
 
 **Made with <3 by Ricky,**
