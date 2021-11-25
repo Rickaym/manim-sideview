@@ -1,6 +1,6 @@
 # Manim Sideview
 
-A utility extension that provides a live video preview of the rendering scene in working with the **[mainm](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
+A utility extension that provides a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
 
 
 Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
