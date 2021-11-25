@@ -5,7 +5,7 @@
   "description": "A video sideview for the Python animations library manim.",
   "repository": {"url": "https://github.com/Rickaym/Manim-Sideview", "type":"git", "directory": "src"},
   "author": {"name": "Ricky", "url": "https://github.com/Rickaym"},
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "Rickaym",
   "engines": {
     "vscode": "^1.62.0"
