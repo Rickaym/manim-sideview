@@ -124,6 +124,17 @@ class ManimSideview {
       this.runWhenConfigured(editor.document);
     }
   }
+  /**
+   * The command for stopping a process
+   */
+  stop(process?: ChildProcess) {
+    if (!process) {
+      process = this.process;
+    }
+    if (process) {
+      process.kill();
+    }
+  }
 
   /**
    * The command for refreshing all active jobs.
@@ -225,9 +236,6 @@ class ManimSideview {
       }
       const mediaFile = conf.sceneName + ".mp4";
       conf.output = path.join(conf.videoDir, mediaFile);
-      vscode.window.showInformationMessage(
-        "Successfully set a rendering scene."
-      );
       return true;
     } else {
       vscode.window.showErrorMessage(
@@ -243,8 +251,8 @@ class ManimSideview {
         text = "$(vm-active) Active Job";
       }
       if (!color) {
-          color = new vscode.ThemeColor("textLink.foreground");
-        }
+        color = new vscode.ThemeColor("textLink.foreground");
+      }
       this.jobStatus.color = color;
       this.jobStatus.text = text;
       this.jobStatus.show();
@@ -260,22 +268,26 @@ class ManimSideview {
    * @param conf running configuration.
    */
   private async doRun(conf: RunningConfig) {
-    const root = getRootPath();
-    if (!root) {
-      return;
-    }
+    const CONTEXT_VARIABLES: ContextVars = {
+      "{media_dir}": conf.mediaDir,
+      "{module_name}": conf.moduleName,
+      "{scene_name}": conf.sceneName,
+    };
     var args = [conf.srcPath];
     if (!conf.usingConfigFile) {
-      if (!conf.usingConfigFile) {
-        args.push(conf.args.trim());
-      }
+      //args.push(
+      //  `--video_dir ${insertContext(CONTEXT_VARIABLES, conf.videoDir)}`
+      //);
+      args.push(conf.args.trim());
     }
     args.push(conf.sceneName.trim());
+    args = args.map((a) => `"${a}"`);
     this.executeCommandInoutputChannel(
       conf.exePath,
       args,
-      path.normalize(root),
-      conf
+      conf.root,
+      conf,
+      CONTEXT_VARIABLES
     );
   }
 
@@ -283,24 +295,25 @@ class ManimSideview {
     command: string,
     args: string[],
     cwd: string,
-    conf: RunningConfig
+    conf: RunningConfig,
+    CONTEXT_VARIABLES: ContextVars
   ) {
     this.outputChannel.clear();
     this.outputChannel.appendLine(
-      `[Running] EXE : ${command}\n          Args: "${args.join(
-        '" "'
-      )}"\n          CWD : ${cwd}`
+      `[Log] EXE : "${command}"\n[Log] CWD : "${cwd}\n[Log] VDir: "${insertContext(
+        CONTEXT_VARIABLES,
+        conf.videoDir
+      )}"\n[Log] Args: ${args.join(" | ")}\n[Log] Conf: ${conf.usingConfigFile}`
     );
-    const CONTEXT_VARIABLES: ContextVars = {
-      "{media_dir}": conf.mediaDir,
-      "{module_name}": conf.moduleName,
-      "{scene_name}": conf.sceneName,
-    };
     const mediaFp = insertContext(
       CONTEXT_VARIABLES,
       toAbsolutePath(conf.output)
     );
-    this.outputChannel.appendLine(`[Running] OUT : ${mediaFp}\n`);
+    this.outputChannel.appendLine(
+      `[Running] IN  : ${command} ${args.join(
+        " "
+      )} \n[Running] OUT : ${mediaFp}\n`
+    );
     if (
       vscode.workspace
         .getConfiguration("manim-sideview")
@@ -311,12 +324,15 @@ class ManimSideview {
     const startTime = new Date();
     if (this.process) {
       if (this.process) {
-        this.process.kill();
+        this.stop();
       }
     }
     const { spawn } = require("child_process");
     this.process = spawn(command, args, { cwd: cwd, shell: true });
-    this.updateJobStatus(new vscode.ThemeColor("textLink.foreground"), "$(sync~spin) Active Job");
+    this.updateJobStatus(
+      new vscode.ThemeColor("textLink.foreground"),
+      "$(sync~spin) Active Job"
+    );
     if (
       !this.process ||
       !this.process.stdout ||
@@ -336,7 +352,7 @@ class ManimSideview {
         const outs = data.toString();
         this.outputChannel.append(outs);
         if (outs.includes(INPUT_REQUEST)) {
-          process.kill();
+          this.stop(process);
           this.outputChannel.append("\n");
         }
       }
@@ -401,9 +417,7 @@ class ManimSideview {
           }
         );
       } else {
-        this.updateJobStatus(
-          new vscode.ThemeColor("minimap.errorHighlight")
-        );
+        this.updateJobStatus(new vscode.ThemeColor("minimap.errorHighlight"));
       }
     });
   }
@@ -441,13 +455,13 @@ class ManimSideview {
    * @returns ManimConfig | undefined | false
    */
   private async getManimConfig(
-    sourcePath: string
+    rootPath: string
   ): Promise<ManimConfig | undefined | false> {
     // user made manim.cfg files normally must remain on the
     // same directory of the source path thus we can guess this as such
     var cfgPath = this.manimCfgPath
       ? this.manimCfgPath
-      : path.join(sourcePath, "../manim.cfg");
+      : path.join(rootPath, "manim.cfg");
     try {
       var parsedRes = await ConfigParser.parse(cfgPath);
     } catch (e) {
@@ -504,6 +518,7 @@ class ManimSideview {
   private async runWhenConfigured(doc: vscode.TextDocument) {
     var sourcePath = doc.fileName;
     const moduleName = sourcePath
+      .replace(new RegExp("/", "g"), "\\")
       .split("\\")
       .slice(-1)
       .join()
@@ -516,11 +531,16 @@ class ManimSideview {
       const conf = vscode.workspace.getConfiguration("manim-sideview");
 
       sourcePath = path.normalize(sourcePath);
+      const root = path.normalize(getRootPath() || "");
+      if (!root) {
+        return;
+      }
       runningCfg = {
         exePath: path.normalize(
           conf.get("defaultManimPath") || DEFAULT_MANIM_EXE
         ),
         args: conf.get("commandLineArgs") || DEFAULT_ARGS,
+        root: root,
         videoDir: path.normalize(
           conf.get("videoDirectory") || DEFAULT_VIDEO_DIR
         ),
@@ -539,7 +559,7 @@ class ManimSideview {
     // we will only try to load a manim config if it is started as
     // such
     if ((activeJob && runningCfg.usingConfigFile) || !activeJob) {
-      const cfg = await this.getManimConfig(sourcePath);
+      const cfg = await this.getManimConfig(runningCfg.root);
 
       if (cfg) {
         runningCfg.mediaDir = cfg.mediaDir;
@@ -615,6 +635,9 @@ export function activate(context: vscode.ExtensionContext) {
         await view.refreshAllConfiguration();
       }
     ),
+    vscode.commands.registerCommand("manim-sideview.stop", async function () {
+      view.stop();
+    }),
     vscode.commands.registerCommand(
       "manim-sideview.setRenderingScene",
       async function () {

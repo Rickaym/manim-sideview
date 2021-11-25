@@ -17,6 +17,7 @@
   "keywords": ["manim", "animations", "manim sideview"],
   "activationEvents": [
     "onCommand:manim-sideview.run",
+    "onCommand:manim-sideview.stop",
     "onCommand:manim-sideview.refreshAllConfiguration",
     "onCommand:manim-sideview.refreshCurrentConfiguration",
     "onCommand:manim-sideview.setRenderingScene",
@@ -87,6 +88,10 @@
         "title": "Refreshs All Active Configurations"
       },
       {
+        "command": "manim-sideview.stop",
+        "title": "Stops Running Processes"
+      },
+    {
         "command": "manim-sideview.refreshCurrentConfiguration",
         "title": "Refreshes Selected File Configuration"
       },
@@ -107,6 +112,11 @@
       {
         "command": "manim-sideview.run",
         "key": "ctrl+' r",
+        "when": "editorFocus"
+      },
+      {
+        "command": "manim-sideview.stop",
+        "key": "ctrl+' x",
         "when": "editorFocus"
       },
       {

@@ -5,6 +5,12 @@ A utility extension that provides a live video preview of the rendering scene in
 
 Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
 
+------
+
+**[Support Server](https://discord.gg/UmnzdPgn6g)** | **[Repository](https://github.com/Rickaym/Code-Jumper)** | **[Install here](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview)**
+
+------
+
 ## Index
 
 1. [Rendering](#rendering)
@@ -28,7 +34,7 @@ It can be done in two ways.
 
 **HOTKEY** - `ctrl + '` `s` *press, release and then press s, this is not simultaneous*
 
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the same directory as the source file.
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the working directory.
 
 #### Preview
 
@@ -133,9 +139,17 @@ Note that this is a visual reminder that the file in current focus has an active
 
 _-_
 
-#### 0.0.1
+#### 0.0.1 - 0.0.2
 
 Initial release of Manim Sideview.
+
+#### 0.0.3
+
++ Added `manim-sideview.stop` for stopping any running processes
++ Paths are now normalized to work with both forward and backward slashes
++ video directories are now static and will not depend on the verdict of manim
++ Setting a valid path no longer replies with "Success" because this can be confusing when there is an exception thrown later down the line that has has nothing to do with the scene name
++ `manim.cfg` files are now derived from the working path - which is the correct case
 
 ---
 

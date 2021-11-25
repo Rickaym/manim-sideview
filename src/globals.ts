@@ -26,6 +26,7 @@ export type RunningConfig = {
   sceneName: string;
   moduleName: string;
   args: string;
+  root: string;
   output: string;
   document: vscode.TextDocument;
   mediaDir: string;
