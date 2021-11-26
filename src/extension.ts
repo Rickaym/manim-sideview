@@ -300,7 +300,7 @@ class ManimSideview {
   ) {
     this.outputChannel.clear();
     this.outputChannel.appendLine(
-      `[Log] EXE : "${command}"\n[Log] CWD : "${cwd}\n[Log] VDir: "${insertContext(
+      `[Log] EXE : "${command}"\n[Log] CWD : "${cwd}"\n[Log] VDir: "${insertContext(
         CONTEXT_VARIABLES,
         conf.videoDir
       )}"\n[Log] Args: ${args.join(" | ")}\n[Log] Conf: ${conf.usingConfigFile}`

@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { normalize } from "path";
 
 /**
  * A list of type and value definitions used in different modules with no ownership
@@ -79,5 +80,5 @@ export function getRootPath(): string | false {
     );
     return false;
   }
-  return vscode.workspace.workspaceFolders[0].uri.path;
+  return normalize(vscode.workspace.workspaceFolders[0].uri.fsPath);
 }
