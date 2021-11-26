@@ -79,8 +79,5 @@ export function getRootPath(): string | false {
     );
     return false;
   }
-  const root = vscode.workspace.workspaceFolders[0].uri.path;
-  return root.startsWith("/") || root.startsWith("\\")
-    ? root.substring(1)
-    : root;
+  return vscode.workspace.workspaceFolders[0].uri.path;
 }
