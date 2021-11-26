@@ -1,0 +1,16 @@
+.image-button {
+    opacity: 1;
+    display: inline-block;
+    border: 2px solid var(--vscode-scrollbarSlider-hoverBackground);
+    width: 80px;
+    height: auto;
+    margin: 1px;
+    transition: .1s ease;
+    backface-visibility: hidden;
+    border-radius: 8px;
+}
+
+.image-button:hover {
+    border-color: var(--vscode-textLink-foreground);
+    cursor: pointer;
+}

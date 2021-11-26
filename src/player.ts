@@ -2,26 +2,28 @@ import * as vscode from "vscode";
 import {
   ContextVars,
   getNonce,
+  getWebviewResource,
   insertContext,
   WebviewResources,
 } from "./globals";
 
 export class VideoPlayer {
   constructor(
-    public readonly extensionUri: vscode.Uri,
-    public readonly disposables: any[]
+    public readonly ctx: vscode.ExtensionContext,
+    public readonly extensionUri: vscode.Uri = ctx.extensionUri,
+    public readonly disposables: any[] = ctx.subscriptions
   ) {
-    this.extensionUri = extensionUri;
-    this.disposables = disposables;
+    this.setup();
   }
 
   private panel: vscode.WebviewPanel | undefined;
-  private loads: WebviewResources = {
-    css: vscode.Uri.joinPath(this.extensionUri, "webview/player/player.css"),
-    js: vscode.Uri.joinPath(this.extensionUri, "webview/player/player.js"),
-    html: vscode.Uri.joinPath(this.extensionUri, "webview/player/player.html"),
-  };
   private htmlDoc: string | undefined;
+
+  private loads: WebviewResources = getWebviewResource(
+    this.extensionUri,
+    "player"
+  );
+
   private fontAwesomeCss = {
     all: vscode.Uri.joinPath(
       this.extensionUri,
@@ -44,8 +46,21 @@ export class VideoPlayer {
     ),
   };
 
+  async setup(): Promise<string> {
+    this.htmlDoc = (
+      await vscode.workspace.fs.readFile(this.loads.html)
+    ).toString();
+    return this.htmlDoc;
+  }
+
   async show(videoUri: vscode.Uri) {
-    const resource = videoUri.with({ scheme: "vscode-resource" }).toString().replace(/vscode-resource:/g, "https://file%2B.vscode-resource.vscode-webview.net");
+    const resource = videoUri
+      .with({ scheme: "vscode-resource" })
+      .toString()
+      .replace(
+        /vscode-resource:/g,
+        "https://file%2B.vscode-resource.vscode-webview.net"
+      );
     if (this.panel) {
       return this.panel.webview.postMessage({
         command: "reload",
@@ -56,9 +71,9 @@ export class VideoPlayer {
       });
     }
     if (!this.htmlDoc) {
-      this.htmlDoc = (
-        await vscode.workspace.fs.readFile(this.loads.html)
-      ).toString();
+      var htmlDoc = await this.setup();
+    } else {
+      var htmlDoc = this.htmlDoc;
     }
     this.panel = vscode.window.createWebviewPanel(
       videoUri.path,
@@ -88,8 +103,8 @@ export class VideoPlayer {
       "%videoSrc%": resource,
       "%cspSource%": this.panel.webview.cspSource,
       "player.css": styleSrc.toString(),
-      "%nonce%": nonce,
       "player.js": this.loads.js.with({ scheme: "vscode-resource" }).toString(),
+      "%nonce%": nonce,
       "../../assets/fontawesome/css/all.min.css": this.panel.webview
         .asWebviewUri(this.fontAwesomeCss.all)
         .toString(),
@@ -104,7 +119,7 @@ export class VideoPlayer {
           .with({ scheme: "vscode-resource" })
           .toString(),
     };
-    this.panel.webview.html = insertContext(vars, this.htmlDoc);
+    this.panel.webview.html = insertContext(vars, htmlDoc);
     this.panel.onDidDispose(
       () => {
         this.panel = undefined;

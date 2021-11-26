@@ -6,6 +6,7 @@ import {
   DEFAULT_MEDIA_DIR,
   DEFAULT_VIDEO_DIR,
   getNonce,
+  getWebviewResource,
   insertContext,
   RunningConfig,
   WebviewResources,
@@ -13,21 +14,28 @@ import {
 
 export class DueTimeConfiguration {
   constructor(
-    public readonly extensionUri: vscode.Uri,
-    public readonly disposables: any[]
+    public readonly ctx: vscode.ExtensionContext,
+    public readonly extensionUri: vscode.Uri = ctx.extensionUri,
+    public readonly disposables: any[] = ctx.subscriptions
   ) {
-    this.extensionUri = extensionUri;
-    this.disposables = disposables;
+    this.setup();
   }
   private panel: vscode.WebviewPanel | undefined;
-  private loads: WebviewResources = {
-    css: vscode.Uri.joinPath(this.extensionUri, "webview/config/config.css"),
-    js: vscode.Uri.joinPath(this.extensionUri, "webview/config/config.js"),
-    html: vscode.Uri.joinPath(this.extensionUri, "webview/config/config.html"),
-  };
   private htmlDoc: string | undefined;
 
-  async showInput(conf: RunningConfig) {
+  private loads: WebviewResources = getWebviewResource(
+    this.extensionUri,
+    "config"
+  );
+
+  async setup(): Promise<string> {
+    this.htmlDoc = (
+      await vscode.workspace.fs.readFile(this.loads.html)
+    ).toString();
+    return this.htmlDoc;
+  }
+
+  async show(conf: RunningConfig) {
     if (this.panel) {
       vscode.window.showErrorMessage(
         "You cannot open multiple configuration panels at the same time."
@@ -36,9 +44,9 @@ export class DueTimeConfiguration {
     }
 
     if (!this.htmlDoc) {
-      this.htmlDoc = (
-        await vscode.workspace.fs.readFile(this.loads.html)
-      ).toString();
+      var htmlDoc = await this.setup();
+    } else {
+      var htmlDoc = this.htmlDoc;
     }
     this.panel = vscode.window.createWebviewPanel(
       "inTimeConfiguration",
@@ -49,18 +57,16 @@ export class DueTimeConfiguration {
       }
     );
 
-    this.panel.iconPath = vscode.Uri.joinPath(this.extensionUri, "assets/images/settings.png");
-
-    const styleSrc = this.panel.webview.asWebviewUri(this.loads.css);
-    const nonce = getNonce();
+    this.panel.iconPath = vscode.Uri.joinPath(
+      this.extensionUri,
+      "assets/images/settings.png"
+    );
 
     const vars: ContextVars = {
-      "%styleSrc%": styleSrc.toString(),
+      "config.css": this.panel.webview.asWebviewUri(this.loads.css).toString(),
+      "config.js": this.loads.js.with({ scheme: "vscode-resource" }).toString(),
       "%cspSource%": this.panel.webview.cspSource,
-      "%nonce%": nonce,
-      "%scriptSrc%": this.loads.js
-        .with({ scheme: "vscode-resource" })
-        .toString(),
+      "%nonce%": getNonce(),
       "%args%":
         conf.args ||
         vscode.workspace
@@ -82,7 +88,7 @@ export class DueTimeConfiguration {
         DEFAULT_MEDIA_DIR,
     };
 
-    this.panel.webview.html = insertContext(vars, this.htmlDoc);
+    this.panel.webview.html = insertContext(vars, htmlDoc);
 
     this.panel.webview.onDidReceiveMessage(
       (message) => {
@@ -97,7 +103,7 @@ export class DueTimeConfiguration {
               conf.args = message.args;
               conf.sceneName = message.sceneName;
               conf.videoDir = message.videoDir;
-              conf.output = join(message.videoDir, conf.sceneName+".mp4");
+              conf.output = join(message.videoDir, conf.sceneName + ".mp4");
               this.panel.dispose();
               vscode.window.showInformationMessage(
                 "Success, I've configured the running configurations to the details provided for now!"

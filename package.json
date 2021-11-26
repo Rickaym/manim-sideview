@@ -5,7 +5,7 @@
   "description": "A video sideview for the Python animations library manim.",
   "repository": {"url": "https://github.com/Rickaym/Manim-Sideview", "type":"git", "directory": "src"},
   "author": {"name": "Ricky", "url": "https://github.com/Rickaym"},
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "Rickaym",
   "engines": {
     "vscode": "^1.62.0"
@@ -21,7 +21,8 @@
     "onCommand:manim-sideview.refreshAllConfiguration",
     "onCommand:manim-sideview.refreshCurrentConfiguration",
     "onCommand:manim-sideview.setRenderingScene",
-    "onCommand:manim-sideview.setInTimeConfiguration"
+    "onCommand:manim-sideview.setInTimeConfiguration",
+    "onCommand:manim-sideview.showMObjectGallery"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -84,20 +85,16 @@
         }
       },
       {
+        "command": "manim-sideview.stop",
+        "title": "Stops Running Processes"
+      },
+      {
         "command": "manim-sideview.refreshAllConfiguration",
         "title": "Refreshs All Active Configurations"
       },
       {
-        "command": "manim-sideview.stop",
-        "title": "Stops Running Processes"
-      },
-    {
         "command": "manim-sideview.refreshCurrentConfiguration",
         "title": "Refreshes Selected File Configuration"
-      },
-      {
-        "command": "manim-sideview.setConfigFile",
-        "title": "Set A Config File"
       },
       {
         "command": "manim-sideview.setRenderingScene",
@@ -106,8 +103,12 @@
       {
         "command": "manim-sideview.setInTimeConfiguration",
         "title": "Set A Configuration"
+      },
+      {
+        "command": "manim-sideview.showMObjectGallery",
+        "title": "Shows MObject Gallery For Manim"
       }
-  ],
+    ],
     "keybindings": [
       {
         "command": "manim-sideview.run",

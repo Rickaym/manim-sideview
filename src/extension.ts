@@ -15,6 +15,7 @@ import {
 import { DueTimeConfiguration } from "./config";
 import { ConfigParser } from "./configparser";
 import { VideoPlayer } from "./player";
+import { Gallery } from "./gallery";
 
 /**
  * ENTRY POINT OF THE EXTENSION
@@ -66,14 +67,9 @@ class ManimSideview {
     this.ctx = ctx;
     this.manimCfgPath = "";
     this.jobs = [];
-    this.prompt = new DueTimeConfiguration(
-      this.ctx.extensionUri,
-      this.ctx.subscriptions
-    );
-    this.player = new VideoPlayer(
-      this.ctx.extensionUri,
-      this.ctx.subscriptions
-    );
+    this.prompt = new DueTimeConfiguration(ctx);
+    this.player = new VideoPlayer(ctx);
+    this.gallery = new Gallery(ctx);
     this.outputChannel = vscode.window.createOutputChannel("Manim");
 
     this.jobStatus = vscode.window.createStatusBarItem(
@@ -97,6 +93,7 @@ class ManimSideview {
   private jobs: Job[];
   private prompt: DueTimeConfiguration;
   private player: VideoPlayer;
+  private gallery: Gallery;
   private outputChannel: vscode.OutputChannel;
   private process: ChildProcess | undefined;
   private jobStatus: vscode.StatusBarItem;
@@ -259,6 +256,13 @@ class ManimSideview {
     } else {
       this.jobStatus.hide();
     }
+  }
+
+  /**
+   * The command for loading the m object gallery
+   */
+  showMObjectGallery() {
+    this.gallery.show();
   }
 
   /**
@@ -606,7 +610,7 @@ class ManimSideview {
       }
       conf = job.config;
     }
-    this.prompt.showInput(conf);
+    this.prompt.show(conf);
   }
 
   private async openSideview(mediaFp: string) {
@@ -654,6 +658,12 @@ export function activate(context: vscode.ExtensionContext) {
       "manim-sideview.refreshCurrentConfiguration",
       async function () {
         await view.refreshCurrentConfiguration();
+      }
+    ),
+    vscode.commands.registerCommand(
+      "manim-sideview.showMObjectGallery",
+      async function () {
+        await view.showMObjectGallery();
       }
     )
   );

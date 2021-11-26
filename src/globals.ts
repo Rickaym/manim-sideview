@@ -82,3 +82,30 @@ export function getRootPath(): string | false {
   }
   return normalize(vscode.workspace.workspaceFolders[0].uri.fsPath);
 }
+
+/**
+ * Used in webviews to load the html, js and css paths in one call.
+ *
+ * @param extensionUri
+ * @param viewName
+ * @returns WebviewResources
+ */
+export function getWebviewResource(
+  extensionUri: vscode.Uri,
+  viewName: string
+): WebviewResources {
+  return {
+    css: vscode.Uri.joinPath(
+      extensionUri,
+      `webview/${viewName}/${viewName}.css`
+    ),
+    js: vscode.Uri.joinPath(
+      extensionUri,
+      `webview/${viewName}/${viewName}.js`
+    ),
+    html: vscode.Uri.joinPath(
+      extensionUri,
+      `webview/${viewName}/${viewName}.html`
+    ),
+  };
+}

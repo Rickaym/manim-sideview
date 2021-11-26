@@ -153,10 +153,16 @@ Initial release of Manim Sideview.
 + video directories are now static and will not depend on the verdict of manim
 + Setting a valid path no longer replies with "Success" because this can be confusing when there is an exception thrown later down the line that has has nothing to do with the scene name
 + `manim.cfg` files are now derived from the working path - which is the correct case
++ Added support server link
 
 #### 0.0.4
 
 + Minor bug fix for Unix machines with trimmed leading slashes
+
+#### 0.0.5
+
++ Fixed server links
++ Added `manim-sideview
 
 ---
 
