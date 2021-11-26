@@ -5,9 +5,12 @@ A utility extension that provides a live video preview of the rendering scene in
 
 Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
 
-------
 
-**[Support Server](https://discord.gg/UmnzdPgn6g)** | **[Repository](https://github.com/Rickaym/Code-Jumper)** | **[Install here](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview)**
+<div align="center">
+
+**[Support Server](https://discord.gg/UmnzdPgn6g)** - **[Install here](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview)**
+
+</div>
 
 ------
 
