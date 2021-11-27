@@ -123,12 +123,18 @@ class ManimSideview {
    * The command for stopping a process
    */
   stop(process?: ChildProcess) {
-    if (!process) {
+    /* if (!process) {
       process = this.process;
     }
     if (process) {
       process.kill();
-    }
+    } */
+    vscode.window.withProgress({
+      "location": vscode.ProgressLocation.Notification,
+      "title": "Attempting to synchronize local gallery..",
+      "cancellable": true},
+      (p, t) => this.gallery.synchronize(p, t)
+    );
   }
 
   /**

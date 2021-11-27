@@ -6,6 +6,12 @@ import {
   insertContext,
   WebviewResources,
 } from "./globals";
+import * as https from "https";
+
+// gallery synchronization files
+const ENTRY_FILE =
+  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/init_images_and_text.js";
+const VERSION_RE = /var\s*version_number\s*=\s*"([^"]+)";?/g;
 
 export class Gallery {
   constructor(
@@ -139,5 +145,60 @@ export class Gallery {
       undefined,
       this.disposables
     );
+  }
+
+  async pullMobjects() {
+
+  };
+
+  async synchronize(
+    progress: vscode.Progress<{ increment: number; message: string }>,
+    token: vscode.CancellationToken
+  ) {
+    const localVersion = (
+      await vscode.workspace.fs.readFile(
+        vscode.Uri.joinPath(this.extensionUri, "assets/mobjects/version.txt")
+      )
+    ).toString();
+
+    let request = https
+      .get(ENTRY_FILE, function (res) {
+        if (res.statusCode === 200) {
+          res.on("data", function (d: Buffer) {
+            const version = d.toString().match(VERSION_RE);
+
+            if (version) {
+              const segs = version[0].split('"');
+              const olVersion = segs[segs.length - 2];
+
+              if (olVersion !== localVersion) {
+                progress.report({
+                  increment: 10,
+                  message: segs[segs.length - 2],
+                });
+                // downloads synchronization here
+              } else {
+                progress.report({
+                  increment: 100,
+                  message: "Your local version is already up to date!",
+                });
+                vscode.window.showInformationMessage("You're already up to date.");
+                request.destroy();
+              }
+            }
+          });
+          request.setTimeout(1000, function () {
+            request.destroy();
+          });
+          progress.report({ increment: 100, message: "Matching Versions" });
+        } else {
+          vscode.window.showErrorMessage(
+            `Synchronizing failure for code ${res.statusCode}, ${res.statusMessage}`
+          );
+        }
+      })
+      .on("error", function (e) {
+        vscode.window.showErrorMessage(`Synchronizing failure ${e.message}`);
+      });
   }
 }
