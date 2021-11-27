@@ -1,18 +1,13 @@
 # Manim Sideview
 
-A utility extension that provides a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
+<img alt="Extension Homepage" src="https://img.shields.io/badge/vscode-install%20Here-brightgreen?logo=visualstudiocode"> <img alt="Extension Version" src="https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview">
+<a href="https://discord.gg/UmnzdPgn6g">
+<img src="https://img.shields.io/discord/793047973751554088?logo=discord" alt="Get Support"></a>
 
+A utility extension that provides a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
 
 Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
 
-
-<div align="center">
-
-**[Support Server](https://discord.gg/UmnzdPgn6g)** - **[Install here](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview)**
-
-</div>
-
-------
 
 ## Index
 
@@ -162,12 +157,12 @@ Initial release of Manim Sideview.
 #### 0.0.5
 
 + Fixed server links
-+ Added `manim-sideview
++ Added `manim-sideview.showMobjectGallery`
 
 ---
 
 ## Credits
 
-Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> and ofcourse the logo by the [manim](https://raw.githubusercontent.com/3b1b/manim)/[community](https://raw.githubusercontent.com/ManimCommunity/manim/) project themselves!
+Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, [mobject gallery](https://github.com/kolibril13/mobject-gallery/) by [kolibril13](https://github.com/kolibril13) and ofcourse the logo by the [manim](https://raw.githubusercontent.com/3b1b/manim)/[community](https://raw.githubusercontent.com/ManimCommunity/manim/) project themselves!
 
 **Made with <3 by Ricky,**
