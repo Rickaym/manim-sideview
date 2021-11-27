@@ -4,7 +4,7 @@
     border: 2px solid var(--vscode-scrollbarSlider-hoverBackground);
     width: 80px;
     height: auto;
-    margin: 1px;
+    margin: 5px;
     transition: .1s ease;
     backface-visibility: hidden;
     border-radius: 8px;

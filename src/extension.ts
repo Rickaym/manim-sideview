@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { ChildProcess } from "child_process";
 
+import { ChildProcess } from "child_process";
 import {
   ContextVars,
   DEFAULT_ARGS,
@@ -10,7 +10,7 @@ import {
   DEFAULT_VIDEO_DIR,
   getRootPath,
   insertContext,
-  RunningConfig,
+  RunningConfig
 } from "./globals";
 import { DueTimeConfiguration } from "./config";
 import { ConfigParser } from "./configparser";

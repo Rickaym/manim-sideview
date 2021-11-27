@@ -23,11 +23,18 @@ export class Gallery {
     this.extensionUri,
     "assets/mobjects"
   );
-  private imageMapping: { [header: string]: JSON } = {};
+  private imageMapping: { [header: string]: { [key: string]: string } } = {};
   private loads: WebviewResources = getWebviewResource(
     this.extensionUri,
     "gallery"
   );
+  private manimIconsPath = {
+    dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
+    light: vscode.Uri.joinPath(
+      this.extensionUri,
+      "assets/images/light_logo.png"
+    ),
+  };
 
   async setup(): Promise<string> {
     this.htmlDoc = (
@@ -72,30 +79,27 @@ export class Gallery {
         enableScripts: true,
       }
     );
-    this.panel.iconPath = {
-      dark: vscode.Uri.joinPath(
-        this.extensionUri,
-        "assets/images/dark_logo.png"
-      ),
-      light: vscode.Uri.joinPath(
-        this.extensionUri,
-        "assets/images/light_logo.png"
-      ),
-    };
+    this.panel.iconPath = this.manimIconsPath;
+
     var images = "";
     const panel = this.panel;
     Object.keys(this.imageMapping).forEach((title) => {
       images += `<h2>${title}</h2>`;
       Object.keys(this.imageMapping[title]).forEach((imgPth) => {
-        images += `<img class="image-button" src=${panel.webview.asWebviewUri(
+        images += `<img class="image-button" id="${this.imageMapping[title][
+          imgPth
+        ].replace(new RegExp('"', "g"), "'")}" src=${panel.webview.asWebviewUri(
           vscode.Uri.joinPath(this.mobjectsPath, "img", imgPth)
         )}>`;
-      });}
-    );
+      });
+    });
 
     const vars: ContextVars = {
       "%cspSource%": this.panel.webview.cspSource,
       "gallery.css": this.panel.webview.asWebviewUri(this.loads.css).toString(),
+      "gallery.js": this.loads.js
+        .with({ scheme: "vscode-resource" })
+        .toString(),
       "%nonce%": getNonce(),
       "%mObjects%": images,
     };
@@ -104,6 +108,37 @@ export class Gallery {
     this.panel.onDidDispose(
       () => {
         this.panel = undefined;
+      },
+      undefined,
+      this.disposables
+    );
+
+    this.panel.webview.onDidReceiveMessage(
+      (message) => {
+        const doc = vscode.window.visibleTextEditors.filter(
+          (e) => e.document.languageId === "python"
+        );
+        if (doc.length > 0) {
+          const appendage = doc[0];
+          const before = appendage.document.getText(
+            new vscode.Range(
+              new vscode.Position(appendage.selection.active.line, 0),
+              appendage.selection.active
+            )
+          );
+          // there is only space or tabs behind
+          var code = message.code;
+          if (!before.trim()) {
+            code = code.replace(new RegExp("\n", "g"), "\n" + before);
+          }
+          appendage.edit((e) => {
+            e.insert(appendage.selection.active, code);
+          });
+          vscode.window.showTextDocument(
+            appendage.document,
+            vscode.ViewColumn.One
+          );
+        }
       },
       undefined,
       this.disposables

@@ -45,6 +45,13 @@ export class VideoPlayer {
       "assets/fontawesome/js/fontawesome.min.js"
     ),
   };
+  private manimIconsPath = {
+    dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
+    light: vscode.Uri.joinPath(
+      this.extensionUri,
+      "assets/images/light_logo.png"
+    ),
+  };
 
   async setup(): Promise<string> {
     this.htmlDoc = (
@@ -86,16 +93,7 @@ export class VideoPlayer {
         enableScripts: true,
       }
     );
-    this.panel.iconPath = {
-      dark: vscode.Uri.joinPath(
-        this.extensionUri,
-        "assets/images/dark_logo.png"
-      ),
-      light: vscode.Uri.joinPath(
-        this.extensionUri,
-        "assets/images/light_logo.png"
-      ),
-    };
+    this.panel.iconPath = this.manimIconsPath;
 
     const styleSrc = this.panel.webview.asWebviewUri(this.loads.css);
     const nonce = getNonce();

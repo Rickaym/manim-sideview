@@ -3,7 +3,7 @@
 src/**
 .gitignore
 .yarnrc
-pull_gallery.py
+pullGallery.ts
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
