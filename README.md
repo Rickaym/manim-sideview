@@ -8,6 +8,8 @@
 
 A utility extension for Visual Code that provides two features:
 * a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
+![](images/example_preview.gif)
+
 
 * an mobject gallery for inserting mobjects
 ![](images/example_of_mobject_gallery.gif)
