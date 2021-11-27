@@ -70,7 +70,7 @@ export class Gallery {
     }
     this.panel = vscode.window.createWebviewPanel(
       "mobject-gallery",
-      "MObjects",
+      "Mobjects",
       {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true,
@@ -101,7 +101,7 @@ export class Gallery {
         .with({ scheme: "vscode-resource" })
         .toString(),
       "%nonce%": getNonce(),
-      "%mObjects%": images,
+      "%Mobjects%": images,
     };
 
     this.panel.webview.html = insertContext(vars, htmlDoc);
