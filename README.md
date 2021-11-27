@@ -4,11 +4,12 @@
 <a href="https://discord.gg/UmnzdPgn6g">
 <img src="https://img.shields.io/discord/793047973751554088?logo=discord" alt="Get Support"></a>
 
-A utility extension that provides a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
+A utility extension for Visual Code that provides two features:
+* a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
 
-Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
-
-
+* an mobject gallery for inserting mobjects
+![](example_of_mobject_gallery.gif)
+Open the gallery by the vscode command palette "Show Mobject Gallery For manim" and click on the shape that you want to use. It will appear in your code editor (either in a python or jupyter file).  
 ## Index
 
 1. [Rendering](#rendering)
@@ -18,6 +19,10 @@ Before you can start a live preview you'll have to setup a few configuration set
 5. [Credits](#credits)
 
 ## Rendering
+
+Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
+
+
 
 Upon opening any Python files, you'll see an icon pop up in the menu bar that looks like this
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.

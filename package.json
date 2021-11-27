@@ -106,7 +106,7 @@
       },
       {
         "command": "manim-sideview.showMobjectGallery",
-        "title": "Shows Mobject Gallery For Manim"
+        "title": "Show Mobject Gallery For Manim"
       }
     ],
     "keybindings": [
