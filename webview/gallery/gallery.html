@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta
+  http-equiv="Content-Security-Policy"
+  content="default-src 'none'; img-src %cspSource% https:; script-src 'nonce-%nonce%'; style-src %cspSource%;"
+/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="gallery.css" rel="stylesheet">
+</head>
+<body>
+  <div>
+    <h2>MObject Gallery</h2>
+  </div>
+  <p>Press to paste the code for the MObject.</p>
+  <div id="mObjects">
+    %mObjects%
+  </div>
+  <hr>
+  <script nonce="%nonce%" src="gallery.js"></script>
+</body>
+</html

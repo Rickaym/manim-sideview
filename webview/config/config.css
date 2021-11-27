@@ -1,0 +1,54 @@
+body {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  font-weight: var(--vscode-font-weight);
+}
+
+input[type="text"] {
+  background-color: var(--vscode-input-background);
+  border-color: transparent;
+  color: var(--vscode-input-foreground);
+  margin-top: 6px;
+}
+input[type="text"]:focus {
+  outline-color: var(--vscode-focusBorder);
+}
+
+#container {
+  text-align: center;
+}
+
+button {
+  display: inline-block;
+}
+
+button.button-primary {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border-radius: 5px;
+  border: transparent;
+}
+
+button.button-primary:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+button.button-secondary {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border-radius: 5px;
+  border: transparent;
+}
+
+button.button-secondary:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+::placeholder {
+  color: var(--vscode-input-placeholderForeground);
+}
+
+div.config-container {
+  padding-left: 10px;
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--
+  The %name% notation is totally non-standard but it is the way we replace important context
+  variables into the document before loading. Other procedures are relatively buggy.
+-->
+<meta
+  http-equiv="Content-Security-Policy"
+  content="default-src 'none'; img-src %cspSource% https:; script-src 'nonce-%nonce%'; style-src %cspSource%;"
+/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="config.css" rel="stylesheet">
+</head>
+<body>
+  <div>
+    <h2>Reconfigure Due Time Configurations</h2>
+  </div>
+  <p><i>Note these configurations are due time and their default values stem from the default configurations,
+    this will only persists so long as you're still in the workspace unscaped. Tt is recommended to <a href="https://docs.manim.community/en/stable/tutorials/configuration.html?highlight=config%20#the-config-files"><b>
+    setup</b></a> a <code>manim.cfg</code> to avoid this step completely.</i></p>
+
+  <section class="container">
+    <form id="config-form">
+        <div class="config-container">
+          <label for="args"><b>Command Line Arguments</b></label> <br>
+          <span>Command line arguments used with manim.</span> <br>
+          <input type="text" id="args" value="%args%" name="command-line-arguments">
+        </div> <br>
+
+        <div class="config-container">
+          <label for="video_dir"><b>Video Directory</b></label> <br>
+          <span>The relative path to the directory where we can find the video.</span> <br>
+          <input type="text" id="video_dir" value="%video_dir%" name="video-directory">
+        </div> <br>
+
+        <div class="config-container">
+          <label for="scene_name"><b>Scene Name</b></label> <br>
+          <span>The name of the scene to be rendered. The sideview does not support multiple scene renderings. Obviously no names with spaces.</span> <br>
+          <input type="text" id="scene_name" value="%scene_name%" name="scene-name" required aria-required="true" pattern="^\w+$">
+        </div> <br>
+      <div class="a-ok">
+        <button type="submit" id="configure" class="button-primary">Configure</button>
+        <button id="cancel" class="button-secondary" formnovalidate>Cancel</button>
+      </div>
+    </form>
+  </section>
+  <script nonce="%nonce%" src="config.js"></script>
+</body>
+</html
