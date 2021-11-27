@@ -663,7 +663,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "manim-sideview.showMObjectGallery",
       async function () {
-        await view.showMObjectGallery();
+        view.showMObjectGallery();
       }
     )
   );
