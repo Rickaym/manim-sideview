@@ -22,7 +22,7 @@
     "onCommand:manim-sideview.refreshCurrentConfiguration",
     "onCommand:manim-sideview.setRenderingScene",
     "onCommand:manim-sideview.setInTimeConfiguration",
-    "onCommand:manim-sideview.showMObjectGallery"
+    "onCommand:manim-sideview.showMobjectGallery"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -105,8 +105,8 @@
         "title": "Set A Configuration"
       },
       {
-        "command": "manim-sideview.showMObjectGallery",
-        "title": "Shows MObject Gallery For Manim"
+        "command": "manim-sideview.showMobjectGallery",
+        "title": "Shows Mobject Gallery For Manim"
       }
     ],
     "keybindings": [

@@ -261,7 +261,7 @@ class ManimSideview {
   /**
    * The command for loading the m object gallery
    */
-  showMObjectGallery() {
+  showMobjectGallery() {
     this.gallery.show();
   }
 
@@ -661,9 +661,9 @@ export function activate(context: vscode.ExtensionContext) {
       }
     ),
     vscode.commands.registerCommand(
-      "manim-sideview.showMObjectGallery",
+      "manim-sideview.showMobjectGallery",
       async function () {
-        view.showMObjectGallery();
+        view.showMobjectGallery();
       }
     )
   );
