@@ -1,6 +1,8 @@
 # Manim Sideview
 
-<img alt="Extension Homepage" src="https://img.shields.io/badge/vscode-install%20Here-brightgreen?logo=visualstudiocode"> <img alt="Extension Version" src="https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview">
+<a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview">
+<img alt="Extension Homepage" src="https://img.shields.io/badge/vscode-install%20Here-brightgreen?logo=visualstudiocode"></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Version" src="https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview"></a>
 <a href="https://discord.gg/UmnzdPgn6g">
 <img src="https://img.shields.io/discord/793047973751554088?logo=discord" alt="Get Support"></a>
 
@@ -8,8 +10,8 @@ A utility extension for Visual Code that provides two features:
 * a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
 
 * an mobject gallery for inserting mobjects
-![](example_of_mobject_gallery.gif)
-Open the gallery by the vscode command palette "Show Mobject Gallery For manim" and click on the shape that you want to use. It will appear in your code editor (either in a python or jupyter file).  
+![](assets/images/example_of_mobject_gallery.gif)
+Open the gallery by the vscode command palette "Show Mobject Gallery For manim" and click on the shape that you want to use. It will appear in your code editor (either in a python or jupyter file).
 ## Index
 
 1. [Rendering](#rendering)

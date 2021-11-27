@@ -1,4 +1,3 @@
-import { fdatasync } from "fs/promises";
 import * as vscode from "vscode";
 import {
   ContextVars,
@@ -126,18 +125,15 @@ export class Gallery {
               appendage.selection.active
             )
           );
-          // there is only space or tabs behind
           var code = message.code;
+          // adaptive indentations
           if (!before.trim()) {
             code = code.replace(new RegExp("\n", "g"), "\n" + before);
           }
           appendage.edit((e) => {
             e.insert(appendage.selection.active, code);
           });
-          vscode.window.showTextDocument(
-            appendage.document,
-            vscode.ViewColumn.One
-          );
+          vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
         }
       },
       undefined,

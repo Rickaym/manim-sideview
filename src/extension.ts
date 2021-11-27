@@ -21,8 +21,7 @@ import { Gallery } from "./gallery";
  * ENTRY POINT OF THE EXTENSION
  */
 
-// mandatory cli flags for user configuration
-// currently none
+// mandatory cli flags for user configuration currently none
 const USER_DEF_CONFIGURATION: string[] = [];
 const LOCATE = { section: "CLI" };
 const SCENE_CLASSES = /(?:\s*class\s+(?<name>\w+)\(Scene\):\s*)/g;
@@ -31,8 +30,7 @@ const SCENE_CLASSES = /(?:\s*class\s+(?<name>\w+)\(Scene\):\s*)/g;
 const INPUT_REQUEST =
   "Choose number corresponding to desired scene/arguments.\r\n(Use comma separated list for multiple entries)\r\nChoice(s):  ";
 
-// The key and value pairs here directly correlate to
-// USER_DEF_CONFIGURATION
+// The key and value pairs here directly correlate to USER_DEF_CONFIGURATION
 type ManimConfig = {
   mediaDir: string;
   videoDir: string;
@@ -686,5 +684,3 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions
   );
 }
-
-export function deactivate() {}
