@@ -5,6 +5,7 @@ src/**
 .yarnrc
 pullGallery.ts
 vsc-extension-quickstart.md
+images/**
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map

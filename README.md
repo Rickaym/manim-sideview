@@ -10,7 +10,7 @@ A utility extension for Visual Code that provides two features:
 * a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
 
 * an mobject gallery for inserting mobjects
-![](assets/images/example_of_mobject_gallery.gif)
+![](images/example_of_mobject_gallery.gif)
 Open the gallery by the vscode command palette "Show Mobject Gallery For manim" and click on the shape that you want to use. It will appear in your code editor (either in a python or jupyter file).
 ## Index
 
@@ -49,7 +49,7 @@ Those using a `manim.cfg` file can skip this part as we derive programmatically 
 
 For those using the runtime configurations, you'll have to provide the media path in the same dialog. When doing so, you can use a few context variables with as privillege as you can when changing the settings as provided [here](#variables).
 
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/video_dir.png"></image>
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/video_dir.png"></image>
 * *figure taken from the in time configuration menu*
 
 #### On Save
@@ -136,7 +136,7 @@ Using unset variables will result in default values being used.
 
 You can find a status bar item inside the status bar (the one at the very bottom) an icon that looks like:
 
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/statusbaritem.png"></image>
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/statusbaritem.png"></image>
 
 Note that this is a visual reminder that the file in current focus has an active job. Relevantly, this icon will change colors to either green or red depending on the results of an execution at times.
 
