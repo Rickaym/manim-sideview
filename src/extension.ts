@@ -97,12 +97,6 @@ class ManimSideview {
   private jobStatus: vscode.StatusBarItem;
   private lastChosenSceneName: string | undefined;
 
-  /**
-   * The command for running a manim sideview.
-   *
-   * @param routine A boolean flag indicating whether if this is called as a routine on saving or as a specific command.
-   * @returns
-   */
   async run(routine: boolean) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -119,35 +113,28 @@ class ManimSideview {
       this.runWhenConfigured(editor.document);
     }
   }
-  /**
-   * The command for stopping a process
-   */
+
   stop(process?: ChildProcess) {
-    /* if (!process) {
+    if (!process) {
       process = this.process;
     }
     if (process) {
       process.kill();
-    } */
+    }
+    /*
     vscode.window.withProgress({
       "location": vscode.ProgressLocation.Notification,
       "title": "Attempting to synchronize local gallery..",
       "cancellable": true},
       (p, t) => this.gallery.synchronize(p, t)
-    );
+    );*/
   }
 
-  /**
-   * The command for refreshing all active jobs.
-   */
   async refreshAllConfiguration() {
     this.jobs = [];
     this.updateJobStatus();
   }
 
-  /**
-   * The command for refreshing the active job.
-   */
   async refreshCurrentConfiguration() {
     const job = this.getActiveJob();
     if (job) {
@@ -156,13 +143,6 @@ class ManimSideview {
     }
   }
 
-  /**
-   * The command for setting a specific config file as
-   * opposed to the manim.cfg that is at the level of
-   * the source directory.
-   *
-   * BETA
-   */
   async setConfigFile() {
     const uri = await vscode.window.showOpenDialog({
       canSelectFolders: false,
@@ -178,8 +158,7 @@ class ManimSideview {
   }
 
   /**
-   * The command for setting the name of a rendering scene.
-   * This only works when you're using an in time configuration.
+   * this only works when you're using an in time configuration.
    */
   async setRenderingScene(conf?: RunningConfig): Promise<boolean> {
     if (!conf) {
@@ -411,7 +390,7 @@ class ManimSideview {
         vscode.workspace.fs.stat(vscode.Uri.file(mediaFp)).then(
           (fs) => {
             // we'll open a side view if we can find the file
-            this.openSideview(mediaFp);
+            this.openSideview(mediaFp, conf.moduleName);
             this.jobs.push({ config: conf, flag: false });
             this.updateJobStatus(
               new vscode.ThemeColor("minimapGutter.addedBackground")
@@ -617,12 +596,12 @@ class ManimSideview {
     this.prompt.show(conf);
   }
 
-  private async openSideview(mediaFp: string) {
+  private async openSideview(mediaFp: string, moduleName: string) {
     const res = vscode.Uri.file(mediaFp);
     if (!res) {
       vscode.window.showErrorMessage("The output file couldn't be found.");
     } else {
-      await this.player.show(res);
+      await this.player.show(res, moduleName);
     }
   }
 }

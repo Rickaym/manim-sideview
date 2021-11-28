@@ -6,27 +6,23 @@
 <a href="https://discord.gg/UmnzdPgn6g">
 <img src="https://img.shields.io/discord/793047973751554088?logo=discord" alt="Get Support"></a>
 
-A utility extension for Visual Code that provides two features:
-* a live video preview of the rendering scene in working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework.
-![](images/example_preview.gif)
+An extension for Visual Studio Code that provides a live preview and various other features in working with **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)**.
 
-
-* an mobject gallery for inserting mobjects
-![](images/example_of_mobject_gallery.gif)
-Open the gallery by the vscode command palette "Show Mobject Gallery For manim" and click on the shape that you want to use. It will appear in your code editor (either in a python or jupyter file).
 ## Index
 
 1. [Rendering](#rendering)
-2. [Context Variables](#context-variables)
-3. [Extension Settings](#extension-settings)
-4. [Status Bar Item](#utilities)
-5. [Credits](#credits)
+2. [Moject Gallery](#mobject-gallery)
+3. [Context Variables](#context-variables)
+4. [Extension Settings](#extension-settings)
+5. [Status Bar Item](#utilities)
+6. [Credits](#credits)
 
 ## Rendering
 
 Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
 
-
+*The final Product!*
+![](images/example_preview.gif)
 
 Upon opening any Python files, you'll see an icon pop up in the menu bar that looks like this
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.
@@ -57,6 +53,15 @@ For those using the runtime configurations, you'll have to provide the media pat
 #### On Save
 
 Configuring your manim projects to execute on save is very easy, just enable the `manim-sideview.runOnSave` settings inside vscode `File -> Preferences -> Settings` menu. This is disabled by default.
+
+## Mobject Gallery
+
+**A mobject gallery for inserting mobjects**
+
+![](images/example_of_mobject_gallery.gif)
+
+Open the gallery by the vscode command palette `Show Mobject Gallery For manim` and click on the shape that you want to use.
+ It will appear in your code editor (either in a python or jupyter file).
 
 ## Context Variables
 
@@ -167,6 +172,8 @@ Initial release of Manim Sideview.
 
 + Fixed server links
 + Added `manim-sideview.showMobjectGallery`
++ Added hide progress button
++ Added debrief for the video
 
 ---
 

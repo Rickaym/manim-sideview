@@ -4,6 +4,7 @@ import {
   getNonce,
   getWebviewResource,
   insertContext,
+  RunningConfig,
   WebviewResources,
 } from "./globals";
 
@@ -60,7 +61,7 @@ export class VideoPlayer {
     return this.htmlDoc;
   }
 
-  async show(videoUri: vscode.Uri) {
+  async show(videoUri: vscode.Uri, moduleName: string) {
     const resource = videoUri
       .with({ scheme: "vscode-resource" })
       .toString()
@@ -75,6 +76,8 @@ export class VideoPlayer {
         pictureInPicture: vscode.workspace
           .getConfiguration("manim-sideview")
           .get("pictureInPictureOnStart"),
+        out: videoUri.fsPath,
+        moduleName: moduleName
       });
     }
     if (!this.htmlDoc) {
@@ -99,6 +102,8 @@ export class VideoPlayer {
     const nonce = getNonce();
     const vars: ContextVars = {
       "%videoSrc%": resource,
+      "%out%": videoUri.fsPath,
+      "%moduleName%": moduleName,
       "%cspSource%": this.panel.webview.cspSource,
       "player.css": styleSrc.toString(),
       "player.js": this.loads.js.with({ scheme: "vscode-resource" }).toString(),
