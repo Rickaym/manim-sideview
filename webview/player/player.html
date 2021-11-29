@@ -2,24 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!-- meta
+<meta
   http-equiv="Content-Security-Policy"
   content="default-src 'none'; media-src %cspSource% https:; img-src %cspSource% https:; script-src 'nonce-%nonce%'; style-src %cspSource% 'unsafe-inline'; font-src  %cspSource% ;"
--->
+/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="player.css" rel="stylesheet">
 <link href="../../assets/fontawesome/css/all.min.css" rel="stylesheet">
 <link href="../../assets/fontawesome/css/fontawesome.min.css" rel="stylesheet">
 </head>
 <body>
-  <div>
-    <h1>Manim Sideview</h1>
+  <h1>Manim Sideview</h1>
     <div class="video-container">
         <div class="player">
             <video autoplay loop id="preview" src="%videoSrc%"></video>
-            <div class="controls">
+            <div class="controls%previewShowProgressOnIdle%">
                 <div class="status-bar">
-                    <div class="color-fill"></div>
+                    <div class="color-fill" style="background-color: %previewProgressColor%;"></div>
                     <div class="demo-fill"></div>
                 </div>
                 <div class="buttons">

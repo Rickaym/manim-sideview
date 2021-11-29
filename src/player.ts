@@ -1,6 +1,8 @@
+import { Context } from "mocha";
 import * as vscode from "vscode";
 import {
   ContextVars,
+  DEFAULT_PROGRESS_BAR_COLOR,
   getNonce,
   getWebviewResource,
   insertContext,
@@ -61,6 +63,15 @@ export class VideoPlayer {
     return this.htmlDoc;
   }
 
+  parseProgressColor(colorStr?: string): string {
+    if (!colorStr) {
+       return DEFAULT_PROGRESS_BAR_COLOR;
+    } else if (!colorStr.startsWith("#")) {
+      return `var(--vscode-${colorStr.replace(/\./g, "-")});`;
+    }
+    return colorStr;
+  }
+
   async show(videoUri: vscode.Uri, moduleName: string) {
     const resource = videoUri
       .with({ scheme: "vscode-resource" })
@@ -77,7 +88,7 @@ export class VideoPlayer {
           .getConfiguration("manim-sideview")
           .get("pictureInPictureOnStart"),
         out: videoUri.fsPath,
-        moduleName: moduleName
+        moduleName: moduleName,
       });
     }
     if (!this.htmlDoc) {
@@ -98,16 +109,25 @@ export class VideoPlayer {
     );
     this.panel.iconPath = this.manimIconsPath;
 
-    const styleSrc = this.panel.webview.asWebviewUri(this.loads.css);
-    const nonce = getNonce();
+    const styleSrc = this.panel.webview.asWebviewUri(this.loads.css).toString();
     const vars: ContextVars = {
       "%videoSrc%": resource,
       "%out%": videoUri.fsPath,
       "%moduleName%": moduleName,
+      "%previewShowProgressOnIdle%": vscode.workspace
+        .getConfiguration("manim-sideview")
+        .get("previewShowProgressOnIdle")
+        ? ""
+        : " hidden-controls",
+      "%previewProgressColor%": this.parseProgressColor(
+        vscode.workspace
+          .getConfiguration("manim-sideview")
+          .get("previewProgressColor")
+      ),
       "%cspSource%": this.panel.webview.cspSource,
-      "player.css": styleSrc.toString(),
+      "player.css": styleSrc,
       "player.js": this.loads.js.with({ scheme: "vscode-resource" }).toString(),
-      "%nonce%": nonce,
+      "%nonce%": getNonce(),
       "../../assets/fontawesome/css/all.min.css": this.panel.webview
         .asWebviewUri(this.fontAwesomeCss.all)
         .toString(),

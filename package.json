@@ -63,6 +63,19 @@
           "scope": "application",
           "default": "true",
           "description": "Whether to focus on the output when run."
+        },
+        "manim-sideview.previewShowProgressOnIdle": {
+          "type": "boolean",
+          "scope": "application",
+          "default": "true",
+          "description": "Whether to display the video progress bar in the video player when the job is idle."
+        },
+        "manim-sideview.previewProgressColor": {
+          "type": "string",
+          "scope": "application",
+          "default": "textLink.foreground",
+          "examples": ["#F1F1F1", "button.border"],
+          "description": "The color of the progress bar. You can use theme colors here."
         }
       }
     },

@@ -47,6 +47,7 @@ export const DEFAULT_VIDEO_DIR = "media/videos/{module_name}/480p15";
 export const DEFAULT_MEDIA_DIR = "media";
 export const DEFAULT_ARGS = "-ql";
 export const DEFAULT_MANIM_EXE = "manim";
+export const DEFAULT_PROGRESS_BAR_COLOR = "var(--vscode-textLink-foreground)";
 
 /**
  * Provide a nonce for inline scripts inside webviews, this is necessary for

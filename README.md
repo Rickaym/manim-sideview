@@ -137,8 +137,17 @@ Using unset variables will result in default values being used.
     <td>Whether to focus on the output log when running.</td>
     <td>true</td>
 </tr>
+<tr>
+    <td>manim-sideview.previewShowProgressOnIdle</td>
+    <td>Whether to display the video progress bar in the video player when the job is idle.</td>
+    <td>true</td>
+</tr>
+<tr>
+    <td>manim-sideview.previewProgressColor</td>
+    <td> The color of the progress bar. You can use https://code.visualstudio.com/api/references/theme-color colors here.</td>
+    <td>textLink.foreground</td>
+</tr>
 </table>
-
 ## Utilities
 
 You can find a status bar item inside the status bar (the one at the very bottom) an icon that looks like:
@@ -174,6 +183,10 @@ Initial release of Manim Sideview.
 + Added `manim-sideview.showMobjectGallery`
 + Added hide progress button
 + Added debrief for the video
+
+#### 0.0.6
+
++ Added video player configurations `previewProgressColor`, `previewShowProgressOnIdle`
 
 ---
 

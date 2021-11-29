@@ -127,7 +127,8 @@ class ManimSideview {
       "title": "Attempting to synchronize local gallery..",
       "cancellable": true},
       (p, t) => this.gallery.synchronize(p, t)
-    );*/
+    );
+    */
   }
 
   async refreshAllConfiguration() {

@@ -139,6 +139,7 @@ export class Gallery {
           appendage.edit((e) => {
             e.insert(appendage.selection.active, code);
           });
+          const a = vscode.window.activeTextEditor;
           vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
         }
       },
