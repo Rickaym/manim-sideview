@@ -191,6 +191,10 @@ Initial release of Manim Sideview.
 + Added video player configurations `previewProgressColor`, `previewShowProgressOnIdle`
 + Added `Check For Updates` button in mobject gallery and a sync lock with the repo
 
+#### 0.0.7
+
++ Added force redownload when assets are damaged
+
 ---
 
 ## Credits

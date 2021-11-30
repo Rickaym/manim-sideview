@@ -45,7 +45,7 @@ function downloadTo(
         res.pipe(file).on("finish", function () {
           if (finale && root) {
             vscode.window.showInformationMessage(
-              "Successfully updated Mobject gallery with the latest version!"
+              "Successfully updated Mobject gallery with the latest version! Open and close the gallery to render updates."
             );
             fs.writeFile(
               path.join(local, "../../version.txt"),
@@ -192,12 +192,12 @@ export class Gallery {
 
     this.panel.webview.onDidReceiveMessage(
       (message) => {
-        if (message.command === "update") {
+        if (message.command === "update" || message.command === "download-again") {
           vscode.window.withProgress({
             "location": vscode.ProgressLocation.Notification,
             "title": "Attempting to synchronize local gallery..",
             "cancellable": true},
-            (p, t) => this.synchronize(p, t)
+            (p, t) => this.synchronize(p, t, message.command === "download-again")
           );
           return;
         }
@@ -230,7 +230,8 @@ export class Gallery {
 
   async synchronize(
     progress: vscode.Progress<{ increment: number; message: string }>,
-    token: vscode.CancellationToken
+    token: vscode.CancellationToken,
+    forceDownload: boolean
   ) {
     const localVersion = (
       await vscode.workspace.fs.readFile(
@@ -253,7 +254,7 @@ export class Gallery {
               const segs = version[0].split('"');
               const olVersion = segs[segs.length - 2];
 
-              if (olVersion === localVersion) {
+              if (olVersion === localVersion && !forceDownload) {
                 progress.report({
                   increment: 100,
                   message: "Your local version is already up to date!",
