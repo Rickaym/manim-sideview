@@ -14,3 +14,11 @@
     border-color: var(--vscode-textLink-foreground);
     cursor: pointer;
 }
+
+
+button.button-primary {
+    background-color: #073D69;
+    color: var(--vscode-button-foreground);
+    border-radius: 5px;
+    border: transparent;
+  }

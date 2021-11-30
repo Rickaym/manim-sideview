@@ -1,10 +1,10 @@
 {
-  "Mobjects_Text_000_Text1.png": "mob = Text(\"Hello\", color=WHITE)",
-  "Mobjects_Text_001_Text2.png": "mob = Text(\"World\", color=YELLOW,slant=ITALIC)",
-  "Mobjects_Text_002_Underline.png": "t = Tex(\"YES\")\nul = Underline(t, color=YELLOW)",
-  "Mobjects_Text_003_Bold.png": "mob = Text(\"NO\", color=YELLOW,weight=BOLD)",
-  "Mobjects_Text_004_MathTex.png": "mob = MathTex(r\"\\Psi(x)\", color=WHITE)",
-  "Mobjects_Text_005_MathTex_stix2.png": "stix2 = TexTemplate()\nstix2.add_to_preamble(r\"\\usepackage{stix2}\", prepend= True)\nMathTex.set_default(tex_template=stix2)\nmob = MathTex(r\"\\Psi(x)\", color=WHITE)",
-  "Mobjects_Text_006_MathTex2.png": "mob = MathTex(r\"e^x\",substrings_to_isolate=\"x\")\nmob.set_color_by_tex(\"x\", YELLOW)",
-  "Mobjects_Text_007_Check.png": "check= Tex(r\"\\checkmark\", color= GREEN, stroke_width=8).scale(3)\ncheck.stretch(0.8, dim = 1)\ncheck.stretch(1.1, dim = 0)"
+  "Mobjects_Text_000_Text1.png": "mob = Text(\"Hello\", color=WHITE)\n",
+  "Mobjects_Text_001_Text2.png": "mob = Text(\"World\", color=YELLOW,slant=ITALIC)\n",
+  "Mobjects_Text_002_Underline.png": "t = Tex(\"YES\")\nul = Underline(t, color=YELLOW)\n",
+  "Mobjects_Text_003_Bold.png": "mob = Text(\"NO\", color=YELLOW,weight=BOLD)\n",
+  "Mobjects_Text_004_MathTex.png": "mob = MathTex(r\"\\Psi(x)\", color=WHITE)\n",
+  "Mobjects_Text_005_MathTex_stix2.png": "stix2 = TexTemplate()\nstix2.add_to_preamble(r\"\\usepackage{stix2}\", prepend= True)\nMathTex.set_default(tex_template=stix2)\nmob = MathTex(r\"\\Psi(x)\", color=WHITE)\n",
+  "Mobjects_Text_006_MathTex2.png": "mob = MathTex(r\"e^x\",substrings_to_isolate=\"x\")\nmob.set_color_by_tex(\"x\", YELLOW)\n",
+  "Mobjects_Text_007_Check.png": "check= Tex(r\"\\checkmark\", color= GREEN, stroke_width=8).scale(3)\ncheck.stretch(0.8, dim = 1)\ncheck.stretch(1.1, dim = 0)\n"
 }

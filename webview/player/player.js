@@ -13,6 +13,13 @@ var setControlsEnabled = document.getElementById("progress-on-idle");
 pipButton.hidden =
   !document.pictureInPictureEnabled || video.disablePictureInPicture;
 
+
+// it's possible that a controls class starts hidden
+// in which case we'll also swap the button
+if (controls.classList.contains("hidden-controls")) {
+    setControlsEnabled.className = "hidden";
+}
+
 function togglePlayPause() {
   if (video.paused) {
     button.className = "pause";
@@ -38,7 +45,6 @@ async function enterPictureInPicture() {
 }
 
 setControlsEnabled.addEventListener("click", function () {
-    console.log(controls.classList);
     if (setControlsEnabled.className === "hidden") {
       setControlsEnabled.className = "shown";
       controls.classList.remove("hidden-controls");

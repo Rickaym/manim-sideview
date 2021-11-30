@@ -5,7 +5,7 @@
   "description": "A video sideview for the Python animations library manim.",
   "repository": {"url": "https://github.com/Rickaym/Manim-Sideview", "type":"git", "directory": "src"},
   "author": {"name": "Ricky", "url": "https://github.com/Rickaym"},
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "Rickaym",
   "engines": {
     "vscode": "^1.62.0"
@@ -74,8 +74,7 @@
           "type": "string",
           "scope": "application",
           "default": "textLink.foreground",
-          "examples": ["#F1F1F1", "button.border"],
-          "description": "The color of the progress bar. You can use theme colors here."
+          "description": "The color of the progress bar. You can use theme colors here. Either specify hex colors `#F1F1F1` or theme colors `button.border`"
         }
       }
     },

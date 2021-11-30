@@ -1,13 +1,13 @@
 {
-  "Camera_and_Style_000_Background.png": "self.camera.background_color = YELLOW",
-  "Camera_and_Style_001_ZoomIN.png": "self.camera.frame.scale(0.6) # needs ZoomedScene",
-  "Camera_and_Style_002_ZoomOUT.png": "self.camera.frame.scale(1.2) # needs ZoomedScene",
-  "Camera_and_Style_003_CameraLEFT.png": "self.camera.frame.shift(LEFT*0.5) # needs ZoomedScene",
-  "Camera_and_Style_004_CameraUP.png": "self.camera.frame.shift(UP*0.4) # needs ZoomedScene",
-  "Camera_and_Style_005_MatchHEIGHT.png": "self.camera.frame.height =  mob.height + 3*SMALL_BUFF # needs ZoomedScene",
-  "Camera_and_Style_006_MatchWIDTH.png": "self.camera.frame.width =  mob.width + 3*SMALL_BUFF # needs ZoomedScene",
-  "Camera_and_Style_007_FullScreenRectangle.png": "mob = FullScreenRectangle(stroke_width=200, color= YELLOW)",
-  "Camera_and_Style_008_SurroundingRectangle.png": "inner = Tex(r\"\\textbf{Hello}\", color=WHITE)\nmob = SurroundingRectangle(inner, corner_radius=0.1)",
-  "Camera_and_Style_009_Dot_set_color_by_gradient.png": "mob = Dot(radius=2.0) \nmob.set_color_by_gradient([PINK, BLUE])\nself.add(mob)",
-  "Camera_and_Style_010_Polygon_set_color.png": "mob = Polygon([-1, .5, 0], [-.5, 2, 0], [1, 2, 0], [1.5, .5, 0], [.25, -.5, 0])\nmob.set_fill(opacity=.5)\nmob.set_color([TEAL, RED, YELLOW])\nmob.set_stroke(width=8)\nmob.move_to(ORIGIN)"
+  "Camera_and_Style_000_Background.png": "self.camera.background_color = YELLOW\n",
+  "Camera_and_Style_001_ZoomIN.png": "self.camera.frame.scale(0.6) # needs ZoomedScene\n",
+  "Camera_and_Style_002_ZoomOUT.png": "self.camera.frame.scale(1.2) # needs ZoomedScene\n",
+  "Camera_and_Style_003_CameraLEFT.png": "self.camera.frame.shift(LEFT*0.5) # needs ZoomedScene\n",
+  "Camera_and_Style_004_CameraUP.png": "self.camera.frame.shift(UP*0.4) # needs ZoomedScene\n",
+  "Camera_and_Style_005_MatchHEIGHT.png": "self.camera.frame.height =  mob.height + 3*SMALL_BUFF # needs ZoomedScene\n",
+  "Camera_and_Style_006_MatchWIDTH.png": "self.camera.frame.width =  mob.width + 3*SMALL_BUFF # needs ZoomedScene\n",
+  "Camera_and_Style_007_FullScreenRectangle.png": "mob = FullScreenRectangle(stroke_width=200, color= YELLOW)\n",
+  "Camera_and_Style_008_SurroundingRectangle.png": "inner = Tex(r\"\\textbf{Hello}\", color=WHITE)\nmob = SurroundingRectangle(inner, corner_radius=0.1)\n",
+  "Camera_and_Style_009_Dot_set_color_by_gradient.png": "mob = Dot(radius=2.0) \nmob.set_color_by_gradient([PINK, BLUE])\nself.add(mob)\n",
+  "Camera_and_Style_010_Polygon_set_color.png": "mob = Polygon([-1, .5, 0], [-.5, 2, 0], [1, 2, 0], [1.5, .5, 0], [.25, -.5, 0], sheen_direction = UP)\nmob.set_fill(opacity=.5)\nmob.set_color([TEAL, RED, YELLOW])\nmob.set_stroke(width=8)\nmob.move_to(ORIGIN)\n"
 }

@@ -121,14 +121,6 @@ class ManimSideview {
     if (process) {
       process.kill();
     }
-    /*
-    vscode.window.withProgress({
-      "location": vscode.ProgressLocation.Notification,
-      "title": "Attempting to synchronize local gallery..",
-      "cancellable": true},
-      (p, t) => this.gallery.synchronize(p, t)
-    );
-    */
   }
 
   async refreshAllConfiguration() {

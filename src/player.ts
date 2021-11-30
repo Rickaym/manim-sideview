@@ -63,13 +63,16 @@ export class VideoPlayer {
     return this.htmlDoc;
   }
 
-  parseProgressColor(colorStr?: string): string {
+  parseProgressStyle(colorStr?: string): string {
     if (!colorStr) {
-       return DEFAULT_PROGRESS_BAR_COLOR;
+       colorStr = DEFAULT_PROGRESS_BAR_COLOR;
+    } else if (colorStr.includes(";") || colorStr.includes('"') || colorStr.includes("'")) {
+      // prevents html injections
+       colorStr = DEFAULT_PROGRESS_BAR_COLOR;
     } else if (!colorStr.startsWith("#")) {
-      return `var(--vscode-${colorStr.replace(/\./g, "-")});`;
+      colorStr = `var(--vscode-${colorStr.replace(/\./g, "-")});`;
     }
-    return colorStr;
+    return `style="background-color: ${colorStr}"`;
   }
 
   async show(videoUri: vscode.Uri, moduleName: string) {
@@ -119,7 +122,7 @@ export class VideoPlayer {
         .get("previewShowProgressOnIdle")
         ? ""
         : " hidden-controls",
-      "%previewProgressColor%": this.parseProgressColor(
+      "%previewProgressStyle%": this.parseProgressStyle(
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("previewProgressColor")

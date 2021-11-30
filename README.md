@@ -158,6 +158,8 @@ Note that this is a visual reminder that the file in current focus has an active
 
 ### Known Issues
 
+1. Jupyter Note books Mobject gallery cell code pasting is disoriented.
+ETA for bugfix: `0.0.7`
 _-_
 
 #### 0.0.1 - 0.0.2
@@ -187,6 +189,7 @@ Initial release of Manim Sideview.
 #### 0.0.6
 
 + Added video player configurations `previewProgressColor`, `previewShowProgressOnIdle`
++ Added `Check For Updates` button in mobject gallery and a sync lock with the repo
 
 ---
 
