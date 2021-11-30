@@ -8,7 +8,9 @@ import {
 } from "./globals";
 import * as https from "https";
 import * as fs from "fs";
-import path = require("path");
+import * as path from "path";
+import Axios from "axios";
+import axios from "axios";
 
 // gallery synchronization files
 const ENTRY_FILE =
@@ -24,6 +26,23 @@ const JSON_FILES = [
 const ASSET_DIR =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/imgs/";
 
+function expandAndDownload(local: string, finale: boolean, version: string) {
+  vscode.workspace.fs.readFile(vscode.Uri.file(local)).then(function (data) {
+    const images = Object.keys(JSON.parse(data.toString()));
+    images.forEach((img) => {
+      if (img.endsWith(".png") || img.endsWith(".jpg")) {
+        downloadTo(
+          `${ASSET_DIR}${img}`,
+          path.join(local, "../img", img),
+          true,
+          img === images[images.length - 1] && finale,
+          version
+        );
+      }
+    });
+  });
+}
+
 /**
  * When the finale flag is true the function will dispatch the success
  * of it's last download. This is to notify when an update is over.
@@ -35,6 +54,7 @@ function downloadTo(
   finale: boolean,
   version: string
 ) {
+  return;
   let request = https
     .get(url, function (res) {
       if (res.statusCode === 200) {
@@ -53,26 +73,9 @@ function downloadTo(
               () => {}
             );
           }
-          vscode.workspace.fs
-            .readFile(vscode.Uri.file(local))
-            .then(function (data) {
-              const images = Object.keys(JSON.parse(data.toString()));
-              images.forEach((img) => {
-                if (
-                  img.endsWith("png") ||
-                  img.endsWith("jpg") ||
-                  img.endsWith("jpeg")
-                ) {
-                  downloadTo(
-                    `${ASSET_DIR}${img}`,
-                    path.join(local, "../img", img),
-                    true,
-                    img === images[images.length - 1] && finale,
-                    version
-                  );
-                }
-              });
-            });
+          if (local.endsWith(".json")) {
+            expandAndDownload(local, finale, version);
+          }
         });
       } else {
         vscode.window.showErrorMessage(
@@ -192,14 +195,11 @@ export class Gallery {
 
     this.panel.webview.onDidReceiveMessage(
       (message) => {
-        if (message.command === "update" || message.command === "download-again") {
-          vscode.window.withProgress({
-            "location": vscode.ProgressLocation.Notification,
-            "title": "Attempting to synchronize local gallery..",
-            "cancellable": true},
-            (p, t) => this.synchronize(p, t, message.command === "download-again")
-          );
-          return;
+        if (
+          message.command === "update" ||
+          message.command === "download-again"
+        ) {
+          return this.synchronize(message.command === "download-again");
         }
         const doc = vscode.window.visibleTextEditors.filter(
           (e) => e.document.languageId === "python"
@@ -228,64 +228,56 @@ export class Gallery {
     );
   }
 
-  async synchronize(
-    progress: vscode.Progress<{ increment: number; message: string }>,
-    token: vscode.CancellationToken,
-    forceDownload: boolean
-  ) {
+  async synchronize(forceDownload: boolean) {
     const localVersion = (
       await vscode.workspace.fs.readFile(
         vscode.Uri.joinPath(this.extensionUri, "assets/mobjects/version.txt")
       )
     ).toString();
+    const root = vscode.Uri.joinPath(
+      this.extensionUri,
+      "assets/mobjects/"
+    ).fsPath;
+    Axios.get(ENTRY_FILE).then(({ data }) => {
+      if (!forceDownload) {
+        const version = data.match(VERSION_RE);
+        if (version) {
+          const segs = version[0].split('"');
+          const olVersion = segs[segs.length - 2];
 
-    const root = vscode.Uri.joinPath(this.extensionUri, "assets/mobjects/");
-
-    let request = https
-      .get(ENTRY_FILE, function (res) {
-        if (res.statusCode === 200) {
-          request.setTimeout(1000, function () {
-            request.destroy();
-          });
-          res.on("data", function (d: Buffer) {
-            const version = d.toString().match(VERSION_RE);
-
-            if (version) {
-              const segs = version[0].split('"');
-              const olVersion = segs[segs.length - 2];
-
-              if (olVersion === localVersion && !forceDownload) {
-                progress.report({
-                  increment: 100,
-                  message: "Your local version is already up to date!",
-                });
-                vscode.window.showInformationMessage(
-                  "You're already up to date."
-                );
-                request.destroy();
-                return;
-              }
-
-              JSON_FILES.forEach((fn) =>
-                downloadTo(
-                  `${ASSET_DIR}${fn}`,
-                  vscode.Uri.joinPath(root, fn).fsPath,
-                  false,
-                  fn === JSON_FILES[JSON_FILES.length - 1],
-                  olVersion
-                )
-              );
-            }
-          });
-          progress.report({ increment: 100, message: "Matching Versions" });
+          if (olVersion === localVersion) {
+            vscode.window.showInformationMessage("You're already up to date.");
+            return;
+          }
         } else {
           vscode.window.showErrorMessage(
-            `Synchronizing failure for code ${res.statusCode}, ${res.statusMessage}`
+            "Version descriptor in remote location missing."
           );
+          return;
         }
-      })
-      .on("error", function (e) {
-        vscode.window.showErrorMessage(`Synchronizing failure ${e.message}`);
+      }
+      vscode.window.showInformationMessage("Please wait a moment while we synchronize the local assets...");
+      JSON_FILES.forEach((fn) => {
+        Axios.get(ASSET_DIR + fn).then(({ data }) => {
+          fs.writeFile(path.join(root, fn), JSON.stringify(data), () => {});
+          console.log(data);
+          const assets = Object.keys(data);
+          assets.forEach((imgFn) => {
+            axios({
+              method: "get",
+              url: ASSET_DIR + imgFn,
+              responseType: "stream",
+            }).then(function (response) {
+              response.data.pipe(
+                fs.createWriteStream(path.join(root, "img", imgFn))
+              );
+              if (fn === JSON_FILES[JSON_FILES.length-1] && imgFn === assets[assets.length-1]) {
+                vscode.window.showInformationMessage("Successfully downloaded all assets!");
+              }
+            });
+          });
+        });
       });
+    });
   }
 }

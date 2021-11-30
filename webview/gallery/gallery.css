@@ -16,19 +16,19 @@
 }
 
 button.button-primary {
-    background-color: #073D69;
+    background-color: var(--vscode-textLink-foreground);
     color: var(--vscode-button-foreground);
     border-radius: 5px;
     border: transparent;
 }
 
 button.button-secondary {
-    background-color: var(--vscode-button-secondaryBackground);
-    color: var(--vscode-button-secondaryForeground);
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
     border-radius: 5px;
     border: transparent;
-}
+  }
 
-button.button-secondary:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground);
-}
+  button.button-secondary:hover {
+    background-color: var(--vscode-button-hoverBackground);
+  }

@@ -195,6 +195,11 @@ Initial release of Manim Sideview.
 
 + Added force redownload when assets are damaged
 
+
+#### 0.0.8
+
++ Using axios now to synchronize assets for better performance
+
 ---
 
 ## Credits
