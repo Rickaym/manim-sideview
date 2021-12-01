@@ -6,7 +6,6 @@ import {
   insertContext,
   WebviewResources,
 } from "./globals";
-import * as https from "https";
 import * as fs from "fs";
 import * as path from "path";
 import Axios from "axios";
@@ -25,68 +24,6 @@ const JSON_FILES = [
 ];
 const ASSET_DIR =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/imgs/";
-
-function expandAndDownload(local: string, finale: boolean, version: string) {
-  vscode.workspace.fs.readFile(vscode.Uri.file(local)).then(function (data) {
-    const images = Object.keys(JSON.parse(data.toString()));
-    images.forEach((img) => {
-      if (img.endsWith(".png") || img.endsWith(".jpg")) {
-        downloadTo(
-          `${ASSET_DIR}${img}`,
-          path.join(local, "../img", img),
-          true,
-          img === images[images.length - 1] && finale,
-          version
-        );
-      }
-    });
-  });
-}
-
-/**
- * When the finale flag is true the function will dispatch the success
- * of it's last download. This is to notify when an update is over.
- */
-function downloadTo(
-  url: string,
-  local: string,
-  root: boolean,
-  finale: boolean,
-  version: string
-) {
-  return;
-  let request = https
-    .get(url, function (res) {
-      if (res.statusCode === 200) {
-        request.setTimeout(1000, function () {
-          request.destroy();
-        });
-        var file = fs.createWriteStream(local);
-        res.pipe(file).on("finish", function () {
-          if (finale && root) {
-            vscode.window.showInformationMessage(
-              "Successfully updated Mobject gallery with the latest version! Open and close the gallery to render updates."
-            );
-            fs.writeFile(
-              path.join(local, "../../version.txt"),
-              version,
-              () => {}
-            );
-          }
-          if (local.endsWith(".json")) {
-            expandAndDownload(local, finale, version);
-          }
-        });
-      } else {
-        vscode.window.showErrorMessage(
-          `Downloading failure for code ${res.statusCode}, ${res.statusMessage}`
-        );
-      }
-    })
-    .on("error", function (e) {
-      vscode.window.showErrorMessage(`Downloading failure ${e.message}`);
-    });
-}
 
 export class Gallery {
   constructor(
@@ -115,6 +52,11 @@ export class Gallery {
       "assets/images/light_logo.png"
     ),
   };
+  private lastActiveEditor: vscode.TextEditor | undefined;
+
+  setLastActiveEditor(editor: vscode.TextEditor) {
+    this.lastActiveEditor = editor;
+  }
 
   async setup(): Promise<string> {
     this.htmlDoc = (
@@ -129,9 +71,7 @@ export class Gallery {
 
     this.imageMapping = {};
     for (let x of loadables) {
-      this.imageMapping[
-        x.replace(".json", "").replace(new RegExp("_", "g"), " ")
-      ] = JSON.parse(
+      this.imageMapping[x.replace(".json", "").replace(/_/g, " ")] = JSON.parse(
         (
           await vscode.workspace.fs.readFile(
             vscode.Uri.joinPath(this.mobjectsPath, x)
@@ -168,7 +108,7 @@ export class Gallery {
       Object.keys(this.imageMapping[title]).forEach((imgPth) => {
         images += `<img class="image-button" id="${this.imageMapping[title][
           imgPth
-        ].replace(new RegExp('"', "g"), "'")}" src=${panel.webview.asWebviewUri(
+        ].replace(/"/g, "'")}" src=${panel.webview.asWebviewUri(
           vscode.Uri.joinPath(this.mobjectsPath, "img", imgPth)
         )}>`;
       });
@@ -200,32 +140,65 @@ export class Gallery {
           message.command === "download-again"
         ) {
           return this.synchronize(message.command === "download-again");
-        }
-        const doc = vscode.window.visibleTextEditors.filter(
-          (e) => e.document.languageId === "python"
-        );
-        if (doc.length > 0) {
-          const appendage = doc[0];
-          const before = appendage.document.getText(
-            new vscode.Range(
-              new vscode.Position(appendage.selection.active.line, 0),
-              appendage.selection.active
-            )
-          );
-          var code = message.code;
-          // adaptive indentations
-          if (!before.trim()) {
-            code = code.replace(new RegExp("\n", "g"), "\n" + before);
-          }
-          appendage.edit((e) => {
-            e.insert(appendage.selection.active, code);
-          });
-          vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
+        } else {
+          this.insertCode(message.code);
         }
       },
       undefined,
       this.disposables
     );
+  }
+
+  getPreviousEditor() {
+    if (!vscode.window.activeTextEditor) {
+      vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
+    }
+    return vscode.window.activeTextEditor;
+  }
+
+  async insertCode(code: string) {
+    const editor = this.lastActiveEditor ? this.lastActiveEditor : this.getPreviousEditor();
+    if (!editor) {
+      return vscode.window.showErrorMessage(
+        "Select a document first and then use the buttons!"
+      );
+    }
+    const doc = vscode.window.visibleTextEditors.filter(
+      (e) => e.document.fileName === editor.document.fileName
+    );
+    if (!doc) {
+      return vscode.window.showErrorMessage(
+        "You haven't selected any document to insert code."
+      );
+    }
+
+    if (doc.length > 0) {
+      const appendage = doc[0];
+      const before = appendage.document.getText(
+        new vscode.Range(
+          new vscode.Position(appendage.selection.active.line, 0),
+          appendage.selection.active
+        )
+      );
+      // adaptive indentations
+      if (!before.trim()) {
+        code = code.replace(/\n/g, "\n" + before);
+      }
+      // notebooks need to be dealt with in a special case when it comes to
+      // refocus - so far this isn't a good fix at all
+      if (typeof appendage.document.notebook === "undefined") {
+        vscode.window.showTextDocument(
+          appendage.document,
+          appendage.viewColumn
+        );
+      } else {
+        vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
+        vscode.commands.executeCommand("notebook.focusPreviousEditor");
+      }
+      appendage.edit((e) => {
+        e.insert(appendage.selection.active, code);
+      });
+    }
   }
 
   async synchronize(forceDownload: boolean) {
@@ -256,7 +229,9 @@ export class Gallery {
           return;
         }
       }
-      vscode.window.showInformationMessage("Please wait a moment while we synchronize the local assets...");
+      vscode.window.showInformationMessage(
+        "Please wait a moment while we synchronize the local assets..."
+      );
       JSON_FILES.forEach((fn) => {
         Axios.get(ASSET_DIR + fn).then(({ data }) => {
           fs.writeFile(path.join(root, fn), JSON.stringify(data), () => {});
@@ -271,8 +246,13 @@ export class Gallery {
               response.data.pipe(
                 fs.createWriteStream(path.join(root, "img", imgFn))
               );
-              if (fn === JSON_FILES[JSON_FILES.length-1] && imgFn === assets[assets.length-1]) {
-                vscode.window.showInformationMessage("Successfully downloaded all assets!");
+              if (
+                fn === JSON_FILES[JSON_FILES.length - 1] &&
+                imgFn === assets[assets.length - 1]
+              ) {
+                vscode.window.showInformationMessage(
+                  "Successfully downloaded all assets!"
+                );
               }
             });
           });

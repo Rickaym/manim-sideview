@@ -195,10 +195,14 @@ Initial release of Manim Sideview.
 
 + Added force redownload when assets are damaged
 
-
 #### 0.0.8
 
 + Using axios now to synchronize assets for better performance
+
+#### 0.0.9
+
++ Scene scanner now looks for all class definitions with subclasses with name Scene in them
++ Better responsiveness for refocusing selected documents in mobject gallery
 
 ---
 

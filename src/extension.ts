@@ -24,7 +24,7 @@ import { Gallery } from "./gallery";
 // mandatory cli flags for user configuration currently none
 const USER_DEF_CONFIGURATION: string[] = [];
 const LOCATE = { section: "CLI" };
-const SCENE_CLASSES = /(?:\s*class\s+(?<name>\w+)\(Scene\):\s*)/g;
+const SCENE_CLASSES = /\s*class\s+(?<name>\w*)\(\w*Scene\w*\):\s*/g;
 
 // a process will be killed if this message is seen
 const INPUT_REQUEST =
@@ -173,7 +173,7 @@ class ManimSideview {
 
     var sceneClasses = contents
       .match(SCENE_CLASSES)
-      ?.map((m) => "$(run-all) " + m.substr(5).replace("(Scene):", "").trim());
+      ?.map((m) => "$(run-all) " + m.substr(5).replace(/\(\w*Scene\w*\):/g, "").trim());
     const askMore = "I'll provide it myself!";
 
     var sceneName;
@@ -233,6 +233,12 @@ class ManimSideview {
       this.jobStatus.hide();
     }
   }
+
+  audit(editor: vscode.TextEditor | undefined) {
+    if (editor && editor.document.languageId === "python") {
+      this.gallery.setLastActiveEditor(editor);
+    }
+  };
 
   /**
    * The command for loading the m object gallery
@@ -657,6 +663,7 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeActiveTextEditor(
     (e) => {
       view.updateJobStatus();
+      view.audit(e);
     },
     null,
     context.subscriptions
