@@ -204,6 +204,15 @@ Initial release of Manim Sideview.
 + Scene scanner now looks for all class definitions with subclasses with name Scene in them
 + Better responsiveness for refocusing selected documents in mobject gallery
 
+#### 0.0.10
+
++ Run-time configuration settings can be set for jobless scene where it'll create a new job for the user
++ Changed default quality mappings with responsiveness to Manim 0.13.1
++ Smarter manim.cfg file analysis and in determining context
+* It should be noted that default rendering will still use `-ql` for backwards compatibility
++ Added manim version re-synchronization command for developer independent compatibility
++ Added version signifier to the mobject gallery
+
 ---
 
 ## Credits

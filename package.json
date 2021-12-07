@@ -1,7 +1,7 @@
 {
   "name": "manim-sideview",
   "displayName": "Manim Sideview",
-  "icon": "assets/logo.png",
+  "icon": "assets/images/logo.png",
   "description": "A video sideview for the Python animations library manim.",
   "repository": {
     "url": "https://github.com/Rickaym/Manim-Sideview",
@@ -12,7 +12,7 @@
     "name": "Ricky",
     "url": "https://github.com/Rickaym"
   },
-  "version": "0.0.9",
+  "version": "0.0.10",
   "publisher": "Rickaym",
   "engines": {
     "vscode": "^1.62.0"
@@ -33,7 +33,9 @@
     "onCommand:manim-sideview.refreshCurrentConfiguration",
     "onCommand:manim-sideview.setRenderingScene",
     "onCommand:manim-sideview.setInTimeConfiguration",
-    "onCommand:manim-sideview.showMobjectGallery"
+    "onCommand:manim-sideview.showMobjectGallery",
+    "onCommand:manim-sideview.syncMobjectGallery",
+    "onCommand:manim-sideview.syncManimConfig"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -130,6 +132,14 @@
       {
         "command": "manim-sideview.showMobjectGallery",
         "title": "Show Mobject Gallery For Manim"
+      },
+      {
+        "command": "manim-sideview.syncMobjectGallery",
+        "title": "Updates Mobject Gallery Assets From Remote"
+      },
+      {
+        "command": "manim-sideview.syncManimConfig",
+        "title": "Updates Internal Manim Config With Local Executable"
       }
     ],
     "keybindings": [

@@ -4,6 +4,7 @@ import {
   getNonce,
   getWebviewResource,
   insertContext,
+  PATHS,
   WebviewResources,
 } from "./globals";
 import * as fs from "fs";
@@ -11,19 +12,19 @@ import * as path from "path";
 import Axios from "axios";
 import axios from "axios";
 
-// gallery synchronization files
-const ENTRY_FILE =
-  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/init_images_and_text.js";
 const VERSION_RE = /var\s*version_number\s*=\s*"([^"]+)";?/g;
-// files targeted for updating
-const JSON_FILES = [
+// gallery synchronization files
+const GITHUB_ENTRY_FILE =
+  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/init_images_and_text.js";
+const GITHUB_ASSET_DIR =
+  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/imgs/";
+
+const mobjMaps = [
   "Camera_and_Style.json",
   "Mobjects_Basics.json",
   "Mobjects_Text.json",
-  "Plots.json",
+  "Plots.json"
 ];
-const ASSET_DIR =
-  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/imgs/";
 
 export class Gallery {
   constructor(
@@ -106,13 +107,18 @@ export class Gallery {
     Object.keys(this.imageMapping).forEach((title) => {
       images += `<h2>${title}</h2>`;
       Object.keys(this.imageMapping[title]).forEach((imgPth) => {
-        images += `<img class="image-button" id="${this.imageMapping[title][
+        const code = this.imageMapping[title][
           imgPth
-        ].replace(/"/g, "'")}" src=${panel.webview.asWebviewUri(
+        ].replace(/"/g, "'");
+        images += `<img class="image-button" src=${panel.webview.asWebviewUri(
           vscode.Uri.joinPath(this.mobjectsPath, "img", imgPth)
-        )}>`;
+        )} alt="${code}">`;
       });
     });
+
+    const localVersion = (
+      await vscode.workspace.fs.readFile(PATHS.cfgVersion)
+    ).toString();
 
     const vars: ContextVars = {
       "%cspSource%": this.panel.webview.cspSource,
@@ -122,6 +128,7 @@ export class Gallery {
         .toString(),
       "%nonce%": getNonce(),
       "%Mobjects%": images,
+      "%version%": localVersion
     };
 
     this.panel.webview.html = insertContext(vars, htmlDoc);
@@ -157,7 +164,9 @@ export class Gallery {
   }
 
   async insertCode(code: string) {
-    const editor = this.lastActiveEditor ? this.lastActiveEditor : this.getPreviousEditor();
+    const editor = this.lastActiveEditor
+      ? this.lastActiveEditor
+      : this.getPreviousEditor();
     if (!editor) {
       return vscode.window.showErrorMessage(
         "Select a document first and then use the buttons!"
@@ -186,14 +195,14 @@ export class Gallery {
       }
       // notebooks need to be dealt with in a special case when it comes to
       // refocus - so far this isn't a good fix at all
-      if (typeof appendage.document.notebook === "undefined") {
+      if (appendage.document.fileName.endsWith(".ipynb")) {
+        vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
+        vscode.commands.executeCommand("notebook.focusPreviousEditor");
+      } else {
         vscode.window.showTextDocument(
           appendage.document,
           appendage.viewColumn
         );
-      } else {
-        vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
-        vscode.commands.executeCommand("notebook.focusPreviousEditor");
       }
       appendage.edit((e) => {
         e.insert(appendage.selection.active, code);
@@ -203,20 +212,17 @@ export class Gallery {
 
   async synchronize(forceDownload: boolean) {
     const localVersion = (
-      await vscode.workspace.fs.readFile(
-        vscode.Uri.joinPath(this.extensionUri, "assets/mobjects/version.txt")
-      )
+      await vscode.workspace.fs.readFile(PATHS.cfgVersion)
     ).toString();
-    const root = vscode.Uri.joinPath(
-      this.extensionUri,
-      "assets/mobjects/"
-    ).fsPath;
-    Axios.get(ENTRY_FILE).then(({ data }) => {
+
+    const root = PATHS.mobjImgs.fsPath;
+
+    Axios.get(GITHUB_ENTRY_FILE).then(({ data }) => {
       if (!forceDownload) {
         const version = data.match(VERSION_RE);
         if (version) {
           const segs = version[0].split('"');
-          const olVersion = segs[segs.length - 2];
+          var olVersion = segs[segs.length - 2];
 
           if (olVersion === localVersion) {
             vscode.window.showInformationMessage("You're already up to date.");
@@ -230,28 +236,29 @@ export class Gallery {
         }
       }
       vscode.window.showInformationMessage(
-        "Please wait a moment while we synchronize the local assets..."
+        "Please wait a moment while we synchronize local assets..."
       );
-      JSON_FILES.forEach((fn) => {
-        Axios.get(ASSET_DIR + fn).then(({ data }) => {
-          fs.writeFile(path.join(root, fn), JSON.stringify(data), () => {});
-          console.log(data);
-          const assets = Object.keys(data);
-          assets.forEach((imgFn) => {
+      mobjMaps.forEach((imgMap) => {
+        Axios.get(GITHUB_ASSET_DIR + imgMap).then(({ data }) => {
+          fs.writeFile(path.join(root, imgMap), JSON.stringify(data), () => {});
+
+          const imgAssets = Object.keys(data);
+          imgAssets.forEach((imgFn) => {
             axios({
               method: "get",
-              url: ASSET_DIR + imgFn,
+              url: GITHUB_ASSET_DIR + imgFn,
               responseType: "stream",
             }).then(function (response) {
               response.data.pipe(
                 fs.createWriteStream(path.join(root, "img", imgFn))
               );
               if (
-                fn === JSON_FILES[JSON_FILES.length - 1] &&
-                imgFn === assets[assets.length - 1]
+                imgMap === mobjMaps[mobjMaps.length - 1] &&
+                imgFn === imgAssets[imgAssets.length - 1]
               ) {
+                fs.writeFile(PATHS.cfgVersion.fsPath, olVersion, () => {});
                 vscode.window.showInformationMessage(
-                  "Successfully downloaded all assets!"
+                  `Successfully downloaded all assets to version ${olVersion}!`
                 );
               }
             });

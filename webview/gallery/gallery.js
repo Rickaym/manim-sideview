@@ -7,7 +7,7 @@ container.addEventListener("click", (event) => {
   if (event.target.className === "image-button") {
     vscode.postMessage({
       command: "code-insert",
-      code: event.target.id,
+      code: event.target.alt,
     });
   }
 });

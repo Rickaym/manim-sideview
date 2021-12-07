@@ -2,9 +2,9 @@ import * as vscode from "vscode";
 import { join } from "path";
 import {
   ContextVars,
-  DEFAULT_ARGS,
-  DEFAULT_MEDIA_DIR,
-  DEFAULT_VIDEO_DIR,
+  BASE_ARGS,
+  BASE_MEDIA_DIR,
+  BASE_VIDEO_DIR,
   getNonce,
   getWebviewResource,
   insertContext,
@@ -72,20 +72,20 @@ export class DueTimeConfiguration {
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("commandLineArgs") ||
-        DEFAULT_ARGS,
+        BASE_ARGS,
       "%video_dir%":
         conf.videoDir ||
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("videoDirectory") ||
-        DEFAULT_VIDEO_DIR,
+        BASE_VIDEO_DIR,
       "%scene_name%": conf.sceneName,
       "%media_dir%":
         conf.mediaDir ||
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("mediaDirectory") ||
-        DEFAULT_MEDIA_DIR,
+        BASE_MEDIA_DIR,
     };
 
     this.panel.webview.html = insertContext(vars, htmlDoc);
@@ -105,9 +105,6 @@ export class DueTimeConfiguration {
               conf.videoDir = message.videoDir;
               conf.output = join(message.videoDir, conf.sceneName + ".mp4");
               this.panel.dispose();
-              vscode.window.showInformationMessage(
-                "Success, I've configured the running configurations to the details provided for now!"
-              );
             }
             return;
         }

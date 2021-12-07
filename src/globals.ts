@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { normalize } from "path";
+import * as fs from "fs";
 
 /**
  * A list of type and value definitions used in different modules with no ownership
@@ -43,11 +44,72 @@ export type WebviewResources = {
   css: vscode.Uri;
 };
 
-export const DEFAULT_VIDEO_DIR = "media/videos/{module_name}/480p15";
-export const DEFAULT_MEDIA_DIR = "media";
-export const DEFAULT_ARGS = "-ql";
-export const DEFAULT_MANIM_EXE = "manim";
-export const DEFAULT_PROGRESS_BAR_COLOR = "var(--vscode-textLink-foreground)";
+// internal in this context means internal to the extension
+export type InternalManimCfg = {
+  media_dir: string;
+  video_dir: string;
+  quality: string;
+  quality_map: { [tp: string]: string };
+  [exts: string]: string | { [tp: string]: string };
+};
+
+/**
+ * A list of internal assets to all the  assets used within the
+ * extension.
+ */
+const pathsToLoad: { [tp: string]: string } = {
+  cfgMap: "assets/local/manim.cfg.json",
+  mobjVersion: "assets/mobjects/version.txt",
+  mobjImgs: "assets/mobjects/",
+};
+
+export const PATHS: { [tp: string]: vscode.Uri } = {};
+
+export var INTERNAL_MANIM_CONFIG: InternalManimCfg = {
+  media_dir: "",
+  video_dir: "",
+  quality: "",
+  quality_map: {},
+};
+export function loadPaths(root: vscode.Uri) {
+  Object.keys(pathsToLoad).forEach((tp) => {
+    PATHS[tp] = vscode.Uri.joinPath(root, pathsToLoad[tp]);
+  });
+}
+
+export async function loadInternalManimCfg() {
+  const cfg = JSON.parse(
+    (await vscode.workspace.fs.readFile(PATHS.cfgMap)).toString()
+  );
+  updateInternalManimCfg(cfg, false);
+}
+
+export function updateInternalManimCfg(
+  updated: {
+    [tp: string]: string;
+  },
+  saveUpdated: boolean = true
+) {
+  Object.keys(INTERNAL_MANIM_CONFIG).forEach((ky) => {
+    if (updated[ky]) {
+      INTERNAL_MANIM_CONFIG[ky] = updated[ky];
+    }
+  });
+  if (saveUpdated) {
+    fs.writeFile(
+      PATHS.cfgMap.fsPath,
+      JSON.stringify(INTERNAL_MANIM_CONFIG),
+      () => {}
+    );
+  }
+}
+
+// base values for running in-time configurations
+export const BASE_VIDEO_DIR = "media/videos/{module_name}/480p15";
+export const BASE_MEDIA_DIR = "media";
+export const BASE_ARGS = "-ql";
+export const BASE_MANIM_EXE = "manim";
+export const BASE_PROGRESS_BAR_COLOR = "var(--vscode-textLink-foreground)";
 
 /**
  * Provide a nonce for inline scripts inside webviews, this is necessary for
@@ -100,10 +162,7 @@ export function getWebviewResource(
       extensionUri,
       `webview/${viewName}/${viewName}.css`
     ),
-    js: vscode.Uri.joinPath(
-      extensionUri,
-      `webview/${viewName}/${viewName}.js`
-    ),
+    js: vscode.Uri.joinPath(extensionUri, `webview/${viewName}/${viewName}.js`),
     html: vscode.Uri.joinPath(
       extensionUri,
       `webview/${viewName}/${viewName}.html`

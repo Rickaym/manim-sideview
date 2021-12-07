@@ -2,7 +2,7 @@ import { Context } from "mocha";
 import * as vscode from "vscode";
 import {
   ContextVars,
-  DEFAULT_PROGRESS_BAR_COLOR,
+  BASE_PROGRESS_BAR_COLOR,
   getNonce,
   getWebviewResource,
   insertContext,
@@ -65,10 +65,10 @@ export class VideoPlayer {
 
   parseProgressStyle(colorStr?: string): string {
     if (!colorStr) {
-       colorStr = DEFAULT_PROGRESS_BAR_COLOR;
+       colorStr = BASE_PROGRESS_BAR_COLOR;
     } else if (colorStr.includes(";") || colorStr.includes('"') || colorStr.includes("'")) {
       // prevents html injections
-       colorStr = DEFAULT_PROGRESS_BAR_COLOR;
+       colorStr = BASE_PROGRESS_BAR_COLOR;
     } else if (!colorStr.startsWith("#")) {
       colorStr = `var(--vscode-${colorStr.replace(/\./g, "-")});`;
     }
