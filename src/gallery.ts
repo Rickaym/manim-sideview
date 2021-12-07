@@ -23,7 +23,7 @@ const mobjMaps = [
   "Camera_and_Style.json",
   "Mobjects_Basics.json",
   "Mobjects_Text.json",
-  "Plots.json"
+  "Plots.json",
 ];
 
 export class Gallery {
@@ -107,9 +107,7 @@ export class Gallery {
     Object.keys(this.imageMapping).forEach((title) => {
       images += `<h2>${title}</h2>`;
       Object.keys(this.imageMapping[title]).forEach((imgPth) => {
-        const code = this.imageMapping[title][
-          imgPth
-        ].replace(/"/g, "'");
+        const code = this.imageMapping[title][imgPth].replace(/"/g, "'");
         images += `<img class="image-button" src=${panel.webview.asWebviewUri(
           vscode.Uri.joinPath(this.mobjectsPath, "img", imgPth)
         )} alt="${code}">`;
@@ -117,7 +115,7 @@ export class Gallery {
     });
 
     const localVersion = (
-      await vscode.workspace.fs.readFile(PATHS.cfgVersion)
+      await vscode.workspace.fs.readFile(PATHS.mobjVersion)
     ).toString();
 
     const vars: ContextVars = {
@@ -128,7 +126,7 @@ export class Gallery {
         .toString(),
       "%nonce%": getNonce(),
       "%Mobjects%": images,
-      "%version%": localVersion
+      "%version%": localVersion,
     };
 
     this.panel.webview.html = insertContext(vars, htmlDoc);
@@ -212,7 +210,7 @@ export class Gallery {
 
   async synchronize(forceDownload: boolean) {
     const localVersion = (
-      await vscode.workspace.fs.readFile(PATHS.cfgVersion)
+      await vscode.workspace.fs.readFile(PATHS.mobjVersion)
     ).toString();
 
     const root = PATHS.mobjImgs.fsPath;
@@ -256,10 +254,11 @@ export class Gallery {
                 imgMap === mobjMaps[mobjMaps.length - 1] &&
                 imgFn === imgAssets[imgAssets.length - 1]
               ) {
-                fs.writeFile(PATHS.cfgVersion.fsPath, olVersion, () => {});
-                vscode.window.showInformationMessage(
-                  `Successfully downloaded all assets to version ${olVersion}!`
-                );
+                fs.writeFile(PATHS.mobjVersion.fsPath, olVersion, () => {
+                  vscode.window.showInformationMessage(
+                    `Successfully downloaded all assets to version ${olVersion}!`
+                  );
+                });
               }
             });
           });

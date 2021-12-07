@@ -213,6 +213,10 @@ Initial release of Manim Sideview.
 + Added manim version re-synchronization command for developer independent compatibility
 + Added version signifier to the mobject gallery
 
+#### 0.0.11
+
++ Patched the local incorrect version filepath for mobject gallery
+
 ---
 
 ## Credits

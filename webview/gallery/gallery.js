@@ -3,6 +3,7 @@ const container = document.getElementById("Mobjects");
 const updates = document.getElementById("updates");
 const fdownload = document.getElementById("download-again");
 
+
 container.addEventListener("click", (event) => {
   if (event.target.className === "image-button") {
     vscode.postMessage({
@@ -13,13 +14,13 @@ container.addEventListener("click", (event) => {
 });
 
 updates.addEventListener("click", (event) => {
-    vscode.postMessage({
-      command: "update"
-    });
+  vscode.postMessage({
+    command: "update",
+  });
 });
 
 fdownload.addEventListener("click", (event) => {
   vscode.postMessage({
-    command: "download-again"
+    command: "download-again",
   });
 });
