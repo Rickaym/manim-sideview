@@ -4,8 +4,6 @@ images/**
 src/**
 .yarnrc
 .gitignore
-pullGallery.ts
-vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map
