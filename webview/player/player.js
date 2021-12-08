@@ -81,7 +81,6 @@ statusbar.addEventListener("click", function (e) {
 
 window.addEventListener("message", function (e) {
   const message = e.data;
-  console.log(message);
   switch (message.command) {
     case "reload":
       video.setAttribute("src", message.resource);

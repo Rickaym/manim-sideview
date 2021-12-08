@@ -65,10 +65,14 @@ export class VideoPlayer {
 
   parseProgressStyle(colorStr?: string): string {
     if (!colorStr) {
-       colorStr = BASE_PROGRESS_BAR_COLOR;
-    } else if (colorStr.includes(";") || colorStr.includes('"') || colorStr.includes("'")) {
+      colorStr = BASE_PROGRESS_BAR_COLOR;
+    } else if (
+      colorStr.includes(";") ||
+      colorStr.includes('"') ||
+      colorStr.includes("'")
+    ) {
       // prevents html injections
-       colorStr = BASE_PROGRESS_BAR_COLOR;
+      colorStr = BASE_PROGRESS_BAR_COLOR;
     } else if (!colorStr.startsWith("#")) {
       colorStr = `var(--vscode-${colorStr.replace(/\./g, "-")});`;
     }
@@ -111,23 +115,21 @@ export class VideoPlayer {
       }
     );
     this.panel.iconPath = this.manimIconsPath;
-
+    const conf = vscode.workspace.getConfiguration("manim-sideview");
     const styleSrc = this.panel.webview.asWebviewUri(this.loads.css).toString();
     const vars: ContextVars = {
       "%videoSrc%": resource,
       "%out%": videoUri.fsPath,
       "%moduleName%": moduleName,
-      "%previewShowProgressOnIdle%": vscode.workspace
-        .getConfiguration("manim-sideview")
-        .get("previewShowProgressOnIdle")
+      "%previewShowProgressOnIdle%": conf.get("previewShowProgressOnIdle")
         ? ""
         : " hidden-controls",
       "%previewProgressStyle%": this.parseProgressStyle(
-        vscode.workspace
-          .getConfiguration("manim-sideview")
-          .get("previewProgressColor")
+        conf.get("previewProgressColor")
       ),
       "%cspSource%": this.panel.webview.cspSource,
+      "%loop%": conf.get("previewLooping") ? "loop" : "",
+      "%autoplay%": conf.get("previewAutoPlay") ? "autoplay": "",
       "player.css": styleSrc,
       "player.js": this.loads.js.with({ scheme: "vscode-resource" }).toString(),
       "%nonce%": getNonce(),

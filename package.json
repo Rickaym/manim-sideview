@@ -88,6 +88,18 @@
           "scope": "application",
           "default": "textLink.foreground",
           "description": "The color of the progress bar. You can use theme colors here. Either specify hex colors `#F1F1F1` or theme colors `button.border`"
+        },
+        "manim-sideview.previewAutoPlay": {
+          "type": "boolean",
+          "scope": "application",
+          "default": "true",
+          "description": "Whether to auto-play the preview right after rendering."
+        },
+        "manim-sideview.previewLooping": {
+          "type": "boolean",
+          "scope": "application",
+          "default": "true",
+          "description": "Whether to loop the preview at the end."
         }
       }
     },

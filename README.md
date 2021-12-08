@@ -217,6 +217,11 @@ Initial release of Manim Sideview.
 
 + Patched the local incorrect version filepath for mobject gallery
 
+#### 0.0.12
+
++ Added configurations to disable or enable auto-play
++ Added configurations to disable or enable looping
+
 ---
 
 ## Credits
