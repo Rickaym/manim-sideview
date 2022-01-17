@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import * as fs from "fs";
 import * as path from "path";
+import * as pty from "node-pty";
 
 import { ChildProcess, spawn } from "child_process";
 import {
@@ -19,6 +19,26 @@ import { DueTimeConfiguration } from "./config";
 import { ConfigParser } from "./configparser";
 import { VideoPlayer } from "./player";
 import { Gallery } from "./gallery";
+import { ManimPseudoTerm } from "./pseudoterm";
+
+/**
+ * Changes a given path to an absolute path if it's a relative
+ * path.
+ *
+ * @param path relative path
+ * @returns absolute path
+ */
+function toAbsolutePath(pth: string): string {
+  if (!path.isAbsolute(pth)) {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders) {
+      throw TypeError("Workspace folders cannot be empty.");
+    }
+    var rootPath = folders[0].uri.fsPath + "/";
+    pth = path.join(rootPath, pth);
+  }
+  return pth;
+}
 
 // mandatory cli flags for user configuration currently none
 const USER_DEF_CONFIGURATION: string[] = [];
@@ -41,25 +61,6 @@ type Job = {
   config: RunningConfig;
 };
 
-/**
- * Changes a given path to an absolute path if it's a relative
- * path.
- *
- * @param path relative path
- * @returns absolute path
- */
-function toAbsolutePath(pth: string): string {
-  if (!path.isAbsolute(pth)) {
-    const folders = vscode.workspace.workspaceFolders;
-    if (!folders) {
-      throw TypeError("Workspace folders cannot be empty.");
-    }
-    var rootPath = folders[0].uri.fsPath + "/";
-    pth = path.join(rootPath, pth);
-  }
-  return pth;
-}
-
 export class ManimSideview {
   constructor(public readonly ctx: vscode.ExtensionContext) {
     this.ctx = ctx;
@@ -68,7 +69,6 @@ export class ManimSideview {
     this.prompt = new DueTimeConfiguration(ctx);
     this.player = new VideoPlayer(ctx);
     this.gallery = new Gallery(ctx);
-    this.outputChannel = vscode.window.createOutputChannel("Manim");
 
     this.jobStatus = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left
@@ -92,10 +92,12 @@ export class ManimSideview {
   private prompt: DueTimeConfiguration;
   private player: VideoPlayer;
   private gallery: Gallery;
-  private outputChannel: vscode.OutputChannel;
   private process: ChildProcess | undefined;
   private jobStatus: vscode.StatusBarItem;
   private lastChosenSceneName: string | undefined;
+  private outputChannel: vscode.OutputChannel =
+    vscode.window.createOutputChannel("manim");
+  private outputPseudoTerm: ManimPseudoTerm = new ManimPseudoTerm("manim");
 
   async run(routine: boolean) {
     const editor = vscode.window.activeTextEditor;
@@ -310,104 +312,119 @@ export class ManimSideview {
     }
     args.push(conf.sceneName.trim());
     args = args.map((a) => `"${a}"`);
-    this.executeCommandInoutputChannel(
-      conf.exePath,
-      args,
-      conf.root,
-      conf,
-      ctxVars
-    );
+
+    var out;
+    if (
+      vscode.workspace
+        .getConfiguration("manim-sideview")
+        .get("outputToTerminal")
+    ) {
+      //this.outputPseudoTerm.cwd = conf.root;
+      //out = this.outputPseudoTerm;
+      out = this.outputChannel;
+    } else {
+      out = this.outputChannel;
+    }
+    //this.executeCommand(args, conf, ctxVars, out);
+    this.executeCommandInTerminal(args, conf, ctxVars);
   }
 
-  private newJob(conf: RunningConfig) {
-    this.jobs.push({ config: conf });
-    this.updateJobStatus(
-      new vscode.ThemeColor("minimapGutter.addedBackground")
-    );
-  }
-
-  private async executeCommandInoutputChannel(
-    command: string,
+  async executeCommand(
     args: string[],
-    cwd: string,
     conf: RunningConfig,
-    ctxVars: ContextVars
+    ctxVars: ContextVars,
+    outputChannel: vscode.OutputChannel
   ) {
-    this.outputChannel.clear();
-    this.outputChannel.appendLine(
-      `[Log] EXE : "${command}"\n[Log] CWD : "${cwd}"\n[Log] VDir: "${insertContext(
-        ctxVars,
-        conf.videoDir
-      )}"\n[Log] Args: ${args.join(" | ")}\n[Log] Conf: ${conf.usingConfigFile}`
-    );
+    const command = conf.exePath;
+    const cwd = conf.root;
+
+    // Output channels will not keep historical logs
+    outputChannel.clear();
+
     const mediaFp = insertContext(ctxVars, toAbsolutePath(conf.output));
-    this.outputChannel.appendLine(
-      `[Running] IN  : ${command} ${args.join(
-        " "
-      )} \n[Running] OUT : ${mediaFp}\n`
+
+    outputChannel.append(
+      `[Log] EXE : "${command}"\n` +
+        `[Log] Args: ${args.join(" | ")}\n` +
+        `[Log] CWD : "${cwd}"\n` +
+        `[Log] VDir: "${insertContext(ctxVars, conf.videoDir)}"\n` +
+        `[Log] Conf: ${conf.usingConfigFile}\n` +
+        `[Running] IN  : ${command} ${args.join(" ")} \n` +
+        `[Running] OUT : ${mediaFp}\n`
     );
+
     if (
       vscode.workspace
         .getConfiguration("manim-sideview")
         .get("focusOutputOnRun")
     ) {
-      this.outputChannel.show(true);
+      outputChannel.show(true);
     }
+
     const startTime = new Date();
     if (this.process) {
-      if (this.process) {
-        this.stop();
-      }
+      this.stop();
     }
+
+    // this.process = spawn(command, args,
+    //   { cwd: cwd, shell: true });
     this.process = spawn(command, args, { cwd: cwd, shell: true });
+
     this.updateJobStatus(
       new vscode.ThemeColor("textLink.foreground"),
       "$(sync~spin) Active Job"
     );
+
     if (
       !this.process ||
       !this.process.stdout ||
       !this.process.stderr ||
       !this.process.stdin
     ) {
-      this.outputChannel.appendLine(
+      outputChannel.appendLine(
         `[Done] returned code=911 in Process: ${this.process}, stdout: ${this.process?.stdout}, stdout: ${this.process?.stderr}`
       );
+      outputChannel.append("\n");
       return vscode.window.showErrorMessage(
-        "Process stumbled on a fatal error, please look at the output channel."
+        "Fatal error, please look at the output channel."
       );
     }
+    // We'll keep a closure because this.process is capable of going undefined
+    // at any given time, but we still want valid references
     const process = this.process;
     this.process.stdout.on("data", (data: string) => {
       if (!process.killed) {
         const outs = data.toString();
-        this.outputChannel.append(outs);
+        outputChannel.append(outs);
+
         if (outs.includes(INPUT_REQUEST)) {
           this.stop(process);
-          this.outputChannel.append("\n");
+          outputChannel.append("\n");
         }
       }
     });
 
     this.process.stderr.on("data", (data: string) => {
       if (!process.killed) {
-        this.outputChannel.append(data.toString());
+        outputChannel.append(data.toString());
       }
     });
 
     this.process.on("error", (err: Error) => {
       if (!process.killed) {
-        this.outputChannel.append(err.toString());
+        outputChannel.append(err.toString());
       }
     });
 
     this.process.on("close", (code: number, signal: string) => {
-      const endTime = new Date();
-      const elapsedTime = (endTime.getTime() - startTime.getTime()) / 1000;
+      const elapsedTime = (new Date().getTime() - startTime.getTime()) / 1000;
+
+      // This process has been user-terminated
       if (signal === "SIGTERM") {
         code = 1;
       }
-      this.outputChannel.appendLine(
+
+      outputChannel.appendLine(
         `\n[Done] returned code=${code} in ${elapsedTime} seconds ${
           code === 1 ? "returned signal " + signal : ""
         } ${
@@ -448,6 +465,22 @@ export class ManimSideview {
         this.updateJobStatus(new vscode.ThemeColor("minimap.errorHighlight"));
       }
     });
+  }
+
+  async executeCommandInTerminal(
+    args: string[],
+    conf: RunningConfig,
+    ctxVars: ContextVars
+  ) {
+    this.outputPseudoTerm.isRunning = true;
+    this.executeCommand(args, conf, ctxVars, this.outputPseudoTerm);
+  }
+
+  private newJob(conf: RunningConfig) {
+    this.jobs.push({ config: conf });
+    this.updateJobStatus(
+      new vscode.ThemeColor("minimapGutter.addedBackground")
+    );
   }
 
   /**
@@ -569,9 +602,7 @@ export class ManimSideview {
       return false;
     }
     return {
-      exePath: path.normalize(
-        conf.get("defaultManimPath") || BASE_MANIM_EXE
-      ),
+      exePath: path.normalize(conf.get("defaultManimPath") || BASE_MANIM_EXE),
       args: conf.get("commandLineArgs") || BASE_ARGS,
       root: root,
       videoDir: path.normalize(conf.get("videoDirectory") || BASE_VIDEO_DIR),

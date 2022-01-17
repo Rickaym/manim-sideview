@@ -12,7 +12,7 @@ import * as path from "path";
 import Axios from "axios";
 import axios from "axios";
 
-const VERSION_RE = /var\s*version_number\s*=\s*"([^"]+)";?/g;
+const VERSION_RE = /version_number\s*=\s*"([^"]+)";?/g;
 // gallery synchronization files
 const GITHUB_ENTRY_FILE =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/init_images_and_text.js";
@@ -162,49 +162,37 @@ export class Gallery {
   }
 
   async insertCode(code: string) {
-    const editor = this.lastActiveEditor
+    const lastEditor = this.lastActiveEditor
       ? this.lastActiveEditor
       : this.getPreviousEditor();
-    if (!editor) {
+    if (!lastEditor) {
       return vscode.window.showErrorMessage(
         "Select a document first and then use the buttons!"
       );
     }
-    const doc = vscode.window.visibleTextEditors.filter(
-      (e) => e.document.fileName === editor.document.fileName
-    );
-    if (!doc) {
-      return vscode.window.showErrorMessage(
-        "You haven't selected any document to insert code."
-      );
-    }
 
-    if (doc.length > 0) {
-      const appendage = doc[0];
-      const before = appendage.document.getText(
-        new vscode.Range(
-          new vscode.Position(appendage.selection.active.line, 0),
-          appendage.selection.active
-        )
+    const before = lastEditor.document.getText(
+      new vscode.Range(
+        new vscode.Position(lastEditor.selection.active.line, 0),
+        lastEditor.selection.active
+      )
+    );
+    // adaptive indentations
+    if (!before.trim()) {
+      code = code.replace(/\n/g, "\n" + before);
+    }
+    lastEditor.edit((e) => {
+      e.insert(lastEditor.selection.active, code);
+    });
+    if (lastEditor.document.fileName.endsWith(".ipynb")) {
+      // focusing on previous groups are a bit glitchy for notebooks in whatever
+      // reason
+      await vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
+    } else {
+      vscode.window.showTextDocument(
+        lastEditor.document,
+        lastEditor.viewColumn
       );
-      // adaptive indentations
-      if (!before.trim()) {
-        code = code.replace(/\n/g, "\n" + before);
-      }
-      // notebooks need to be dealt with in a special case when it comes to
-      // refocus - so far this isn't a good fix at all
-      if (appendage.document.fileName.endsWith(".ipynb")) {
-        vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
-        vscode.commands.executeCommand("notebook.focusPreviousEditor");
-      } else {
-        vscode.window.showTextDocument(
-          appendage.document,
-          appendage.viewColumn
-        );
-      }
-      appendage.edit((e) => {
-        e.insert(appendage.selection.active, code);
-      });
     }
   }
 
@@ -228,7 +216,7 @@ export class Gallery {
           }
         } else {
           vscode.window.showErrorMessage(
-            "Version descriptor in remote location missing."
+            "Version descriptor in remote location missing. Please try again later."
           );
           return;
         }

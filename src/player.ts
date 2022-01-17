@@ -1,4 +1,3 @@
-import { Context } from "mocha";
 import * as vscode from "vscode";
 import {
   ContextVars,
@@ -6,7 +5,6 @@ import {
   getNonce,
   getWebviewResource,
   insertContext,
-  RunningConfig,
   WebviewResources,
 } from "./globals";
 
@@ -65,10 +63,14 @@ export class VideoPlayer {
 
   parseProgressStyle(colorStr?: string): string {
     if (!colorStr) {
-       colorStr = BASE_PROGRESS_BAR_COLOR;
-    } else if (colorStr.includes(";") || colorStr.includes('"') || colorStr.includes("'")) {
+      colorStr = BASE_PROGRESS_BAR_COLOR;
+    } else if (
+      colorStr.includes(";") ||
+      colorStr.includes('"') ||
+      colorStr.includes("'")
+    ) {
       // prevents html injections
-       colorStr = BASE_PROGRESS_BAR_COLOR;
+      colorStr = BASE_PROGRESS_BAR_COLOR;
     } else if (!colorStr.startsWith("#")) {
       colorStr = `var(--vscode-${colorStr.replace(/\./g, "-")});`;
     }
@@ -78,11 +80,12 @@ export class VideoPlayer {
   async show(videoUri: vscode.Uri, moduleName: string) {
     const resource = videoUri
       .with({ scheme: "vscode-resource" })
-      .toString()
-      .replace(
-        /vscode-resource:/g,
-        "https://file%2B.vscode-resource.vscode-webview.net"
-      );
+      .toString();
+
+      //.replace(
+      //  /vscode-resource:/g,
+      //  "https://file%2B.vscode-resource.vscode-webview.net"
+      // );
     if (this.panel) {
       return this.panel.webview.postMessage({
         command: "reload",
@@ -111,26 +114,24 @@ export class VideoPlayer {
       }
     );
     this.panel.iconPath = this.manimIconsPath;
-
+    const conf = vscode.workspace.getConfiguration("manim-sideview");
     const styleSrc = this.panel.webview.asWebviewUri(this.loads.css).toString();
     const vars: ContextVars = {
       "%videoSrc%": resource,
       "%out%": videoUri.fsPath,
       "%moduleName%": moduleName,
-      "%previewShowProgressOnIdle%": vscode.workspace
-        .getConfiguration("manim-sideview")
-        .get("previewShowProgressOnIdle")
+      "%previewShowProgressOnIdle%": conf.get("previewShowProgressOnIdle")
         ? ""
         : " hidden-controls",
       "%previewProgressStyle%": this.parseProgressStyle(
-        vscode.workspace
-          .getConfiguration("manim-sideview")
-          .get("previewProgressColor")
+        conf.get("previewProgressColor")
       ),
       "%cspSource%": this.panel.webview.cspSource,
+      "%loop%": conf.get("previewLooping") ? "loop" : "",
+      "%autoplay%": conf.get("previewAutoPlay") ? "autoplay": "",
+      "%nonce%": getNonce(),
       "player.css": styleSrc,
       "player.js": this.loads.js.with({ scheme: "vscode-resource" }).toString(),
-      "%nonce%": getNonce(),
       "../../assets/fontawesome/css/all.min.css": this.panel.webview
         .asWebviewUri(this.fontAwesomeCss.all)
         .toString(),

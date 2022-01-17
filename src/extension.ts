@@ -1,19 +1,15 @@
 // ENTRY POINT OF THE EXTENSION
 
 import * as vscode from "vscode";
-import { loadInternalManimCfg, loadPaths } from "./globals";
+import { loadGlobals, loadPaths } from "./globals";
 import { ManimSideview } from "./sideview";
-
-/**
- * TODO: finish manim.cfg default loading for given options
- */
 
 export async function activate(context: vscode.ExtensionContext) {
   // convert raw paths into full paths
   // for accessing PATHS
-  loadPaths(context.extensionUri);
-  await loadInternalManimCfg();
+  await loadGlobals(context);
   const view = new ManimSideview(context);
+
   // insert function calls into closures to persist "this"
   context.subscriptions.push(
     vscode.commands.registerCommand(

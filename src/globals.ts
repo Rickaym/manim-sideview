@@ -65,23 +65,40 @@ const pathsToLoad: { [tp: string]: string } = {
 
 export const PATHS: { [tp: string]: vscode.Uri } = {};
 
+// The supposed default internal manim configuration
 export var INTERNAL_MANIM_CONFIG: InternalManimCfg = {
   media_dir: "",
   video_dir: "",
   quality: "",
   quality_map: {},
 };
+
+export var EXTENSION_VERSION: string | undefined;
+
+/**
+ * Load all the required assets as a resource
+ * @param root root URI
+ */
 export function loadPaths(root: vscode.Uri) {
   Object.keys(pathsToLoad).forEach((tp) => {
     PATHS[tp] = vscode.Uri.joinPath(root, pathsToLoad[tp]);
   });
 }
 
-export async function loadInternalManimCfg() {
+export async function loadGlobals(ctx: vscode.ExtensionContext) {
+  loadPaths(ctx.extensionUri);
   const cfg = JSON.parse(
     (await vscode.workspace.fs.readFile(PATHS.cfgMap)).toString()
   );
   updateInternalManimCfg(cfg, false);
+  var PACKAGE_JSON: { [key: string]: string } = JSON.parse(
+    fs
+      .readFileSync(
+        vscode.Uri.joinPath(ctx.extensionUri, "package.json").fsPath
+      )
+      .toString()
+  );
+  EXTENSION_VERSION = PACKAGE_JSON["version"];
 }
 
 export function updateInternalManimCfg(
@@ -126,6 +143,14 @@ export function getNonce(): string {
   return text;
 }
 
+/**
+ * Replaces {variables} with a given map - sorta like how Python string
+ * formatting works.
+ *
+ * @param context Context Variables
+ * @param payload The string using the ctx variables
+ * @returns
+ */
 export function insertContext(context: ContextVars, payload: string): string {
   var path = payload;
   Object.keys(context).forEach((k) => {

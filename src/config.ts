@@ -63,8 +63,6 @@ export class DueTimeConfiguration {
     );
 
     const vars: ContextVars = {
-      "config.css": this.panel.webview.asWebviewUri(this.loads.css).toString(),
-      "config.js": this.loads.js.with({ scheme: "vscode-resource" }).toString(),
       "%cspSource%": this.panel.webview.cspSource,
       "%nonce%": getNonce(),
       "%args%":
@@ -86,6 +84,8 @@ export class DueTimeConfiguration {
           .getConfiguration("manim-sideview")
           .get("mediaDirectory") ||
         BASE_MEDIA_DIR,
+        "config.css": this.panel.webview.asWebviewUri(this.loads.css).toString(),
+        "config.js": this.loads.js.with({ scheme: "vscode-resource" }).toString()
     };
 
     this.panel.webview.html = insertContext(vars, htmlDoc);
