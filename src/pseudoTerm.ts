@@ -59,7 +59,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
       switch (char) {
         case keys.enter:
           // preserve the run command line for history
-          this.writeEmitter.fire(`\r${this.prompt}\r\n`);
+          this.writeEmitter.fire(`\r\n${this.prompt}`);
           if (this.content) {
             this.isRunning = true;
             try {
@@ -118,6 +118,11 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
     if (this.pty.handleInput) {
       this.pty.handleInput(keys.enter);
     }
+  }
+
+  replace(value: string): void {
+      this.clear();
+      this.writeEmitter.fire(value);
   }
 
   clear(): void {
