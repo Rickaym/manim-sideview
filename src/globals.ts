@@ -59,7 +59,7 @@ export type InternalManimCfg = {
  */
 const pathsToLoad: { [tp: string]: string } = {
   cfgMap: "assets/local/manim.cfg.json",
-  mobjVersion: "assets/mobjects/version.txt",
+  mobjVersion: "assets/mobjects/mobject_version.txt",
   mobjImgs: "assets/mobjects/",
 };
 

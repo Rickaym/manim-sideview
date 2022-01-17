@@ -13,18 +13,22 @@ import Axios from "axios";
 import axios from "axios";
 
 const VERSION_RE = /version_number\s*=\s*"([^"]+)";?/g;
-// gallery synchronization files
+const GITHUB_ROOT_DIR =
+  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
+  // gallery synchronization files
 const GITHUB_ENTRY_FILE =
-  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/init_images_and_text.js";
+  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/index.js";
 const GITHUB_ASSET_DIR =
-  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/imgs/";
+  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/gallery_assets/";
+// object mappings
+const mobjMap = "gallery_parameters.json";
 
-const mobjMaps = [
-  "Camera_and_Style.json",
-  "Mobjects_Basics.json",
-  "Mobjects_Text.json",
-  "Plots.json",
-];
+interface ImageMap {
+  image_path: string;
+  celltype: string;
+  css: string;
+  code: string;
+}
 
 export class Gallery {
   constructor(
@@ -41,7 +45,7 @@ export class Gallery {
     this.extensionUri,
     "assets/mobjects"
   );
-  private imageMapping: { [header: string]: { [key: string]: string } } = {};
+  private imageMapping: { [title: string]: ImageMap[] } = {};
   private loads: WebviewResources = getWebviewResource(
     this.extensionUri,
     "gallery"
@@ -64,22 +68,8 @@ export class Gallery {
       await vscode.workspace.fs.readFile(this.loads.html)
     ).toString();
 
-    const loadables = (
-      await vscode.workspace.fs.readDirectory(this.mobjectsPath)
-    )
-      .filter((f) => f[0].endsWith(".json") && f[1] === 1)
-      .map((fd) => fd[0]);
-
-    this.imageMapping = {};
-    for (let x of loadables) {
-      this.imageMapping[x.replace(".json", "").replace(/_/g, " ")] = JSON.parse(
-        (
-          await vscode.workspace.fs.readFile(
-            vscode.Uri.joinPath(this.mobjectsPath, x)
-          )
-        ).toString()
-      );
-    }
+    const loadable = vscode.Uri.joinPath(this.mobjectsPath, mobjMap);
+    this.imageMapping = JSON.parse((await vscode.workspace.fs.readFile(loadable)).toString());
     return this.htmlDoc;
   }
 
@@ -106,10 +96,10 @@ export class Gallery {
     const panel = this.panel;
     Object.keys(this.imageMapping).forEach((title) => {
       images += `<h2>${title}</h2>`;
-      Object.keys(this.imageMapping[title]).forEach((imgPth) => {
-        const code = this.imageMapping[title][imgPth].replace(/"/g, "'");
+      this.imageMapping[title].forEach((imgMap) => {
+        const code = imgMap.code.replace(/"/g, "'");
         images += `<img class="image-button" src=${panel.webview.asWebviewUri(
-          vscode.Uri.joinPath(this.mobjectsPath, "img", imgPth)
+          vscode.Uri.joinPath(this.mobjectsPath, imgMap.image_path)
         )} alt="${code}">`;
       });
     });
@@ -181,9 +171,14 @@ export class Gallery {
     if (!before.trim()) {
       code = code.replace(/\n/g, "\n" + before);
     }
+
     lastEditor.edit((e) => {
       e.insert(lastEditor.selection.active, code);
+    }).then((e) => {
+      // reveal entirity of code
+      lastEditor.revealRange(new vscode.Range(lastEditor.selection.active, lastEditor.selection.active));
     });
+
     if (lastEditor.document.fileName.endsWith(".ipynb")) {
       // focusing on previous groups are a bit glitchy for notebooks in whatever
       // reason
@@ -206,45 +201,48 @@ export class Gallery {
     Axios.get(GITHUB_ENTRY_FILE).then(({ data }) => {
       if (!forceDownload) {
         const version = data.match(VERSION_RE);
-        if (version) {
-          const segs = version[0].split('"');
-          var olVersion = segs[segs.length - 2];
-
-          if (olVersion === localVersion) {
-            vscode.window.showInformationMessage("You're already up to date.");
-            return;
-          }
-        } else {
+        if (!version) {
           vscode.window.showErrorMessage(
             "Version descriptor in remote location missing. Please try again later."
           );
           return;
         }
+
+        const segs = version[0].split('"');
+        var olVersion = segs[segs.length - 2];
+
+        if (olVersion === localVersion) {
+          vscode.window.showInformationMessage("You're already up to date!");
+          return;
+        }
       }
       vscode.window.showInformationMessage(
-        "Please wait a moment while we synchronize local assets..."
-      );
-      mobjMaps.forEach((imgMap) => {
-        Axios.get(GITHUB_ASSET_DIR + imgMap).then(({ data }) => {
-          fs.writeFile(path.join(root, imgMap), JSON.stringify(data), () => {});
+        "Please wait a moment while we pull remote assets..."
+    );
+      Axios.get(GITHUB_ASSET_DIR + mobjMap).then(({ data }) => {
+        fs.writeFile(path.join(root, mobjMap), JSON.stringify(data), () => {});
 
-          const imgAssets = Object.keys(data);
-          imgAssets.forEach((imgFn) => {
+        const imgAssets = Object.keys(data);
+        imgAssets.forEach((categoryName) => {
+          let allObjects: { [key: string]: string}[] = data[categoryName];
+          allObjects.forEach((mObj) => {
+            let imgFn = mObj.image_path;
+            console.log(GITHUB_ROOT_DIR + imgFn);
             axios({
               method: "get",
-              url: GITHUB_ASSET_DIR + imgFn,
+              url: GITHUB_ROOT_DIR + imgFn,
               responseType: "stream",
             }).then(function (response) {
               response.data.pipe(
-                fs.createWriteStream(path.join(root, "img", imgFn))
+                fs.createWriteStream(path.join(root, imgFn))
               );
               if (
-                imgMap === mobjMaps[mobjMaps.length - 1] &&
-                imgFn === imgAssets[imgAssets.length - 1]
+                categoryName === imgAssets[imgAssets.length - 1] &&
+                mObj === allObjects[allObjects.length - 1]
               ) {
                 fs.writeFile(PATHS.mobjVersion.fsPath, olVersion, () => {
                   vscode.window.showInformationMessage(
-                    `Successfully downloaded all assets to version ${olVersion}!`
+                    `Successfully downloaded all assets to version ${olVersion}! Please reload the webview.`
                   );
                 });
               }
