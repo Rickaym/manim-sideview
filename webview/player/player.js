@@ -13,6 +13,11 @@ var setControlsEnabled = document.getElementById("progress-on-idle");
 pipButton.hidden =
   !document.pictureInPictureEnabled || video.disablePictureInPicture;
 
+if (video.paused) {
+  button.className = "play";
+} else {
+  button.className = "paused";
+}
 
 // it's possible that a controls class starts hidden
 // in which case we'll also swap the button
@@ -81,7 +86,6 @@ statusbar.addEventListener("click", function (e) {
 
 window.addEventListener("message", function (e) {
   const message = e.data;
-  console.log(message);
   switch (message.command) {
     case "reload":
       video.setAttribute("src", message.resource);
