@@ -5,7 +5,7 @@
   width: 80px;
   height: auto;
   margin: 1px;
-  transition: 0.1s ease;
+  transition: all 200ms ease;
   backface-visibility: hidden;
   border-radius: 8px;
 }
@@ -13,14 +13,20 @@
 .image-button:hover {
   border-color: var(--vscode-textLink-foreground);
   cursor: pointer;
+  transform: scale(1.1);
 }
 
 button.button-primary {
-  background-color: var(--vscode-textLink-foreground);
+  background-color: #2A5DB0;
   color: var(--vscode-button-foreground);
   border-radius: 5px;
   border: transparent;
   cursor: pointer;
+  transition: all 200ms ease;
+}
+
+button.button-primary:hover {
+  background-color: #3679e6;
 }
 
 button.button-secondary {
@@ -29,6 +35,7 @@ button.button-secondary {
   border-radius: 5px;
   border: transparent;
   cursor: pointer;
+  transition: all 200ms ease;
 }
 
 button.button-secondary:hover {
