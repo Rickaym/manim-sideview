@@ -12,7 +12,7 @@
     "name": "Ricky",
     "url": "https://github.com/Rickaym"
   },
-  "version": "0.0.11",
+  "version": "0.0.12",
   "publisher": "Rickaym",
   "engines": {
     "vscode": "^1.62.0"
@@ -88,6 +88,24 @@
           "scope": "application",
           "default": "textLink.foreground",
           "description": "The color of the progress bar. You can use theme colors here. Either specify hex colors `#F1F1F1` or theme colors `button.border`"
+        },
+        "manim-sideview.previewAutoPlay": {
+          "type": "boolean",
+          "scope": "application",
+          "default": "true",
+          "description": "Whether to auto-play the preview right after rendering."
+        },
+        "manim-sideview.previewLooping": {
+          "type": "boolean",
+          "scope": "application",
+          "default": "true",
+          "description": "Whether to loop the preview at the end."
+        },
+        "manim-sideview.outputToTerminal": {
+          "type": "boolean",
+          "scope": "application",
+          "default": "true",
+          "description": "Whether to relay output to a terminal. If False, an output channel rather than a terminal is used to display text."
         }
       }
     },
@@ -180,6 +198,7 @@
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "@vscode/test-electron": "^1.6.2",
+    "electron-rebuild": "^3.2.5",
     "eslint": "^7.32.0",
     "glob": "^7.1.7",
     "mocha": "^9.1.1",
@@ -187,7 +206,6 @@
   },
   "dependencies": {
     "axios": "^0.24.0",
-    "milligram": "^1.4.1",
-    "qs": "^6.10.1"
+    "node-pty": "^0.10.1"
   }
 }
