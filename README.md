@@ -159,50 +159,25 @@ Note that this is a visual reminder that the file in current focus has an active
 ### Known Issues
 
 1. Jupyter Note books Mobject gallery cell code pasting is disoriented.
-ETA for bugfix: `0.0.7`
-_-_
+2. Buttons from Picture in Picture unresponsive [*linked issue*](https://github.com/Rickaym/Manim-Sideview/issues/7).
+3. Seeking video duration [*linked issue*](https://github.com/Rickaym/Manim-Sideview/issues/7).
 
-#### 0.0.1 - 0.0.2
+## Changelog
 
-Initial release of Manim Sideview.
+#### 0.0.13
 
-#### 0.0.3
+[-] Terminal Output<br>
+[-] Jupyter Notebook Fix<br>
+[-] Added Pseudoterminal for file<br>
 
-+ Added `manim-sideview.stop` for stopping any running processes
-+ Paths are now normalized to work with both forward and backward slashes
-+ video directories are now static and will not depend on the verdict of manim
-+ Setting a valid path no longer replies with "Success" because this can be confusing when there is an exception thrown later down the line that has has nothing to do with the scene name
-+ `manim.cfg` files are now derived from the working path - which is the correct case
-+ Added support server link
+#### 0.0.12
 
-#### 0.0.4
++ Added configurations to disable or enable auto-play
++ Added configurations to disable or enable looping
 
-+ Minor bug fix for Unix machines with trimmed leading slashes
+#### 0.0.11
 
-#### 0.0.5
-
-+ Fixed server links
-+ Added `manim-sideview.showMobjectGallery`
-+ Added hide progress button
-+ Added debrief for the video
-
-#### 0.0.6
-
-+ Added video player configurations `previewProgressColor`, `previewShowProgressOnIdle`
-+ Added `Check For Updates` button in mobject gallery and a sync lock with the repo
-
-#### 0.0.7
-
-+ Added force redownload when assets are damaged
-
-#### 0.0.8
-
-+ Using axios now to synchronize assets for better performance
-
-#### 0.0.9
-
-+ Scene scanner now looks for all class definitions with subclasses with name Scene in them
-+ Better responsiveness for refocusing selected documents in mobject gallery
++ Patched the local incorrect version filepath for mobject gallery
 
 #### 0.0.10
 
@@ -213,11 +188,47 @@ Initial release of Manim Sideview.
 + Added manim version re-synchronization command for developer independent compatibility
 + Added version signifier to the mobject gallery
 
-#### 0.0.11
+#### 0.0.9
 
-+ Patched the local incorrect version filepath for mobject gallery
++ Scene scanner now looks for all class definitions with subclasses with name Scene in them
++ Better responsiveness for refocusing selected documents in mobject gallery
 
----
+#### 0.0.8
+
++ Using axios now to synchronize assets for better performance
+
+#### 0.0.7
+
++ Added force redownload when assets are damaged
+
+#### 0.0.6
+
++ Added video player configurations `previewProgressColor`, `previewShowProgressOnIdle`
++ Added `Check For Updates` button in mobject gallery and a sync lock with the repo
+
+#### 0.0.5
+
++ Fixed server links
++ Added `manim-sideview.showMobjectGallery`
++ Added hide progress button
++ Added debrief for the video
+
+#### 0.0.4
+
++ Minor bug fix for Unix machines with trimmed leading slashes
+
+#### 0.0.3
+
++ Added `manim-sideview.stop` for stopping any running processes
++ Paths are now normalized to work with both forward and backward slashes
++ video directories are now static and will not depend on the verdict of manim
++ Setting a valid path no longer replies with "Success" because this can be confusing when there is an exception thrown later down the line that has has nothing to do with the scene name
++ `manim.cfg` files are now derived from the working path - which is the correct case
++ Added support server link
+
+#### 0.0.1 - 0.0.2
+
+Initial release of Manim Sideview.
 
 ## Credits
 
