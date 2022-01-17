@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as pty from "node-pty";
 
 import { ChildProcess, spawn } from "child_process";
 import {
@@ -319,14 +318,13 @@ export class ManimSideview {
         .getConfiguration("manim-sideview")
         .get("outputToTerminal")
     ) {
-      //this.outputPseudoTerm.cwd = conf.root;
-      //out = this.outputPseudoTerm;
-      out = this.outputChannel;
+      this.outputPseudoTerm.cwd = conf.root;
+      this.outputPseudoTerm.isRunning = true;
+      out = this.outputPseudoTerm;
     } else {
       out = this.outputChannel;
     }
-    //this.executeCommand(args, conf, ctxVars, out);
-    this.executeCommandInTerminal(args, conf, ctxVars);
+    this.executeCommand(args, conf, ctxVars, out);
   }
 
   async executeCommand(
@@ -465,15 +463,6 @@ export class ManimSideview {
         this.updateJobStatus(new vscode.ThemeColor("minimap.errorHighlight"));
       }
     });
-  }
-
-  async executeCommandInTerminal(
-    args: string[],
-    conf: RunningConfig,
-    ctxVars: ContextVars
-  ) {
-    this.outputPseudoTerm.isRunning = true;
-    this.executeCommand(args, conf, ctxVars, this.outputPseudoTerm);
   }
 
   private newJob(conf: RunningConfig) {
