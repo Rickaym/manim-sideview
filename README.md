@@ -25,7 +25,7 @@ Before you can start a live preview you'll have to setup a few configuration set
 ![](images/example_preview.gif)
 
 Upon opening any Python files, you'll see an icon pop up in the menu bar that looks like this
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "20px"></image>. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "20px">. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.
 
 Whenever a file is run successfully for the first time, the extension creates a dedicated job tied to the source file, you can look at [this](#utilities) to make sure - as long as this job is active, all your settings will persist. Note that run on save does not get activated on files that don't have jobs.
 
@@ -33,7 +33,7 @@ Whenever a file is run successfully for the first time, the extension creates a 
 
 It can be done in two ways.
 
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/settings.png" height="100%" width= "20px"></image> The first option is to provide in a runtime/in time (can be used interchangeably) configuration - where we'll ask you a few questions to tweak the settings on run time
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/settings.png" height="100%" width= "20px"> The first option is to provide in a runtime/in time (can be used interchangeably) configuration - where we'll ask you a few questions to tweak the settings on run time
 
 **HOTKEY** - `ctrl + '` `s` *press, release and then press s, this is not simultaneous*
 
