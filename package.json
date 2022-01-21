@@ -15,7 +15,7 @@
   "version": "0.0.13",
   "publisher": "Rickaym",
   "engines": {
-    "vscode": "^1.62.0"
+    "vscode": "^1.63.1"
   },
   "categories": [
     "Visualization",
