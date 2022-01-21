@@ -78,16 +78,10 @@ export class VideoPlayer {
   }
 
   async show(videoUri: vscode.Uri, moduleName: string) {
-    const resource = videoUri
-      .with({ scheme: "vscode-resource" })
-      .toString();
-      // https://file%2B.vscode-resource.vscode-webview.net/d%3A/Programming/Python/Lectures/Compilers/doobedoo/Episode2.mp4
-      // vscode-resource:/d%3A/Programming/Python/Lectures/Compilers/doobedoo/Episode2.mp4
-
     if (this.panel) {
       return this.panel.webview.postMessage({
         command: "reload",
-        resource: resource,
+        resource: this.panel.webview.asWebviewUri(videoUri).toString(),
         pictureInPicture: vscode.workspace
           .getConfiguration("manim-sideview")
           .get("pictureInPictureOnStart"),
@@ -115,7 +109,7 @@ export class VideoPlayer {
     const conf = vscode.workspace.getConfiguration("manim-sideview");
     const styleSrc = this.panel.webview.asWebviewUri(this.loads.css).toString();
     const vars: ContextVars = {
-      "%videoSrc%": resource.toString(),
+      "%videoSrc%": this.panel.webview.asWebviewUri(videoUri).toString(),
       "%out%": videoUri.fsPath,
       "%moduleName%": moduleName,
       "%previewShowProgressOnIdle%": conf.get("previewShowProgressOnIdle")
