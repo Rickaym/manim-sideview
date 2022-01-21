@@ -197,7 +197,7 @@ export class Gallery {
     ).toString();
 
     const root = PATHS.mobjImgs.fsPath;
-
+    var newVersion = localVersion;
     Axios.get(GITHUB_ENTRY_FILE).then(({ data }) => {
       if (!forceDownload) {
         const version = data.match(VERSION_RE);
@@ -209,9 +209,9 @@ export class Gallery {
         }
 
         const segs = version[0].split('"');
-        var olVersion = segs[segs.length - 2];
+        newVersion = segs[segs.length - 2];
 
-        if (olVersion === localVersion) {
+        if (newVersion === localVersion) {
           vscode.window.showInformationMessage("You're already up to date!");
           return;
         }
@@ -227,7 +227,6 @@ export class Gallery {
           let allObjects: { [key: string]: string}[] = data[categoryName];
           allObjects.forEach((mObj) => {
             let imgFn = mObj.image_path;
-            console.log(GITHUB_ROOT_DIR + imgFn);
             axios({
               method: "get",
               url: GITHUB_ROOT_DIR + imgFn,
@@ -240,9 +239,9 @@ export class Gallery {
                 categoryName === imgAssets[imgAssets.length - 1] &&
                 mObj === allObjects[allObjects.length - 1]
               ) {
-                fs.writeFile(PATHS.mobjVersion.fsPath, olVersion, () => {
+                fs.writeFile(PATHS.mobjVersion.fsPath, newVersion, () => {
                   vscode.window.showInformationMessage(
-                    `Successfully downloaded all assets to version ${olVersion}! Please reload the webview.`
+                    `Successfully downloaded all assets to version ${newVersion}! Please reload the webview.`
                   );
                 });
               }
