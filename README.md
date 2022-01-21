@@ -147,6 +147,20 @@ Using unset variables will result in default values being used.
     <td> The color of the progress bar. You can use https://code.visualstudio.com/api/references/theme-color colors here.</td>
     <td>textLink.foreground</td>
 </tr>
+<tr>
+    <td> manim-sideview.previewAutoPlay </td>
+    <td> Whether to auto-play the preview right after rendering. </td>
+    <td>True</td>
+</tr>
+<tr>
+    <td> manim-sideview.previewLooping </td>
+    <td> Whether to loop the preview at the end. </td>
+    <td>True</td>
+</tr>
+<tr>
+    <td> manim-sideview.outputToTerminal </td>
+    <td> Whether to relay output to a terminal. If False, an output channel rather than a terminal is used to display text.</td>
+    <td>False</td>
 </table>
 ## Utilities
 
@@ -158,17 +172,16 @@ Note that this is a visual reminder that the file in current focus has an active
 
 ### Known Issues
 
-1. Jupyter Note books Mobject gallery cell code pasting is disoriented.
-2. Buttons from Picture in Picture unresponsive [*linked issue*](https://github.com/Rickaym/Manim-Sideview/issues/7).
-3. Seeking video duration [*linked issue*](https://github.com/Rickaym/Manim-Sideview/issues/7).
+1. Buttons from Picture in Picture unresponsive [*linked issue*](https://github.com/Rickaym/Manim-Sideview/issues/7).
+2. Seeking video duration [*linked issue*](https://github.com/Rickaym/Manim-Sideview/issues/7).
 
 ## Changelog
 
 #### 0.0.13
 
-[-] Terminal Output<br>
-[-] Jupyter Notebook Fix<br>
-[-] Added Pseudoterminal for file<br>
++ Optional Terminal Output<br>
++ Jupyter Notebook Fix<br>
++ Webview URI error fix<br>
 
 #### 0.0.12
 
