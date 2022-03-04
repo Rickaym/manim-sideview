@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { normalize } from "path";
 import * as fs from "fs";
+import { normalize } from "path";
 
 /**
  * A list of type and value definitions used in different modules with no ownership

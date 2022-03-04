@@ -55,7 +55,6 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
       if (this.isRunning) {
         return;
       }
-      const c = this.content;
       switch (char) {
         case keys.enter:
           // preserve the run command line for history

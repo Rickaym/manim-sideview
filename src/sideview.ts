@@ -364,9 +364,7 @@ export class ManimSideview {
       this.stop();
     }
 
-    // this.process = spawn(command, args,
-    //   { cwd: cwd, shell: true });
-    this.process = spawn(command, args, { cwd: cwd, shell: true });
+    this.process = spawn(command, args, { cwd: cwd, shell: false });
 
     this.updateJobStatus(
       new vscode.ThemeColor("textLink.foreground"),
