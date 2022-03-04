@@ -11,7 +11,7 @@ An extension for Visual Studio Code that provides a live preview and various oth
 ## Index
 
 1. [Rendering](#rendering)
-2. [Moject Gallery](#mobject-gallery)
+2. [Mobject Gallery](#mobject-gallery)
 3. [Context Variables](#context-variables)
 4. [Extension Settings](#extension-settings)
 5. [Status Bar Item](#utilities)
