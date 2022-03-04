@@ -158,6 +158,7 @@ Using unset variables will result in default values being used.
     <td> Whether to relay output to a terminal. If False, an output channel rather than a terminal is used to display text.</td>
     <td>True</td>
 </table>
+
 ## Utilities
 
 You can find a status bar item inside the status bar (the one at the very bottom) an icon that looks like:
