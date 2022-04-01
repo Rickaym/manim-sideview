@@ -61,7 +61,7 @@ Open the gallery by the vscode command palette `Show Mobject Gallery For manim` 
 
 This also works in a jupyter notebook:
 
-
+https://user-images.githubusercontent.com/44469195/161231956-656dc877-73b9-4f7f-b58a-ec1368abdbd2.mov
 
 ## Context Variables
 
