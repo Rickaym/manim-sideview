@@ -59,6 +59,10 @@ Configuring your manim projects to execute on save is very easy, just enable the
 Open the gallery by the vscode command palette `Show Mobject Gallery For manim` and click on the shape that you want to use.
  It will appear in your code editor (either in a python or jupyter file).
 
+This also works in a jupyter notebook:
+
+https://user-images.githubusercontent.com/44469195/161231956-656dc877-73b9-4f7f-b58a-ec1368abdbd2.mov
+
 ## Context Variables
 
 Sometimes we don't want to set an absolute path to the media file. Context Variables can only be used in:
