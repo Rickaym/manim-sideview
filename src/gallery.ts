@@ -12,6 +12,7 @@ import * as path from "path";
 import Axios from "axios";
 import axios from "axios";
 
+
 const VERSION_RE = /version_number\s*=\s*"([^"]+)";?/g;
 const GITHUB_ROOT_DIR =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
@@ -61,16 +62,6 @@ export class Gallery {
 
   setLastActiveEditor(editor: vscode.TextEditor) {
     this.lastActiveEditor = editor;
-  }
-
-  async setup(): Promise<string> {
-    this.htmlDoc = (
-      await vscode.workspace.fs.readFile(this.loads.html)
-    ).toString();
-
-    const loadable = vscode.Uri.joinPath(this.mobjectsPath, mobjMap);
-    this.imageMapping = JSON.parse((await vscode.workspace.fs.readFile(loadable)).toString());
-    return this.htmlDoc;
   }
 
   async show() {
@@ -157,7 +148,7 @@ export class Gallery {
       : this.getPreviousEditor();
     if (!lastEditor) {
       return vscode.window.showErrorMessage(
-        "Select a document first and then use the buttons!"
+        "Select a document first and then use the gallery!"
       );
     }
 
