@@ -161,6 +161,11 @@ export function insertContext(context: ContextVars, payload: string): string {
   return path;
 }
 
+export function defaultFormatHandler(level: string, msg: string) {
+  const date = new Date();
+  return `[${date.toLocaleDateString()} ${date.getHours()}:${date.getMinutes()}] ${level.toUpperCase()}: ${msg}`;
+}
+
 export function getRootPath(): string | false {
   if (!vscode.workspace.workspaceFolders) {
     vscode.window.showErrorMessage(

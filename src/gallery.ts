@@ -11,12 +11,12 @@ import * as fs from "fs";
 import * as path from "path";
 import Axios from "axios";
 import axios from "axios";
-
+import { TemplateEngine } from "./templateEngine";
 
 const VERSION_RE = /version_number\s*=\s*"([^"]+)";?/g;
 const GITHUB_ROOT_DIR =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
-  // gallery synchronization files
+// gallery synchronization files
 const GITHUB_ENTRY_FILE =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/index.js";
 const GITHUB_ASSET_DIR =
@@ -33,15 +33,11 @@ interface ImageMap {
 
 export class Gallery {
   constructor(
-    public readonly ctx: vscode.ExtensionContext,
-    public readonly extensionUri: vscode.Uri = ctx.extensionUri,
-    public readonly disposables: any[] = ctx.subscriptions
-  ) {
-    this.setup();
-  }
+    public readonly extensionUri: vscode.Uri,
+    public readonly disposables: any[]
+  ) {}
 
   private panel: vscode.WebviewPanel | undefined;
-  private htmlDoc: string | undefined;
   private mobjectsPath: vscode.Uri = vscode.Uri.joinPath(
     this.extensionUri,
     "assets/mobjects"
@@ -65,11 +61,6 @@ export class Gallery {
   }
 
   async show() {
-    if (!this.htmlDoc) {
-      var htmlDoc = await this.setup();
-    } else {
-      var htmlDoc = this.htmlDoc;
-    }
     this.panel = vscode.window.createWebviewPanel(
       "mobject-gallery",
       "Mobjects",
@@ -79,9 +70,9 @@ export class Gallery {
       },
       {
         enableScripts: true,
+        enableForms: false,
       }
     );
-    this.panel.iconPath = this.manimIconsPath;
 
     var images = "";
     const panel = this.panel;
@@ -95,22 +86,16 @@ export class Gallery {
       });
     });
 
-    const localVersion = (
-      await vscode.workspace.fs.readFile(PATHS.mobjVersion)
-    ).toString();
+    const engine = new TemplateEngine(this.panel.webview, this.loads, "gallery");
 
-    const vars: ContextVars = {
-      "%cspSource%": this.panel.webview.cspSource,
-      "gallery.css": this.panel.webview.asWebviewUri(this.loads.css).toString(),
-      "gallery.js": this.loads.js
-        .with({ scheme: "vscode-resource" })
-        .toString(),
-      "%nonce%": getNonce(),
-      "%Mobjects%": images,
-      "%version%": localVersion,
-    };
+    this.panel.iconPath = this.manimIconsPath;
+    this.panel.webview.html = await engine.render({
+      mobjects: images,
+      version: (
+        await vscode.workspace.fs.readFile(PATHS.mobjVersion)
+      ).toString(),
+    });
 
-    this.panel.webview.html = insertContext(vars, htmlDoc);
     this.panel.onDidDispose(
       () => {
         this.panel = undefined;
@@ -118,7 +103,6 @@ export class Gallery {
       undefined,
       this.disposables
     );
-
     this.panel.webview.onDidReceiveMessage(
       (message) => {
         if (
@@ -142,44 +126,75 @@ export class Gallery {
     return vscode.window.activeTextEditor;
   }
 
+  /**
+   * Fix indentations into user configured settings.
+   *
+   * @param code
+   * @param editor
+   * @returns string
+   */
+  static adaptiveIndent(code: string, editor: vscode.TextEditor) {
+    const before = editor.document.getText(
+      new vscode.Range(
+        new vscode.Position(editor.selection.active.line, 0),
+        editor.selection.active
+      )
+    );
+
+    var tab = "\t";
+    if (editor.options.insertSpaces && editor.options.tabSize) {
+      if (typeof editor.options.tabSize === "string") {
+        var tabSize = parseInt(editor.options.tabSize);
+      } else {
+        var tabSize = editor.options.tabSize;
+      }
+      tab = " ".repeat(tabSize);
+    }
+    if (!before.trim()) {
+      const replacable = `\n${tab}`;
+      code = code
+        .replace(/\n    /g, replacable)
+        .replace(/^\t/g, replacable)
+        .replace(/\n/g, "\n" + before);
+    }
+    return code;
+  }
+
+  static getPreviousEditor() {
+    if (!vscode.window.activeTextEditor) {
+      vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
+    }
+    return vscode.window.activeTextEditor;
+  }
+
   async insertCode(code: string) {
     const lastEditor = this.lastActiveEditor
       ? this.lastActiveEditor
-      : this.getPreviousEditor();
+      : Gallery.getPreviousEditor();
     if (!lastEditor) {
       return vscode.window.showErrorMessage(
         "Select a document first and then use the gallery!"
       );
     }
 
-    const before = lastEditor.document.getText(
-      new vscode.Range(
-        new vscode.Position(lastEditor.selection.active.line, 0),
-        lastEditor.selection.active
-      )
-    );
-    // adaptive indentations
-    if (!before.trim()) {
-      code = code.replace(/\n/g, "\n" + before);
-    }
+    code = Gallery.adaptiveIndent(code, lastEditor);
 
-    lastEditor.edit((e) => {
-      e.insert(lastEditor.selection.active, code);
-    }).then((e) => {
-      // reveal entirity of code
-      lastEditor.revealRange(new vscode.Range(lastEditor.selection.active, lastEditor.selection.active));
-    });
-
-    if (lastEditor.document.fileName.endsWith(".ipynb")) {
-      // focusing on previous groups are a bit glitchy for notebooks in whatever
-      // reason
-      await vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
-    } else {
-      vscode.window.showTextDocument(
-        lastEditor.document,
-        lastEditor.viewColumn
-      );
-    }
+    lastEditor
+      .edit((e) => {
+        e.insert(lastEditor.selection.active, code);
+      })
+      .then(() => {
+        vscode.commands
+          .executeCommand("workbench.action.focusPreviousGroup")
+          .then(() =>
+            lastEditor.revealRange(
+              new vscode.Range(
+                lastEditor.selection.active,
+                lastEditor.selection.active
+              )
+            )
+          );
+      });
   }
 
   async synchronize(forceDownload: boolean) {
@@ -209,13 +224,13 @@ export class Gallery {
       }
       vscode.window.showInformationMessage(
         "Please wait a moment while we pull remote assets..."
-    );
+      );
       Axios.get(GITHUB_ASSET_DIR + mobjMap).then(({ data }) => {
         fs.writeFile(path.join(root, mobjMap), JSON.stringify(data), () => {});
 
         const imgAssets = Object.keys(data);
         imgAssets.forEach((categoryName) => {
-          let allObjects: { [key: string]: string}[] = data[categoryName];
+          let allObjects: { [key: string]: string }[] = data[categoryName];
           allObjects.forEach((mObj) => {
             let imgFn = mObj.image_path;
             axios({
@@ -223,9 +238,7 @@ export class Gallery {
               url: GITHUB_ROOT_DIR + imgFn,
               responseType: "stream",
             }).then(function (response) {
-              response.data.pipe(
-                fs.createWriteStream(path.join(root, imgFn))
-              );
+              response.data.pipe(fs.createWriteStream(path.join(root, imgFn)));
               if (
                 categoryName === imgAssets[imgAssets.length - 1] &&
                 mObj === allObjects[allObjects.length - 1]

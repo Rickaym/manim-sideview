@@ -12,6 +12,7 @@ import {
   BASE_VIDEO_DIR,
   INTERNAL_MANIM_CONFIG,
   updateInternalManimCfg,
+  defaultFormatHandler,
 } from "./globals";
 
 import { DueTimeConfiguration } from "./config";
@@ -66,8 +67,8 @@ export class ManimSideview {
     this.manimCfgPath = "";
     this.jobs = [];
     this.prompt = new DueTimeConfiguration(ctx);
-    this.player = new VideoPlayer(ctx);
-    this.gallery = new Gallery(ctx);
+    this.player = new VideoPlayer(ctx.extensionUri, ctx.subscriptions);
+    this.gallery = new Gallery(ctx.extensionUri, ctx.subscriptions);
 
     this.jobStatus = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left
@@ -84,6 +85,7 @@ export class ManimSideview {
     this.ctx.subscriptions.push(this.jobStatus);
   }
   private manimCfgPath: string;
+
   // a list of running jobs tied to each file
   // starting a job will allow auto-save rendering
   // unless explicitely disabled
@@ -152,7 +154,7 @@ export class ManimSideview {
   }
 
   /**
-   * this only works when you're using an in time configuration.
+   * This only works when you're using an in time configuration.
    */
   async setRenderingScene(conf?: RunningConfig): Promise<boolean> {
     if (!conf) {
@@ -340,15 +342,31 @@ export class ManimSideview {
     outputChannel.clear();
 
     const mediaFp = insertContext(ctxVars, toAbsolutePath(conf.output));
+    if (conf.usingConfigFile) {
+      outputChannel.appendLine(
+        defaultFormatHandler(
+          "info",
+          `Configuration status ${conf.usingConfigFile}`
+        )
+      );
+    }
 
     outputChannel.append(
-      `[Log] EXE : "${command}"\n` +
-        `[Log] Args: ${args.join(" | ")}\n` +
-        `[Log] CWD : "${cwd}"\n` +
-        `[Log] VDir: "${insertContext(ctxVars, conf.videoDir)}"\n` +
-        `[Log] Conf: ${conf.usingConfigFile}\n` +
-        `[Running] IN  : ${command} ${args.join(" ")} \n` +
-        `[Running] OUT : ${mediaFp}\n`
+      defaultFormatHandler("info", `Current working directory "${cwd}"\n`) +
+        defaultFormatHandler(
+          "info",
+          `Manim Executable Path at "${command}"\n`
+        ) +
+        defaultFormatHandler("info", `Added arguments ${args.join(" | ")}\n`) +
+        defaultFormatHandler(
+          "info",
+          `Relative Output Video Path at "${insertContext(
+            ctxVars,
+            conf.videoDir
+          )}"\n`
+        ) +
+        defaultFormatHandler("debug", `${command} ${args.join(" ")}\n`) +
+        defaultFormatHandler("info", `Output Video Path at "${mediaFp}"\n`)
     );
 
     if (
@@ -378,7 +396,10 @@ export class ManimSideview {
       !this.process.stdin
     ) {
       outputChannel.appendLine(
-        `[Done] returned code=911 in Process: ${this.process}, stdout: ${this.process?.stdout}, stdout: ${this.process?.stderr}`
+        defaultFormatHandler(
+          "info",
+          `Execution returned code=911 in Process: ${this.process}, stdout: ${this.process?.stdout}, stdout: ${this.process?.stderr}`
+        )
       );
       outputChannel.append("\n");
       return vscode.window.showErrorMessage(
@@ -421,13 +442,16 @@ export class ManimSideview {
       }
 
       outputChannel.appendLine(
-        `\n[Done] returned code=${code} in ${elapsedTime} seconds ${
-          code === 1 ? "returned signal " + signal : ""
-        } ${
-          signal === "SIGTERM"
-            ? "Cause: An old process has been terminated due to a termination signal."
-            : ""
-        }\n`
+        defaultFormatHandler(
+          "info",
+          `Execution returned code=${code} in ${elapsedTime} seconds ${
+            code === 1 ? "returned signal " + signal : ""
+          } ${
+            signal === "SIGTERM"
+              ? "Cause: An old process has been terminated due to a termination signal."
+              : ""
+          }\n`
+        )
       );
       const isMainProcess = this.process && this.process.pid === process.pid;
 

@@ -178,6 +178,14 @@ Note that this is a visual reminder that the file in current focus has an active
 
 ## Changelog
 
+#### 0.0.14
+
+[] Manim Gallery View now use the `plywood-gallery-for-vsce` template engine.<br>
+[] Video player now use the same template engine.<br>
+- Fontawesome CSS and JS files<br>
++ User Extension log format changed<br>
+[] Video player `fontawesome` buttons now turned into text to reduce load.<br>
+
 #### 0.0.13
 
 + Optional Terminal Output<br>

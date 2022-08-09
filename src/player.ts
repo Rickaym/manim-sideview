@@ -7,45 +7,16 @@ import {
   insertContext,
   WebviewResources,
 } from "./globals";
+import { TemplateEngine } from "./templateEngine";
 
 export class VideoPlayer {
   constructor(
-    public readonly ctx: vscode.ExtensionContext,
-    public readonly extensionUri: vscode.Uri = ctx.extensionUri,
-    public readonly disposables: any[] = ctx.subscriptions
-  ) {
-    this.setup();
-  }
+    public readonly extensionUri: vscode.Uri,
+    public readonly disposables: any[]
+  ) {}
 
   private panel: vscode.WebviewPanel | undefined;
-  private htmlDoc: string | undefined;
 
-  private loads: WebviewResources = getWebviewResource(
-    this.extensionUri,
-    "player"
-  );
-
-  private fontAwesomeCss = {
-    all: vscode.Uri.joinPath(
-      this.extensionUri,
-      "assets/fontawesome/css/all.min.css"
-    ),
-    fontawesome: vscode.Uri.joinPath(
-      this.extensionUri,
-      "assets/fontawesome/css/fontawesome.min.css"
-    ),
-  };
-
-  private fontAwesomeJs = {
-    all: vscode.Uri.joinPath(
-      this.extensionUri,
-      "assets/fontawesome/js/all.min.js"
-    ),
-    fontawesome: vscode.Uri.joinPath(
-      this.extensionUri,
-      "assets/fontawesome/js/fontawesome.min.js"
-    ),
-  };
   private manimIconsPath = {
     dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
     light: vscode.Uri.joinPath(
@@ -53,13 +24,6 @@ export class VideoPlayer {
       "assets/images/light_logo.png"
     ),
   };
-
-  async setup(): Promise<string> {
-    this.htmlDoc = (
-      await vscode.workspace.fs.readFile(this.loads.html)
-    ).toString();
-    return this.htmlDoc;
-  }
 
   parseProgressStyle(colorStr?: string): string {
     if (!colorStr) {
@@ -89,11 +53,7 @@ export class VideoPlayer {
         moduleName: moduleName,
       });
     }
-    if (!this.htmlDoc) {
-      var htmlDoc = await this.setup();
-    } else {
-      var htmlDoc = this.htmlDoc;
-    }
+
     this.panel = vscode.window.createWebviewPanel(
       videoUri.path,
       "Video Player",
@@ -105,40 +65,28 @@ export class VideoPlayer {
         enableScripts: true,
       }
     );
-    this.panel.iconPath = this.manimIconsPath;
+
+    const engine = new TemplateEngine(
+      this.panel.webview,
+      getWebviewResource(this.extensionUri, "player"),
+      "player"
+    );
     const conf = vscode.workspace.getConfiguration("manim-sideview");
-    const styleSrc = this.panel.webview.asWebviewUri(this.loads.css).toString();
-    const vars: ContextVars = {
-      "%videoSrc%": this.panel.webview.asWebviewUri(videoUri).toString(),
-      "%out%": videoUri.fsPath,
-      "%moduleName%": moduleName,
-      "%previewShowProgressOnIdle%": conf.get("previewShowProgressOnIdle")
+    this.panel.iconPath = this.manimIconsPath;
+    this.panel.webview.html = await engine.render({
+      videoSrc: this.panel.webview.asWebviewUri(videoUri).toString(),
+      out: videoUri.fsPath,
+      moduleName: moduleName,
+      previewShowProgressOnIdle: conf.get("previewShowProgressOnIdle")
         ? ""
         : " hidden-controls",
-      "%previewProgressStyle%": this.parseProgressStyle(
+      previewProgressStyle: this.parseProgressStyle(
         conf.get("previewProgressColor")
       ),
-      "%cspSource%": this.panel.webview.cspSource,
-      "%loop%": conf.get("previewLooping") ? "loop" : "",
-      "%autoplay%": conf.get("previewAutoPlay") ? "autoplay": "",
-      "%nonce%": getNonce(),
-      "player.css": styleSrc,
-      "player.js": this.loads.js.with({ scheme: "vscode-resource" }).toString(),
-      "../../assets/fontawesome/css/all.min.css": this.panel.webview
-        .asWebviewUri(this.fontAwesomeCss.all)
-        .toString(),
-      "../../assets/fontawesome/css/fontawesome.min.css": this.panel.webview
-        .asWebviewUri(this.fontAwesomeCss.fontawesome)
-        .toString(),
-      "../../assets/fontawesome/js/all.min.js": this.fontAwesomeJs.all
-        .with({ scheme: "vscode-resource" })
-        .toString(),
-      "../../assets/fontawesome/js/fontawesome.min.js":
-        this.fontAwesomeJs.fontawesome
-          .with({ scheme: "vscode-resource" })
-          .toString(),
-    };
-    this.panel.webview.html = insertContext(vars, htmlDoc);
+      loop: conf.get("previewLooping") ? "loop" : "",
+      autoplay: conf.get("previewAutoPlay") ? "autoplay" : "",
+    });
+
     this.panel.onDidDispose(
       () => {
         this.panel = undefined;
