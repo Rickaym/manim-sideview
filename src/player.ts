@@ -41,7 +41,7 @@ export class VideoPlayer {
     return `style="background-color: ${colorStr}"`;
   }
 
-  async show(videoUri: vscode.Uri, moduleName: string) {
+  async showVideo(videoUri: vscode.Uri, moduleName: string) {
     if (this.panel) {
       return this.panel.webview.postMessage({
         command: "reload",

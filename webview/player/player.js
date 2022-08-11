@@ -8,30 +8,31 @@ var moduleNameSpan = document.querySelector(".module-name");
 var video = document.getElementById("preview");
 var button = document.getElementById("play-pause");
 var pipButton = document.getElementById("pip");
-var setControlsEnabled = document.getElementById("progress-on-idle");
 
 pipButton.hidden =
   !document.pictureInPictureEnabled || video.disablePictureInPicture;
 
-if (video.paused) {
-  button.className = "play";
-} else {
-  button.className = "paused";
-}
+togglePlayPause(false);
 
-// it's possible that a controls class starts hidden
-// in which case we'll also swap the button
-if (controls.classList.contains("hidden-controls")) {
-    setControlsEnabled.className = "hidden";
-}
-
-function togglePlayPause() {
-  if (video.paused) {
-    button.className = "pause";
-    video.play();
-  } else {
-    button.className = "play";
+function pauseVideo(toggle) {
+  button.textContent = "Play";
+  if (toggle) {
     video.pause();
+  }
+}
+
+function playVideo(toggle) {
+  button.textContent = "Pause";
+  if (toggle) {
+    video.play();
+  }
+}
+
+function togglePlayPause(toggle = true) {
+  if (video.paused) {
+    playVideo(toggle);
+  } else {
+    pauseVideo(toggle);
   }
 }
 
@@ -49,15 +50,22 @@ async function enterPictureInPicture() {
   }
 }
 
-setControlsEnabled.addEventListener("click", function () {
-    if (setControlsEnabled.className === "hidden") {
-      setControlsEnabled.className = "shown";
-      controls.classList.remove("hidden-controls");
-    } else {
-      setControlsEnabled.className = "hidden";
-      controls.classList.add("hidden-controls");
-    };
-});
+// var setControlsEnabled = document.getElementById("progress-on-idle");
+// // it's possible that a controls class starts hidden
+// // in which case we'll also swap the button
+// if (controls.classList.contains("hidden-controls")) {
+//     setControlsEnabled.className = "hidden";
+// }
+
+// setControlsEnabled.addEventListener("click", function () {
+//     if (setControlsEnabled.className === "hidden") {
+//       setControlsEnabled.className = "shown";
+//       controls.classList.remove("hidden-controls");
+//     } else {
+//       setControlsEnabled.className = "hidden";
+//       controls.classList.add("hidden-controls");
+//     };
+// });
 
 pipButton.addEventListener("click", enterPictureInPicture);
 
@@ -71,6 +79,10 @@ video.addEventListener("click", function () {
 
 video.addEventListener("timeupdate", function () {
   timestatus.style.width = (video.currentTime / video.duration) * 100 + "%";
+});
+
+video.addEventListener('ended', function () {
+  pauseVideo(false);
 });
 
 statusbar.addEventListener("mousemove", function (e) {

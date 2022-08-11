@@ -184,7 +184,7 @@ Note that this is a visual reminder that the file in current focus has an active
 [] Video player now use the same template engine.<br>
 - Fontawesome CSS and JS files<br>
 + User Extension log format changed<br>
-[] Video player `fontawesome` buttons now turned into text to reduce load.<br>
++ Revamped video player<br>
 
 #### 0.0.13
 

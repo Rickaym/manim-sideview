@@ -312,7 +312,7 @@ export class ManimSideview {
       args.push(conf.args.trim());
     }
     args.push(conf.sceneName.trim());
-    args = args.map((a) => `"${a}"`);
+    // args = args.map((a) => `"${a}"`);
 
     var out;
     if (
@@ -337,11 +337,11 @@ export class ManimSideview {
   ) {
     const command = conf.exePath;
     const cwd = conf.root;
+    const mediaFp = insertContext(ctxVars, toAbsolutePath(conf.output));
 
     // Output channels will not keep historical logs
     outputChannel.clear();
 
-    const mediaFp = insertContext(ctxVars, toAbsolutePath(conf.output));
     if (conf.usingConfigFile) {
       outputChannel.appendLine(
         defaultFormatHandler(
@@ -471,7 +471,12 @@ export class ManimSideview {
         vscode.workspace.fs.stat(vscode.Uri.file(mediaFp)).then(
           (fs) => {
             // we'll open a side view if we can find the file
-            this.openSideview(mediaFp, conf.moduleName);
+            const res = vscode.Uri.file(mediaFp);
+            if (!res) {
+              vscode.window.showErrorMessage("The output file couldn't be found.");
+            } else {
+              this.player.showVideo(res, conf.moduleName);
+            }
             this.newJob(conf);
           },
           (res) => {
@@ -706,14 +711,5 @@ export class ManimSideview {
       }
     }
     this.prompt.show(conf);
-  }
-
-  private async openSideview(mediaFp: string, moduleName: string) {
-    const res = vscode.Uri.file(mediaFp);
-    if (!res) {
-      vscode.window.showErrorMessage("The output file couldn't be found.");
-    } else {
-      await this.player.show(res, moduleName);
-    }
   }
 }

@@ -11,39 +11,31 @@
 <link href="player.css" rel="stylesheet">
 </head>
 <body>
-  <h1>Manim Sideview</h1>
   <div class="video-container">
       <div class="player">
         <video {{ autoplay }} {{ loop }} id="preview" src="{{ videoSrc }}"></video>
         <div class="controls{{ previewShowProgressOnIdle }}">
           <div class="status-bar">
-            <div class="color-fill">{{ previewProgressStyle }}</div>
+            <div class="color-fill" {{ previewProgressStyle }}></div>
             <div class="demo-fill"></div>
           </div>
           <div class="buttons">
-            <button id="play-pause" class="pause">Pause</button>
+            <button id="play-pause">Pause</button>
             <button id="pip">Pip</button>
-            <button id="progress-on-idle" class="shown">Idle</button>
           </div>
         </div>
       </div>
   </div>
   <section>
     <div class="description-container">
-      <div class="accordion">
-        <div class="description-item" id="description">
-          <div class="description-link">
-            <span class="module-name"><b>{{ moduleName }}</b></span>
-            <i class="fas fa-caret-down"></i>
-            <i class="fas fa-caret-up"></i>
-          </div>
+      <div class="description-item" id="description">
+          <div class="module-name"><b>{{ moduleName }}</b></div>
           <div class="description">
             <p class="value">
               <b>Media File Path</b>: {{ out }}<br>
             </p>
           </div>
         </div>
-      </div>
     </div>
   </section>
   <script nonce="{{ nonce }}" src="player.js"></script>

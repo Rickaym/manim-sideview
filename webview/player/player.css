@@ -2,6 +2,10 @@
   --controls-background: rgba(0, 0, 0, 0.3)
 }
 
+body {
+  padding: 20px 20px;
+}
+
 video {
   height: 100%;
   width: 100%;
@@ -11,10 +15,10 @@ video {
   display: flex;
   border: 1px solid transparent;
   border-radius: 1.9% 1.9% 0 0;
-  background-color: rgba(0, 0, 0, 0.2);
   justify-content: center;
   align-items: center;
   height: 100%;
+  background-color: transparent;
 }
 
 .player {
@@ -26,30 +30,26 @@ video {
 }
 
 .player:hover .controls {
-  transform: translateY(0) translateY(-3px);
+  transform: translateY(0) translateY(-6px);
 }
 
 .controls {
   display: flex;
+  background-color: transparent;
   position: absolute;
-  bottom: 0;
+  bottom: -2px;
   width: 100%;
   flex-wrap: wrap;
-  background-color: var(--controls-background);
-  transform: translateY(100%) translateY(-5px);
   transition: 0.2s;
+  transform: translateY(100%) translateY(-5px);
 }
 
-
 .hidden-controls {
-  display: flex;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  flex-wrap: wrap;
-  background-color: var(--controls-background);
   transform: translateY(100%);
-  transition: 0.2s;
+}
+
+.buttons {
+  margin-top: 3px;
 }
 
 .buttons button {
@@ -60,45 +60,11 @@ video {
   cursor: pointer;
 }
 
-.buttons button#pip:before {
-  content: "\f2d2";
-  font-family: "Font Awesome 5 Free";
-  width: 30px;
-  height: 20px;
-  display: inline-block;
-  color: white;
-}
-
-.buttons button#play-pause:before {
-  width: 30px;
-  height: 20px;
-  display: inline-block;
-  color: white;
-}
-
-.buttons button.hidden:before {
-  content: "\f070";
-  font-family: "Font Awesome 5 Free";
-}
-
-.buttons button.shown:before {
-  content: "\f06e";
-  font-family: "Font Awesome 5 Free";
-}
-
-.buttons button.play:before {
-  content: "▶";
-}
-
-.buttons button.pause:before {
-  content: "\f28b";
-  font-family: "Font Awesome 5 Free";
-}
-
 .status-bar {
   left: 0;
   top: 0;
-  height: 10px;
+  background-color: transparent;
+  height: 5px;
   width: 100%;
 }
 
@@ -114,8 +80,6 @@ video {
 .demo-fill {
   position: absolute;
   height: 5px;
-  margin-bottom: 3px;
-  width: 0%;
   transition: 0.3s;
 }
 
@@ -132,49 +96,27 @@ section {
 }
 
 .description-item {
-  background-color: var(--vscode-dropdown-background);
   border-radius: 0 0 .4rem .4rem;
   margin-bottom: 1rem;
-  padding: .7rem;
-}
-
-.description-link {
-  font-size: 1.1rem;
-  text-decoration: none;
-  color: whitesmoke;
-  background-color: var(--vscode-dropdown-background);
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.description-link .fa-caret-down {
-  display: none;
+  max-height: 20rem;
+  display: block;
 }
 
 .description {
-  max-height: 0;
   width: 100%;
   overflow: hidden;
   position: relative;
   transition: max-height 650ms;
 }
 
+.module-name {
+  font-size: 2rem;
+  line-height: 2.8rem;
+}
+
 .description p.value {
   color: rgb(255, 255, 255, 0.5);
   font-size: 0.7rem;
   padding-left: 0.2rem;
-}
-
-.description-item:hover .description {
-  max-height: 20rem;
-}
-
-.description-item:hover .fa-caret-down {
-  display: block;
-}
-
-.description-item:hover .fa-caret-up {
-  display: none;
+  overflow-wrap: break-word;
 }
