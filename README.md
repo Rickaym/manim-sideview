@@ -180,11 +180,12 @@ Note that this is a visual reminder that the file in current focus has an active
 
 #### 0.0.14
 
-[] Manim Gallery View now use the `plywood-gallery-for-vsce` template engine.<br>
-[] Video player now use the same template engine.<br>
-- Fontawesome CSS and JS files<br>
++ Manim Gallery View now use the `plywood-gallery-for-vsce` template engine.<br>
++ Video player now use the same template engine.<br>
++ Video player revamped--now simple and straight forward<br>
 + User Extension log format changed<br>
-+ Revamped video player<br>
++ "Mobject" to "MObject" change extension-wide
+- Fontawesome CSS and JS files removed<br>
 
 #### 0.0.13
 

@@ -1,28 +1,20 @@
 var timestatus = document.querySelector(".color-fill");
 var demostatus = document.querySelector(".demo-fill");
-var statusbar = document.querySelector(".status-bar");
 var controls = document.querySelector(".controls");
 var valueReport = document.querySelector(".value");
 var moduleNameSpan = document.querySelector(".module-name");
 
 var video = document.getElementById("preview");
-var button = document.getElementById("play-pause");
-var pipButton = document.getElementById("pip");
-
-pipButton.hidden =
-  !document.pictureInPictureEnabled || video.disablePictureInPicture;
 
 togglePlayPause(false);
 
 function pauseVideo(toggle) {
-  button.textContent = "Play";
   if (toggle) {
     video.pause();
   }
 }
 
 function playVideo(toggle) {
-  button.textContent = "Pause";
   if (toggle) {
     video.play();
   }
@@ -50,29 +42,6 @@ async function enterPictureInPicture() {
   }
 }
 
-// var setControlsEnabled = document.getElementById("progress-on-idle");
-// // it's possible that a controls class starts hidden
-// // in which case we'll also swap the button
-// if (controls.classList.contains("hidden-controls")) {
-//     setControlsEnabled.className = "hidden";
-// }
-
-// setControlsEnabled.addEventListener("click", function () {
-//     if (setControlsEnabled.className === "hidden") {
-//       setControlsEnabled.className = "shown";
-//       controls.classList.remove("hidden-controls");
-//     } else {
-//       setControlsEnabled.className = "hidden";
-//       controls.classList.add("hidden-controls");
-//     };
-// });
-
-pipButton.addEventListener("click", enterPictureInPicture);
-
-button.addEventListener("click", function () {
-  togglePlayPause();
-});
-
 video.addEventListener("click", function () {
   togglePlayPause();
 });
@@ -85,13 +54,13 @@ video.addEventListener('ended', function () {
   pauseVideo(false);
 });
 
-statusbar.addEventListener("mousemove", function (e) {
+controls.addEventListener("mousemove", function (e) {
   const brc = this.getBoundingClientRect();
   const seek = (e.clientX - brc.left) / brc.width;
   demostatus.style.width = seek * 100 + "%";
 });
 
-statusbar.addEventListener("click", function (e) {
+controls.addEventListener("click", function (e) {
   const brc = this.getBoundingClientRect();
   const seek = (e.clientX - brc.left) / brc.width;
 });

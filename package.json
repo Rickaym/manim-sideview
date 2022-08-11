@@ -121,7 +121,7 @@
     "commands": [
       {
         "command": "manim-sideview.run",
-        "title": "Runs a Sideview",
+        "title": "Manim: Runs a Sideview",
         "icon": {
           "light": "./assets/images/rotation.png",
           "dark": "./assets/images/rotation.png"
@@ -129,35 +129,35 @@
       },
       {
         "command": "manim-sideview.stop",
-        "title": "Stops Running Processes"
+        "title": "Manim: Stops Running Processes"
       },
       {
         "command": "manim-sideview.refreshAllConfiguration",
-        "title": "Refreshs All Active Configurations"
+        "title": "Manim: Refreshes All Active Configurations"
       },
       {
         "command": "manim-sideview.refreshCurrentConfiguration",
-        "title": "Refreshes Selected File Configuration"
+        "title": "Manim: Refreshes Selected File Configuration"
       },
       {
         "command": "manim-sideview.setRenderingScene",
-        "title": "Set A New SceneName"
+        "title": "Manim: Set A New SceneName"
       },
       {
         "command": "manim-sideview.setInTimeConfiguration",
-        "title": "Set A Configuration"
+        "title": "Manim: Set A Configuration"
       },
       {
         "command": "manim-sideview.showMobjectGallery",
-        "title": "Show Mobject Gallery For Manim"
+        "title": "Manim: Open MObject Gallery"
       },
       {
         "command": "manim-sideview.syncMobjectGallery",
-        "title": "Updates Mobject Gallery Assets From Remote"
+        "title": "Manim: Find MObject Gallery Updates"
       },
       {
         "command": "manim-sideview.syncManimConfig",
-        "title": "Updates Internal Manim Config With Local Executable"
+        "title": "Manim: Updates Internal Manim Config With Local Executable"
       }
     ],
     "keybindings": [

@@ -42,7 +42,7 @@ export class Gallery {
     this.extensionUri,
     "assets/mobjects"
   );
-  private imageMapping: { [title: string]: ImageMap[] } = {};
+
   private loads: WebviewResources = getWebviewResource(
     this.extensionUri,
     "gallery"
@@ -63,7 +63,7 @@ export class Gallery {
   async show() {
     this.panel = vscode.window.createWebviewPanel(
       "mobject-gallery",
-      "Mobjects",
+      "MObject Gallery",
       {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true,
@@ -74,11 +74,16 @@ export class Gallery {
       }
     );
 
+    const loadable = vscode.Uri.joinPath(this.mobjectsPath, mobjMap);
+    const imageMapping: { [title: string]: ImageMap[] } = JSON.parse(
+      (await vscode.workspace.fs.readFile(loadable)).toString()
+    );
+
     var images = "";
     const panel = this.panel;
-    Object.keys(this.imageMapping).forEach((title) => {
+    Object.keys(imageMapping).forEach((title) => {
       images += `<h2>${title}</h2>`;
-      this.imageMapping[title].forEach((imgMap) => {
+      imageMapping[title].forEach((imgMap) => {
         const code = imgMap.code.replace(/"/g, "'");
         images += `<img class="image-button" src=${panel.webview.asWebviewUri(
           vscode.Uri.joinPath(this.mobjectsPath, imgMap.image_path)
@@ -86,7 +91,11 @@ export class Gallery {
       });
     });
 
-    const engine = new TemplateEngine(this.panel.webview, this.loads, "gallery");
+    const engine = new TemplateEngine(
+      this.panel.webview,
+      this.loads,
+      "gallery"
+    );
 
     this.panel.iconPath = this.manimIconsPath;
     this.panel.webview.html = await engine.render({

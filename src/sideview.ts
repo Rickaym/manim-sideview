@@ -475,7 +475,7 @@ export class ManimSideview {
             if (!res) {
               vscode.window.showErrorMessage("The output file couldn't be found.");
             } else {
-              this.player.showVideo(res, conf.moduleName);
+              this.player.showVideo(res, conf);
             }
             this.newJob(conf);
           },

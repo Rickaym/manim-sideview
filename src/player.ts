@@ -6,6 +6,7 @@ import {
   getWebviewResource,
   insertContext,
   WebviewResources,
+  RunningConfig,
 } from "./globals";
 import { TemplateEngine } from "./templateEngine";
 
@@ -41,7 +42,9 @@ export class VideoPlayer {
     return `style="background-color: ${colorStr}"`;
   }
 
-  async showVideo(videoUri: vscode.Uri, moduleName: string) {
+  async showVideo(videoUri: vscode.Uri, runtimeConfig: RunningConfig) {
+    // const title = runtimeConfig.output.split("\\").pop() || "Untitled";
+    const title = runtimeConfig.sceneName;
     if (this.panel) {
       return this.panel.webview.postMessage({
         command: "reload",
@@ -50,13 +53,13 @@ export class VideoPlayer {
           .getConfiguration("manim-sideview")
           .get("pictureInPictureOnStart"),
         out: videoUri.fsPath,
-        moduleName: moduleName,
+        moduleName: title,
       });
     }
 
     this.panel = vscode.window.createWebviewPanel(
       videoUri.path,
-      "Video Player",
+      "Manim Sideview",
       {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true,
@@ -76,7 +79,7 @@ export class VideoPlayer {
     this.panel.webview.html = await engine.render({
       videoSrc: this.panel.webview.asWebviewUri(videoUri).toString(),
       out: videoUri.fsPath,
-      moduleName: moduleName,
+      moduleName: title,
       previewShowProgressOnIdle: conf.get("previewShowProgressOnIdle")
         ? ""
         : " hidden-controls",

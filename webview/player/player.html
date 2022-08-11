@@ -15,14 +15,8 @@
       <div class="player">
         <video {{ autoplay }} {{ loop }} id="preview" src="{{ videoSrc }}"></video>
         <div class="controls{{ previewShowProgressOnIdle }}">
-          <div class="status-bar">
-            <div class="color-fill" {{ previewProgressStyle }}></div>
-            <div class="demo-fill"></div>
-          </div>
-          <div class="buttons">
-            <button id="play-pause">Pause</button>
-            <button id="pip">Pip</button>
-          </div>
+          <div class="color-fill" {{ previewProgressStyle }}></div>
+          <div class="demo-fill"></div>
         </div>
       </div>
   </div>
@@ -32,7 +26,7 @@
           <div class="module-name"><b>{{ moduleName }}</b></div>
           <div class="description">
             <p class="value">
-              <b>Media File Path</b>: {{ out }}<br>
+              <b>Media File Path</b> {{ out }}<br>
             </p>
           </div>
         </div>

@@ -13,12 +13,12 @@ video {
 
 .video-container {
   display: flex;
+  background-color: black;
   border: 1px solid transparent;
   border-radius: 1.9% 1.9% 0 0;
   justify-content: center;
   align-items: center;
   height: 100%;
-  background-color: transparent;
 }
 
 .player {
@@ -27,52 +27,23 @@ video {
   max-width: 800px;
   overflow: hidden;
   position: relative;
-}
-
-.player:hover .controls {
-  transform: translateY(0) translateY(-6px);
+  cursor: pointer;
 }
 
 .controls {
   display: flex;
   background-color: transparent;
   position: absolute;
-  bottom: -2px;
+  bottom: 3.24px;
   width: 100%;
   flex-wrap: wrap;
-  transition: 0.2s;
-  transform: translateY(100%) translateY(-5px);
 }
 
-.hidden-controls {
-  transform: translateY(100%);
-}
-
-.buttons {
-  margin-top: 3px;
-}
-
-.buttons button {
-  background: none;
-  border: 0;
-  outline: 0;
-  color: white;
+.controls:hover {
   cursor: pointer;
 }
 
-.status-bar {
-  left: 0;
-  top: 0;
-  background-color: transparent;
-  height: 5px;
-  width: 100%;
-}
-
-.status-bar:hover {
-  cursor: pointer;
-}
-
-.status-bar:hover .demo-fill {
+.controls:hover .demo-fill {
   background-color: rgba(255, 255, 255, 0.342);
 }
 
@@ -104,14 +75,15 @@ section {
 
 .description {
   width: 100%;
-  overflow: hidden;
   position: relative;
   transition: max-height 650ms;
 }
 
 .module-name {
-  font-size: 2rem;
-  line-height: 2.8rem;
+  font-size: 1.5rem;
+  margin-top: 5px;
+  overflow-wrap: break-word;
+  font-weight: bold;
 }
 
 .description p.value {
