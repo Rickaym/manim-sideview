@@ -167,7 +167,7 @@ export function defaultFormatHandler(level: string, msg: string) {
 }
 
 export function getRootPath(): string | false {
-  if (!vscode.workspace.workspaceFolders) {
+  if (!(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0])) {
     vscode.window.showErrorMessage(
       "I couldn't figure out the root path due to the lack of workspaces, please make one!"
     );
