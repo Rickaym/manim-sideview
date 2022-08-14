@@ -19,7 +19,7 @@ import { DueTimeConfiguration } from "./config";
 import { ConfigParser } from "./configparser";
 import { VideoPlayer } from "./player";
 import { Gallery } from "./gallery";
-import { ManimPseudoTerm } from "./pseudoterm";
+import { ManimPseudoTerm } from "./pseudoTerm";
 
 /**
  * Changes a given path to an absolute path if it's a relative

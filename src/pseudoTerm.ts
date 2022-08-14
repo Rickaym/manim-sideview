@@ -36,7 +36,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
     this.name = name;
   }
 
-  public cwd = path.dirname(vscode.workspace.textDocuments[0].fileName);
+  public cwd = path.dirname(vscode.workspace.textDocuments[0]?.fileName || process.cwd());
   private prompt = `${defPrompt} ${this.cwd}>`;
   private intro = "Manim Extension XTerm\n\rServes as a terminal for logging purpose." +
               "\n\r\n\rUtilize the powershell for anything else.\n\r\n\r" +
