@@ -296,9 +296,9 @@ export class ManimSideview {
    */
   private async doRun(conf: RunningConfig) {
     const ctxVars: ContextVars = {
-      "{media_dir}": conf.mediaDir,
-      "{module_name}": conf.moduleName,
-      "{scene_name}": conf.sceneName,
+      "{media_dir}": conf.mediaDir, // eslint-disable-line @typescript-eslint/naming-convention
+      "{module_name}": conf.moduleName, // eslint-disable-line @typescript-eslint/naming-convention
+      "{scene_name}": conf.sceneName, // eslint-disable-line @typescript-eslint/naming-convention
     };
     let args = [conf.srcPath];
     if (!conf.usingConfigFile) {
@@ -561,8 +561,8 @@ export class ManimSideview {
         return false;
       }
       let manimConfig: ManimConfig = {
-        videoDir: INTERNAL_MANIM_CONFIG.video_dir,
-        mediaDir: INTERNAL_MANIM_CONFIG.media_dir,
+        videoDir: INTERNAL_MANIM_CONFIG.videoDir,
+        mediaDir: INTERNAL_MANIM_CONFIG.mediaDir,
         quality: INTERNAL_MANIM_CONFIG.quality,
       };
 
@@ -579,8 +579,8 @@ export class ManimSideview {
       }
       manimConfig.videoDir = insertContext(
         {
-          "{quality}": INTERNAL_MANIM_CONFIG.quality_map[manimConfig.quality],
-          "{media_dir}": manimConfig.mediaDir,
+          "{quality}": INTERNAL_MANIM_CONFIG.qualityMap[manimConfig.quality], // eslint-disable-line @typescript-eslint/naming-convention
+          "{media_dir}": manimConfig.mediaDir, // eslint-disable-line @typescript-eslint/naming-convention
         },
         manimConfig.videoDir
       );

@@ -19,7 +19,7 @@ const GITHUB_ENTRY_FILE =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/html_configuration.yaml";
 
 interface ImageMap {
-  image_path: string;
+  imagePath: string;
   celltype: string;
   css: string;
   code: string;
@@ -80,7 +80,7 @@ export class Gallery {
       imageMapping[title].forEach((imgMap) => {
         const code = imgMap.code.replace(/"/g, "'");
         images += `<img class="image-button" src=${panel.webview.asWebviewUri(
-          vscode.Uri.joinPath(this.mobjectsPath, imgMap.image_path)
+          vscode.Uri.joinPath(this.mobjectsPath, imgMap.imagePath)
         )} alt="${code}">`;
       });
     });
@@ -209,8 +209,12 @@ export class Gallery {
     var {data} = await axios.get(GITHUB_ENTRY_FILE);
     data = yaml.load(data) as any; // Parse yaml
     
-    const {user_content_version, gallary_parameters_path} = data;
-    let newVersion = user_content_version;
+    let newVersion = data["user_content_version"];
+    
+    // Related to https://github.com/kolibril13/mobject-gallery/issues/3
+    const galleryParameters =
+      data["gallery_parameters_path"] ||
+      data["gallary_parameters_path"];
 
     if (!forceDownload) {
       if (!newVersion) {
@@ -224,13 +228,15 @@ export class Gallery {
         vscode.window.showInformationMessage("You're already up to date!");
         return;
       }
-    } else newVersion = newVersion || localVersion;
+    } else if(!newVersion) {
+      newVersion = localVersion;
+    }
 
     vscode.window.showInformationMessage(
       "Please wait a moment while we pull remote assets..."
     ); 
     
-    var {data} = await axios.get(GITHUB_ROOT_DIR + gallary_parameters_path);
+    var {data} = await axios.get(GITHUB_ROOT_DIR + galleryParameters);
 
     await pfs.writeFile(PATHS.mobjGalleryParameters.fsPath, JSON.stringify(data));
 

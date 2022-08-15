@@ -71,14 +71,14 @@ export class DueTimeConfiguration {
           .getConfiguration("manim-sideview")
           .get("commandLineArgs") ||
         BASE_ARGS,
-      "%video_dir%":
+      "%video_dir%": // eslint-disable-line @typescript-eslint/naming-convention
         conf.videoDir ||
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("videoDirectory") ||
         BASE_VIDEO_DIR,
-      "%scene_name%": conf.sceneName,
-      "%media_dir%":
+      "%scene_name%": conf.sceneName, // eslint-disable-line @typescript-eslint/naming-convention
+      "%media_dir%": // eslint-disable-line @typescript-eslint/naming-convention
         conf.mediaDir ||
         vscode.workspace
           .getConfiguration("manim-sideview")

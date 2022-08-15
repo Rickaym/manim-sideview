@@ -46,10 +46,10 @@ export type WebviewResources = {
 
 // internal in this context means internal to the extension
 export type InternalManimCfg = {
-  media_dir: string;
-  video_dir: string;
+  mediaDir: string;
+  videoDir: string;
   quality: string;
-  quality_map: { [tp: string]: string };
+  qualityMap: { [tp: string]: string };
   [exts: string]: string | { [tp: string]: string };
 };
 
@@ -68,10 +68,10 @@ export const PATHS: { [tp: string]: vscode.Uri } = {};
 
 // The supposed default internal manim configuration
 export var INTERNAL_MANIM_CONFIG: InternalManimCfg = {
-  media_dir: "",
-  video_dir: "",
+  mediaDir: "",
+  videoDir: "",
   quality: "",
-  quality_map: {},
+  qualityMap: {},
 };
 
 export var EXTENSION_VERSION: string | undefined;
