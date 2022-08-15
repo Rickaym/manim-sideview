@@ -19,7 +19,8 @@ const GITHUB_ENTRY_FILE =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/html_configuration.yaml";
 
 interface ImageMap {
-  imagePath: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  image_path: string;
   celltype: string;
   css: string;
   code: string;
@@ -80,7 +81,7 @@ export class Gallery {
       imageMapping[title].forEach((imgMap) => {
         const code = imgMap.code.replace(/"/g, "'");
         images += `<img class="image-button" src=${panel.webview.asWebviewUri(
-          vscode.Uri.joinPath(this.mobjectsPath, imgMap.imagePath)
+          vscode.Uri.joinPath(this.mobjectsPath, imgMap.image_path)
         )} alt="${code}">`;
       });
     });
