@@ -579,8 +579,10 @@ export class ManimSideview {
       }
       manimConfig.videoDir = insertContext(
         {
-          "{quality}": INTERNAL_MANIM_CONFIG.qualityMap[manimConfig.quality], // eslint-disable-line @typescript-eslint/naming-convention
-          "{media_dir}": manimConfig.mediaDir, // eslint-disable-line @typescript-eslint/naming-convention
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          "{quality}": INTERNAL_MANIM_CONFIG.qualityMap[manimConfig.quality],
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          "{media_dir}": manimConfig.mediaDir, 
         },
         manimConfig.videoDir
       );
