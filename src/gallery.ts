@@ -1,15 +1,13 @@
 import * as vscode from "vscode";
 import {
-  ContextVars,
-  getNonce,
   getWebviewResource,
-  insertContext,
   PATHS,
   WebviewResources,
 } from "./globals";
 import * as fs from "fs";
+import { promises as pfs } from "fs";
 import * as path from "path";
-import Axios from "axios";
+import * as yaml from "js-yaml";
 import axios from "axios";
 import { TemplateEngine } from "./templateEngine";
 
@@ -18,11 +16,7 @@ const GITHUB_ROOT_DIR =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
 // gallery synchronization files
 const GITHUB_ENTRY_FILE =
-  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/index.js";
-const GITHUB_ASSET_DIR =
-  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/gallery_assets/";
-// object mappings
-const mobjMap = "gallery_parameters.json";
+  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/html_configuration.yaml";
 
 interface ImageMap {
   image_path: string;
@@ -74,7 +68,7 @@ export class Gallery {
       }
     );
 
-    const loadable = vscode.Uri.joinPath(this.mobjectsPath, mobjMap);
+    const loadable = PATHS.mobjGalleryParameters;
     const imageMapping: { [title: string]: ImageMap[] } = JSON.parse(
       (await vscode.workspace.fs.readFile(loadable)).toString()
     );
@@ -212,56 +206,55 @@ export class Gallery {
     ).toString();
 
     const root = PATHS.mobjImgs.fsPath;
-    var newVersion = localVersion;
-    Axios.get(GITHUB_ENTRY_FILE).then(({ data }) => {
-      if (!forceDownload) {
-        const version = data.match(VERSION_RE);
-        if (!version) {
-          vscode.window.showErrorMessage(
-            "Version descriptor in remote location missing. Please try again later."
+    var {data} = await axios.get(GITHUB_ENTRY_FILE);
+    data = yaml.load(data) as any; // Parse yaml
+    
+    const {user_content_version, gallary_parameters_path} = data;
+    let newVersion = user_content_version;
+
+    if (!forceDownload) {
+      if (!newVersion) {
+        vscode.window.showErrorMessage(
+          "Version descriptor in remote location missing. Please try again later."
+        );
+        return;
+      }
+
+      if (newVersion === localVersion) {
+        vscode.window.showInformationMessage("You're already up to date!");
+        return;
+      }
+    } else newVersion = newVersion || localVersion;
+
+    vscode.window.showInformationMessage(
+      "Please wait a moment while we pull remote assets..."
+    ); 
+    
+    var {data} = await axios.get(GITHUB_ROOT_DIR + gallary_parameters_path);
+
+    await pfs.writeFile(PATHS.mobjGalleryParameters.fsPath, JSON.stringify(data));
+
+    const objectLists = Object.values(data);
+    for(const [index, entry] of objectLists.entries()) {
+      const allObjects: any[] = entry as any[];
+
+      for(const mObj of allObjects) {
+        let imagePath = mObj.image_path;
+        var { data } = await axios({
+          method: "get",
+          url: GITHUB_ROOT_DIR + imagePath,
+          responseType: "stream",
+        });
+
+        data.pipe(fs.createWriteStream(path.join(root, imagePath)));
+
+        if (index >= objectLists.length - 1) {
+          await pfs.writeFile(PATHS.mobjVersion.fsPath, newVersion);
+          vscode.window.showInformationMessage(
+            `Successfully downloaded all assets to version ${newVersion}! Please reload the webview.`
           );
-          return;
-        }
-
-        const segs = version[0].split('"');
-        newVersion = segs[segs.length - 2];
-
-        if (newVersion === localVersion) {
-          vscode.window.showInformationMessage("You're already up to date!");
-          return;
         }
       }
-      vscode.window.showInformationMessage(
-        "Please wait a moment while we pull remote assets..."
-      );
-      Axios.get(GITHUB_ASSET_DIR + mobjMap).then(({ data }) => {
-        fs.writeFile(path.join(root, mobjMap), JSON.stringify(data), () => {});
-
-        const imgAssets = Object.keys(data);
-        imgAssets.forEach((categoryName) => {
-          let allObjects: { [key: string]: string }[] = data[categoryName];
-          allObjects.forEach((mObj) => {
-            let imgFn = mObj.image_path;
-            axios({
-              method: "get",
-              url: GITHUB_ROOT_DIR + imgFn,
-              responseType: "stream",
-            }).then(function (response) {
-              response.data.pipe(fs.createWriteStream(path.join(root, imgFn)));
-              if (
-                categoryName === imgAssets[imgAssets.length - 1] &&
-                mObj === allObjects[allObjects.length - 1]
-              ) {
-                fs.writeFile(PATHS.mobjVersion.fsPath, newVersion, () => {
-                  vscode.window.showInformationMessage(
-                    `Successfully downloaded all assets to version ${newVersion}! Please reload the webview.`
-                  );
-                });
-              }
-            });
-          });
-        });
-      });
-    });
+    }
   }
 }
