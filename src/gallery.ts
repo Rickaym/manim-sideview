@@ -213,7 +213,7 @@ export class Gallery {
     let newVersion = data["user_content_version"];
     
     // Related to https://github.com/kolibril13/mobject-gallery/issues/3
-    const galleryParameters =
+    const galleryParameters = https://github.com/kolibril13/mobject-gallery/issues/3
       data["gallery_parameters_path"] ||
       data["gallary_parameters_path"];
 
