@@ -1,1 +1,13 @@
-{"media_dir":"./media","video_dir":"{media_dir}/videos/{module_name}/{quality}","quality":"high_quality","quality_map":{"fourk_quality":"2160p60","production_quality":"1440p60","high_quality":"1080p60","medium_quality":"720p30","low_quality":"480p15","example_quality":"480p30"}}
+{
+    "mediaDir":"./media",
+    "videoDir":"{media_dir}/videos/{module_name}/{quality}",
+    "quality":"high",
+    "qualityMap": {
+        "fourk":"2160p60",
+        "production":"1440p60",
+        "high":"1080p60",
+        "medium":"720p30",
+        "low":"480p15",
+        "example":"480p30"
+    }
+}

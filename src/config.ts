@@ -63,28 +63,36 @@ export class DueTimeConfiguration {
     );
 
     const vars: ContextVars = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       "%cspSource%": this.panel.webview.cspSource,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       "%nonce%": getNonce(),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       "%args%":
         conf.args ||
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("commandLineArgs") ||
         BASE_ARGS,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       "%video_dir%":
         conf.videoDir ||
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("videoDirectory") ||
         BASE_VIDEO_DIR,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       "%scene_name%": conf.sceneName,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       "%media_dir%":
         conf.mediaDir ||
         vscode.workspace
           .getConfiguration("manim-sideview")
           .get("mediaDirectory") ||
         BASE_MEDIA_DIR,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         "config.css": this.panel.webview.asWebviewUri(this.loads.css).toString(),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         "config.js": this.loads.js.with({ scheme: "vscode-resource" }).toString()
     };
 
