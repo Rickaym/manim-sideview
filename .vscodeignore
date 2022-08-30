@@ -4,6 +4,7 @@ images/**
 src/**
 .yarnrc
 .gitignore
+.publish.bat
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map

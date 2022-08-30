@@ -4,26 +4,35 @@
 
 An extension for Visual Studio Code that provides a live preview and various other features in working with **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)**.
 
+
 ## Index
 
-1. [Rendering](#rendering)
+1. [Quickstart](#quickstart)
+2. [Rendering The Scene](#rendering)
 2. [Mobject Gallery](#mobject-gallery)
 3. [Context Variables](#context-variables)
 4. [Extension Settings](#extension-settings)
 5. [Status Bar Item](#utilities)
 6. [Credits](#credits)
 
-## Rendering
+## Frequently Asked Questions
+1. [How do I render on save?](#how-do-i-render-on-save)
+2. [How do I change the scene name after running?](#how-do-i-change-the-scene-name-after-running)
+3. [How do I change the default manim executable path?](#how-do-i-change-the-default-manim-executable-path)
 
-Before you can start a live preview you'll have to setup a few configuration settings for rendering! As well as the media path. This is because the extension combines the sideview and the file execution into a single workflow, read further ~
+## Quickstart
+1. Install this Extension!
+2. Open up a Python file with the scene code
+3. Press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar to start rendering and preview the scene immediately! (or use `Ctrl+'` `r`)
 
-*The final Product!*
 ![](images/example_preview.gif)
 
-Upon opening any Python files, you'll see an icon pop up in the menu bar that looks like this
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "20px">. The file will be executed and rendered using manim under appropriate configurations when clicked. You can also use the hotkey which is set to by default `ctrl + '` `r` *press, release and then press r, this is not simultaneous*.
 
-Whenever a file is run successfully for the first time, the extension creates a dedicated job tied to the source file, you can look at [this](#utilities) to make sure - as long as this job is active, all your settings will persist. Note that run on save does not get activated on files that don't have jobs.
+## Rendering
+
+This extension does not come prepackaged with the Python manim executable or any of its necessary packages, it assumes an installation of manim on `PATH`, if the executable is not on `PATH` you may set a custom path by following [this guide](#how-do-i-change-the-default-manim-executable-path).
+
+When a scene is successfully rendered for the first time, the extension creates a active job tied to the source file, you can look at [this](#utilities) to make sure - as long as this job is active, all your settings will persist. Note that run on save does not get activated on files that don't have jobs.
 
 #### Configuration
 
@@ -46,28 +55,21 @@ For those using the runtime configurations, you'll have to provide the media pat
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/video_dir.png"></image>
 * *figure taken from the in time configuration menu*
 
-#### On Save
-
-Configuring your manim projects to execute on save is very easy, just enable the `manim-sideview.runOnSave` settings inside vscode `File -> Preferences -> Settings` menu. This is disabled by default.
-
 ## Mobject Gallery
 
-**A mobject gallery for inserting mobjects**
+An Mobject gallery is a webview that allow users to insert code snippets for commonly used manim objects, e.g., shapes, text, etc...
 
+E.g.
 ![](images/example_of_mobject_gallery.gif)
 
-Open the gallery by the vscode command palette `Show Mobject Gallery For manim` and click on the shape that you want to use.
- It will appear in your code editor (either in a python or jupyter file).
+Open the command palette using `Shift + Command + P (Mac)` / `Ctrl + Shift + P` and use the command `Manim: Open MObject Gallery` to open the gallery.
 
-This also works in a jupyter notebook:
-
-https://user-images.githubusercontent.com/44469195/161231956-656dc877-73b9-4f7f-b58a-ec1368abdbd2.mov
+Click on the shape you'd like to insert the Mobject code into a Python or Jupyter Notebook!
 
 ## Context Variables
 
 Sometimes we don't want to set an absolute path to the media file. Context Variables can only be used in:
-* Configuration of `manim-sideview.videoFilePath`
-* In time configurations `Video Directory` option
+* Configuration of `manim-sideview.videoDirectory`
 
 The case of variable names matter.
 #### Variables
@@ -92,76 +94,25 @@ The case of variable names matter.
 
 Using unset variables will result in default values being used.
 
-## Extension Settings
+## Frequently Asked Questions
 
-**Contemporary settings**
+### How do I render on save?
 
-1. After starting a job, you can change the scene name between executions. This can be done by using the command `manim-sideview.setRenderingScene` through pressing `F1` and searching it up - or use the hotkey by default set to `ctrl + '` `c`. This prompt looks exactly like the one shown whenever you start an execution process.
+Enable the `manim-sideview.runOnSave` settings inside vscode `File -> Preferences -> Settings` menu.
 
-2. When running a job using in time configurations you can change it anytime by resetting it. You can reset it by calling the command `manim-sideview.setInTimeConfiguration` through pressing `F1` and searching it up. This will bring up a webview if you have an active job that allows resetting.
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_runonsave.png"></image>
 
-**Application or default settings**
-<table>
-<tr>
-    <th>Identifier</th>
-    <th>Description</th>
-    <th>Default</th>
-</tr>
-<tr>
-    <td> manim-sideview.defaultManimPath </td>
-    <td>The absolute path to the manim executable.</td>
-    <td>manim</td>
-</tr>
-<tr>
-    <td> manim-sideview.commandLineArgs </td>
-    <td> The command line arguments in rendering manim. Refer to https://docs.manim.community/en/stable/tutorials/configuration.html?highlight=configuration#a-list-of-all-cli-flags for existing arugments. </td>
-    <td>-ql</td>
-</tr>
-<tr>
-    <td>manim-sideview.videoDirectory</td>
-    <td>The video output directory. We can use context variables here to place them under the media directory. This does not include the `.mp4` file itself.</td>
-    <td>{media_dir}/videos/{module_name}/480p15</td>
-</tr>
-<tr>
-    <td>manim-sideview.mediaDirectory</td>
-    <td>The root folder for all media output.</td>
-    <td>media</td>
-</tr>
-<tr>
-    <td>manim-sideview.runOnSave</td>
-    <td>Whether to run on save for a file that has been run before.</td>
-    <td>false</td>
-</tr>
-<tr>
-    <td>manim-sideview.focusOutputOnRun</td>
-    <td>Whether to focus on the output log when running.</td>
-    <td>true</td>
-</tr>
-<tr>
-    <td>manim-sideview.previewShowProgressOnIdle</td>
-    <td>Whether to display the video progress bar in the video player when the job is idle.</td>
-    <td>true</td>
-</tr>
-<tr>
-    <td>manim-sideview.previewProgressColor</td>
-    <td> The color of the progress bar. You can use https://code.visualstudio.com/api/references/theme-color colors here.</td>
-    <td>textLink.foreground</td>
-</tr>
-<tr>
-    <td> manim-sideview.previewAutoPlay </td>
-    <td> Whether to auto-play the preview right after rendering. </td>
-    <td>True</td>
-</tr>
-<tr>
-    <td> manim-sideview.previewLooping </td>
-    <td> Whether to loop the preview at the end. </td>
-    <td>True</td>
-</tr>
-<tr>
-    <td> manim-sideview.outputToTerminal </td>
-    <td> Whether to relay output to a terminal. If False, an output channel rather than a terminal is used to display text.</td>
-    <td>True</td>
-</table>
+### How do I change the scene name after running?
+
+You can change the scene name after a job by using the `Manim: Set A New SceneName` command through the command palette `Shift + Command + P (Mac)` / `Ctrl + Shift + P`.
+
+Alternatively, you can also use the following default hotkey `Ctrl + '` `c`.
+
+### How do I change the default manim executable path?
+
+You can set the default manim executable path by changing the `manim-sideview.defaultManimPath` configuration in `File -> Preferences -> Settings`.
+
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_defaultmanimpath.png"></image>
 
 ## Utilities
 
@@ -169,7 +120,7 @@ You can find a status bar item inside the status bar (the one at the very bottom
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/statusbaritem.png"></image>
 
-Note that this is a visual reminder that the file in current focus has an active job. Relevantly, this icon will change colors to either green or red depending on the results of an execution at times.
+This is a visual reminder that the file in current focus has an active renderer. Relevantly, this icon will change colors to either green or red depending on the results of an execution at times.
 
 ### Known Issues
 
@@ -186,6 +137,7 @@ Note that this is a visual reminder that the file in current focus has an active
 + User Extension log format changed<br>
 + "Mobject" to "MObject" change extension-wide
 - Fontawesome CSS and JS files removed<br>
++ Complete rewrite of the readme file for less word content<br>
 
 #### 0.0.13
 
