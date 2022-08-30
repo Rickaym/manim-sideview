@@ -46,10 +46,10 @@ export type WebviewResources = {
 
 // internal in this context means internal to the extension
 export type InternalManimCfg = {
-  media_dir: string;
-  video_dir: string;
+  mediaDir: string;
+  videoDir: string;
   quality: string;
-  quality_map: { [tp: string]: string };
+  qualityMap: { [tp: string]: string };
   [exts: string]: string | { [tp: string]: string };
 };
 
@@ -60,6 +60,7 @@ export type InternalManimCfg = {
 const pathsToLoad: { [tp: string]: string } = {
   cfgMap: "assets/local/manim.cfg.json",
   mobjVersion: "assets/mobjects/mobject_version.txt",
+  mobjGalleryParameters: "assets/mobjects/gallery_parameters.json",
   mobjImgs: "assets/mobjects/",
 };
 
@@ -67,10 +68,10 @@ export const PATHS: { [tp: string]: vscode.Uri } = {};
 
 // The supposed default internal manim configuration
 export var INTERNAL_MANIM_CONFIG: InternalManimCfg = {
-  media_dir: "",
-  video_dir: "",
+  mediaDir: "",
+  videoDir: "",
   quality: "",
-  quality_map: {},
+  qualityMap: {},
 };
 
 export var EXTENSION_VERSION: string | undefined;
@@ -167,7 +168,7 @@ export function defaultFormatHandler(level: string, msg: string) {
 }
 
 export function getRootPath(): string | false {
-  if (!vscode.workspace.workspaceFolders) {
+  if (!(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0])) {
     vscode.window.showErrorMessage(
       "I couldn't figure out the root path due to the lack of workspaces, please make one!"
     );

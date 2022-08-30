@@ -19,7 +19,7 @@ import { DueTimeConfiguration } from "./config";
 import { ConfigParser } from "./configparser";
 import { VideoPlayer } from "./player";
 import { Gallery } from "./gallery";
-import { ManimPseudoTerm } from "./pseudoterm";
+import { ManimPseudoTerm } from "./pseudoTerm";
 
 /**
  * Changes a given path to an absolute path if it's a relative
@@ -34,7 +34,7 @@ function toAbsolutePath(pth: string): string {
     if (!folders) {
       throw TypeError("Workspace folders cannot be empty.");
     }
-    var rootPath = folders[0].uri.fsPath + "/";
+    const rootPath = folders[0].uri.fsPath + "/";
     pth = path.join(rootPath, pth);
   }
   return pth;
@@ -43,7 +43,7 @@ function toAbsolutePath(pth: string): string {
 // mandatory cli flags for user configuration currently none
 const USER_DEF_CONFIGURATION: string[] = [];
 const LOCATE = { section: "CLI" };
-const SCENE_CLASSES = /\s*class\s+(?<name>\w*)\(\w*Scene\w*\):\s*/g;
+const SCENE_CLASSES = /class\s+(?<name>\w+)\(\w*Scene\w*\):/g;
 const CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
 
 // a process will be killed if this message is seen
@@ -158,7 +158,7 @@ export class ManimSideview {
    */
   async setRenderingScene(conf?: RunningConfig): Promise<boolean> {
     if (!conf) {
-      var job = this.getActiveJob();
+      const job = this.getActiveJob();
       if (!job) {
         await vscode.window.showErrorMessage(
           "You do not have an active job to set a scene for."
@@ -174,17 +174,13 @@ export class ManimSideview {
       .replace(/\r/g, "")
       .replace(/\n/g, "");
 
-    var sceneClasses = contents.match(SCENE_CLASSES)?.map(
-      (m) =>
+    const sceneClasses = [...contents.matchAll(SCENE_CLASSES)].map(
+      m =>
         "$(run-all) " +
-        m
-          .substr(5)
-          .replace(/\(\w*Scene\w*\):/g, "")
-          .trim()
+        m.groups?.name
     );
     const askMore = "I'll provide it myself!";
 
-    var sceneName;
     if (sceneClasses) {
       if (this.lastChosenSceneName) {
         sceneClasses.push(`$(refresh) ${this.lastChosenSceneName}`);
@@ -205,7 +201,7 @@ export class ManimSideview {
       });
     }
 
-    sceneName = choice
+    const sceneName = choice
       ?.replace("$(run-all)", "")
       .replace("$(refresh)", "")
       .trim();
@@ -264,7 +260,7 @@ export class ManimSideview {
       ["cfg", "show"]
     );
 
-    var fullStdout = "";
+    let fullStdout = "";
     process.stdout.on("data", function (data: string) {
       fullStdout += data.toString();
     });
@@ -300,11 +296,11 @@ export class ManimSideview {
    */
   private async doRun(conf: RunningConfig) {
     const ctxVars: ContextVars = {
-      "{media_dir}": conf.mediaDir,
-      "{module_name}": conf.moduleName,
-      "{scene_name}": conf.sceneName,
+      "{media_dir}": conf.mediaDir, // eslint-disable-line @typescript-eslint/naming-convention
+      "{module_name}": conf.moduleName, // eslint-disable-line @typescript-eslint/naming-convention
+      "{scene_name}": conf.sceneName, // eslint-disable-line @typescript-eslint/naming-convention
     };
-    var args = [conf.srcPath];
+    let args = [conf.srcPath];
     if (!conf.usingConfigFile) {
       //args.push(
       //  `--video_dir ${insertContext(ctxVars, conf.videoDir)}`
@@ -314,7 +310,7 @@ export class ManimSideview {
     args.push(conf.sceneName.trim());
     // args = args.map((a) => `"${a}"`);
 
-    var out;
+    let out;
     if (
       vscode.workspace
         .getConfiguration("manim-sideview")
@@ -507,7 +503,7 @@ export class ManimSideview {
    * @returns Job | undefined
    */
   private getActiveJob(srcPath?: string): Job | undefined {
-    var path: string;
+    let path: string;
     if (!srcPath) {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "python") {
@@ -536,7 +532,7 @@ export class ManimSideview {
   ): Promise<ManimConfig | undefined | false> {
     // user made manim.cfg files normally must remain on the
     // same directory of the source path thus we can guess this as such
-    var cfgPath = this.manimCfgPath
+    let cfgPath = this.manimCfgPath
       ? this.manimCfgPath
       : path.join(rootPath, "manim.cfg");
     try {
@@ -555,9 +551,7 @@ export class ManimSideview {
     }
 
     const cfgKeys = Object.keys(dict);
-    const hasAll = USER_DEF_CONFIGURATION.map((key) =>
-      cfgKeys.includes(key)
-    ).every((e) => e);
+    const hasAll = USER_DEF_CONFIGURATION.every(key => cfgKeys.includes(key));
 
     if (hasAll === true) {
       if (!vscode.workspace.workspaceFolders) {
@@ -567,8 +561,8 @@ export class ManimSideview {
         return false;
       }
       let manimConfig: ManimConfig = {
-        videoDir: INTERNAL_MANIM_CONFIG.video_dir,
-        mediaDir: INTERNAL_MANIM_CONFIG.media_dir,
+        videoDir: INTERNAL_MANIM_CONFIG.videoDir,
+        mediaDir: INTERNAL_MANIM_CONFIG.mediaDir,
         quality: INTERNAL_MANIM_CONFIG.quality,
       };
 
@@ -585,8 +579,10 @@ export class ManimSideview {
       }
       manimConfig.videoDir = insertContext(
         {
-          "{quality}": INTERNAL_MANIM_CONFIG.quality_map[manimConfig.quality],
-          "{media_dir}": manimConfig.mediaDir,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          "{quality}": INTERNAL_MANIM_CONFIG.qualityMap[manimConfig.quality],
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          "{media_dir}": manimConfig.mediaDir, 
         },
         manimConfig.videoDir
       );
@@ -603,7 +599,7 @@ export class ManimSideview {
   }
 
   private newRunningConfig(doc: vscode.TextDocument): RunningConfig | false {
-    var sourcePath = doc.fileName;
+    let sourcePath = doc.fileName;
     const conf = vscode.workspace.getConfiguration("manim-sideview");
     const moduleName = sourcePath
       .replace(new RegExp("/", "g"), "\\")
@@ -637,7 +633,7 @@ export class ManimSideview {
    */
   private async runWhenConfigured(doc: vscode.TextDocument) {
     const activeJob = this.getActiveJob(doc.fileName);
-    var runningCfg: RunningConfig;
+    let runningCfg: RunningConfig;
 
     if (!activeJob) {
       const newConf = this.newRunningConfig(doc);
@@ -692,7 +688,7 @@ export class ManimSideview {
 
   async setInTimeConfiguration(conf?: RunningConfig) {
     if (!conf) {
-      var job = this.getActiveJob();
+      let job = this.getActiveJob();
       if (!job || job.config.usingConfigFile) {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
