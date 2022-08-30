@@ -18,50 +18,46 @@ The extension assumes an installation of manim on `PATH` to work. If the executa
 7. [Frequently Asked Questions](#frequently-asked-questions)
 
 ## Quickstart
-Open up a Python file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon (or) use `Ctrl+'` `r` from the menu bar to immediately start rendering a preview.
+Open the file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon (or) use `Ctrl+'` `r` from the menu bar to immediately start rendering a preview.
 
-**E.g.**
 ![](images/example_preview.gif)
 
+*That's it, folks!*
 
 ## Rendering
 
-When a scene is successfully rendered for the first time, the extension creates an active job tied to the source file, you can ensure this by finding a clickable icon inside the status bar
+When a scene is successfully rendered for the first time, the extension creates an active job tied to the source file, this ensures persistence in scene names, video directories, and media directories for rendering. You can reset this cache by clicking on the icon.
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/statusbaritem.png"></image>
 
-Depending on the execution for rendering, this icon may change color to green or red for success or failure.
+Depending on the execution for rendering, this icon may change also color to green or red for success or failure.
 
 ## Config File
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> The extension recoginizes any manim configuration files as per [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) with a few mandatory flags. It is necessary to have the config file in the working directory.
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> The extension recognizes any manim configuration files as per [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) with a few mandatory flags. It is necessary to have the config file in the working directory.
 
 ## Mobject Gallery
 
-The Mobject gallery is a webview that allow users to insert code snippets for commonly used manim objects, like squares, text and also complex graphs.
+The Mobject gallery is a web view that allows users to insert code snippets for commonly used manim objects, like squares, text, and also complex graphs.
 
-**E.g.**
 ![](images/example_of_mobject_gallery.gif)
 
 ### How do I open the gallery?
 1. Open the command palette using `Shift + Command + P (Mac)` / `Ctrl + Shift + P`
 2. Use the command `Manim: Open MObject Gallery`
 
-You can place the cursor at a desired location and click the image of the manim object to insert the code into a Python file or Jupyter Notebook!
-
+You can place the cursor at the desired location and click the image of the manim object to insert the code into a Python file or Jupyter Notebook!
 
 ## Changing default Configuration
 
-The extension needs a relative path to the media file to serve a live preview. Using a `manim.cfg` file makes it explicit in that the extension can use the default path, however, in some cases, you might want the extension to set the video output path or the live preview path to a different location.
+The extension requires a few flags such as the `videoDir` and `mediaDir` to be set to load the video file. Using a `manim.cfg` file with these flags makes it explicit, however, in some cases, you might not want to use the configuration file. To get around this issue, you can change the default configurations for the extension rendered through the settings `File -> Preferences -> Settings` to custom values.
 
-You can achieve this by opening the settings through
- `File -> Preferences -> Settings` and changing the
-manim-sideview.commandLineArgs
-manim-sideview.videoDirectory
-manim-sideview.mediaDirectory
+1. `manim-sideview.commandLineArgs`
+2. `manim-sideview.videoDirectory`
+3. `manim-sideview.mediaDirectory`
 
 ### Context Variables
 
-These are variables you can use in the default configurations.
+These are variables you can use for setting the default configurations.
 #### Variables
 <table>
 <tr>
@@ -110,16 +106,15 @@ You can set the default manim executable path by changing the `manim-sideview.de
 
 ### Known Issues
 
-1. Buttons from Picture in Picture unresponsive [*linked issue*](https://github.com/Rickaym/Manim-Sideview/issues/7).
-2. Seeking video duration [*linked issue*](https://github.com/Rickaym/Manim-Sideview/issues/7).
+... None
 
 ## Changelog
 
 #### 0.0.14
 
-+ Manim Gallery View now use the `plywood-gallery-for-vsce` template engine.<br>
-+ Video player now use the same template engine.<br>
-+ Video player revamped--now simple and straight forward<br>
++ Manim Gallery View now uses the `plywood-gallery-for-vsce` template engine.<br>
++ Video player now uses the same template engine.<br>
++ Video player revamped--now simple and straightforward <br>
 + User Extension log format changed<br>
 + "Mobject" to "MObject" change extension-wide
 - Fontawesome CSS and JS files removed<br>
@@ -138,14 +133,14 @@ You can set the default manim executable path by changing the `manim-sideview.de
 
 #### 0.0.11
 
-+ Patched the local incorrect version filepath for mobject gallery
++ Patched the local incorrect version file path for mobject gallery
 
 #### 0.0.10
 
-+ Run-time configuration settings can be set for jobless scene where it'll create a new job for the user
++ Run-time configuration settings can be set for jobless scenes where it'll create a new job for the user
 + Changed default quality mappings with responsiveness to Manim 0.13.1
 + Smarter manim.cfg file analysis and in determining context
-* It should be noted that default rendering will still use `-ql` for backwards compatibility
+* It should be noted that default rendering will still use `-ql` for backward compatibility
 + Added manim version re-synchronization command for developer independent compatibility
 + Added version signifier to the mobject gallery
 
@@ -160,7 +155,7 @@ You can set the default manim executable path by changing the `manim-sideview.de
 
 #### 0.0.7
 
-+ Added force redownload when assets are damaged
++ Added force re-download when assets are damaged
 
 #### 0.0.6
 
@@ -183,13 +178,13 @@ You can set the default manim executable path by changing the `manim-sideview.de
 + Added `manim-sideview.stop` for stopping any running processes
 + Paths are now normalized to work with both forward and backward slashes
 + video directories are now static and will not depend on the verdict of manim
-+ Setting a valid path no longer replies with "Success" because this can be confusing when there is an exception thrown later down the line that has has nothing to do with the scene name
++ Setting a valid path no longer replies with "Success" because this can be confusing when there is an exception thrown later down the line that has nothing to do with the scene name
 + `manim.cfg` files are now derived from the working path - which is the correct case
 + Added support server link
 
 #### 0.0.1 - 0.0.2
 
-Initial release of Manim Sideview.
+The initial release of Manim Sideview.
 
 ## Credits
 
