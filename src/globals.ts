@@ -1,40 +1,82 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { normalize } from "path";
+import path = require("path");
 
-/**
- * A list of type and value definitions used in different modules with no ownership
- * to any.
- *
- * Mainly to avoid circular dependencies
- */
+export const LOGGER = vscode.window.createOutputChannel("Manim Sideview");
+
+type FormatHandlerFn = (level: string, msg: string) => string;
+
+export class Log {
+  static format(level: string, msg: string) {
+    const date = new Date();
+    return `[${date.toLocaleDateString()} ${date.getHours()}:${date.getMinutes()}] ${level.toUpperCase()}: ${msg}`;
+  }
+
+  static logs(
+    level: string,
+    msg: string,
+    formatter: FormatHandlerFn = Log.format
+  ) {
+    LOGGER.appendLine(formatter(level, msg));
+    return msg;
+  }
+
+  static info(msg: string) {
+    return Log.logs("info", msg);
+  }
+
+  static warn(msg: string) {
+    return Log.logs("warn", msg);
+  }
+
+  static error(msg: string) {
+    return Log.logs("error", msg);
+  }
+}
+
+// The key and value pairs that directly correlate to the output path
+export type ManimConfig = {
+  mediaDir: string;
+  videoDir: string;
+  quality: string;
+};
 
 /**
  * A configuration necessary to run a render.
  *
- * exePath: the absolute path to the manim.exe executable
- * srcPath: the absolute path to the source.py file
+ * executablePath: the absolute path to the manim.exe executable
+ * srcPath: the absolute path to the running Python file
  * sceneName: the name of the scene to be rendered
  * moduleName: the module name of the source file
- * args: the command line arguments
- * output: the relative path to the video file
- * mediaDir: the root folder for all media output
- * videoDir: the directory where the video is output
- * usingConfigFile: whether if this is running using a configuration file
+ * cliArgs: any extra command line arguments
+ * srcRootFolder: the absolute path to the root directory
+ * document: the vscode.TextDocument for the Python file
+ * isUsingCfgFile: whether if this is running using a configuration file
  */
 export type RunningConfig = {
-  exePath: string;
+  executablePath: string;
   srcPath: string;
   sceneName: string;
   moduleName: string;
-  args: string;
-  root: string;
-  output: string;
+  cliArgs: string;
+  srcRootFolder: string;
   document: vscode.TextDocument;
-  mediaDir: string;
-  videoDir: string;
-  usingConfigFile: boolean;
+  isUsingCfgFile: boolean;
+  manimConfig: ManimConfig;
 };
+
+export function getOutputPath(
+  config: RunningConfig,
+  extension: string = ".mp4"
+) {
+  return insertContext(
+    {
+      "{module_name}": config.moduleName, // eslint-disable-line @typescript-eslint/naming-convention
+      "{scene_name}": config.sceneName, // eslint-disable-line @typescript-eslint/naming-convention
+    },
+    path.join(config.manimConfig.videoDir, config.sceneName + extension)
+  );
+}
 
 export type ContextVars = { [k: string]: string };
 
@@ -53,45 +95,67 @@ export type InternalManimCfg = {
   [exts: string]: string | { [tp: string]: string };
 };
 
-/**
- * A list of internal assets to all the  assets used within the
- * extension.
- */
-const pathsToLoad: { [tp: string]: string } = {
-  cfgMap: "assets/local/manim.cfg.json",
-  mobjVersion: "assets/mobjects/mobject_version.txt",
-  mobjGalleryParameters: "assets/mobjects/gallery_parameters.json",
-  mobjImgs: "assets/mobjects/",
+// default fallback configurations
+export var FALLBACK_CONFIG: InternalManimCfg = {
+  mediaDir: "./media",
+  videoDir: "{media_dir}/videos/{module_name}/{quality}",
+  quality: "low",
+  qualityMap: {
+    fourk: "2160p60",
+    production: "1440p60",
+    high: "1080p60",
+    medium: "720p30",
+    low: "480p15",
+    example: "480p30",
+  },
 };
 
+// Loaded on activation
 export const PATHS: { [tp: string]: vscode.Uri } = {};
 
-// The supposed default internal manim configuration
-export var INTERNAL_MANIM_CONFIG: InternalManimCfg = {
-  mediaDir: "",
-  videoDir: "",
-  quality: "",
-  qualityMap: {},
-};
+export function updateFallbackManimCfg(
+  updated: {
+    [tp: string]: string;
+  },
+  saveUpdated: boolean = true
+) {
+  Object.keys(FALLBACK_CONFIG).forEach((ky) => {
+    if (updated[ky]) {
+      FALLBACK_CONFIG[ky] = updated[ky];
+    }
+  });
+
+  if (saveUpdated) {
+    fs.writeFile(
+      PATHS.cfgMap!.fsPath,
+      JSON.stringify(FALLBACK_CONFIG),
+      () => {}
+    );
+  }
+}
 
 export var EXTENSION_VERSION: string | undefined;
 
-/**
- * Load all the required assets as a resource
- * @param root root URI
- */
-export function loadPaths(root: vscode.Uri) {
-  Object.keys(pathsToLoad).forEach((tp) => {
-    PATHS[tp] = vscode.Uri.joinPath(root, pathsToLoad[tp]);
-  });
-}
-
 export async function loadGlobals(ctx: vscode.ExtensionContext) {
-  loadPaths(ctx.extensionUri);
+  Log.info("Loading globals.");
+
+  const pathsToLoad: { [tp: string]: string } = {
+    cfgMap: "assets/local/manim.cfg.json",
+    mobjVersion: "assets/mobjects/mobject_version.txt",
+    mobjGalleryParameters: "assets/mobjects/gallery_parameters.json",
+    mobjImgs: "assets/mobjects/",
+  };
+
+  Object.keys(pathsToLoad).forEach((tp) => {
+    PATHS[tp] = vscode.Uri.joinPath(ctx.extensionUri, pathsToLoad[tp]);
+  });
+  Log.info("Loaded all resource paths.");
+
   const cfg = JSON.parse(
-    (await vscode.workspace.fs.readFile(PATHS.cfgMap)).toString()
+    (await vscode.workspace.fs.readFile(PATHS.cfgMap!)).toString()
   );
-  updateInternalManimCfg(cfg, false);
+  updateFallbackManimCfg(cfg, false);
+
   var PACKAGE_JSON: { [key: string]: string } = JSON.parse(
     fs
       .readFileSync(
@@ -100,26 +164,7 @@ export async function loadGlobals(ctx: vscode.ExtensionContext) {
       .toString()
   );
   EXTENSION_VERSION = PACKAGE_JSON["version"];
-}
-
-export function updateInternalManimCfg(
-  updated: {
-    [tp: string]: string;
-  },
-  saveUpdated: boolean = true
-) {
-  Object.keys(INTERNAL_MANIM_CONFIG).forEach((ky) => {
-    if (updated[ky]) {
-      INTERNAL_MANIM_CONFIG[ky] = updated[ky];
-    }
-  });
-  if (saveUpdated) {
-    fs.writeFile(
-      PATHS.cfgMap.fsPath,
-      JSON.stringify(INTERNAL_MANIM_CONFIG),
-      () => {}
-    );
-  }
+  Log.info("Successfully loaded all globals.");
 }
 
 // base values for running in-time configurations
@@ -160,21 +205,6 @@ export function insertContext(context: ContextVars, payload: string): string {
     }
   });
   return path;
-}
-
-export function defaultFormatHandler(level: string, msg: string) {
-  const date = new Date();
-  return `[${date.toLocaleDateString()} ${date.getHours()}:${date.getMinutes()}] ${level.toUpperCase()}: ${msg}`;
-}
-
-export function getRootPath(): string | false {
-  if (!(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0])) {
-    vscode.window.showErrorMessage(
-      "I couldn't figure out the root path due to the lack of workspaces, please make one!"
-    );
-    return false;
-  }
-  return normalize(vscode.workspace.workspaceFolders[0].uri.fsPath);
 }
 
 /**

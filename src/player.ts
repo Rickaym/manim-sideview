@@ -1,11 +1,7 @@
 import * as vscode from "vscode";
 import {
-  ContextVars,
   BASE_PROGRESS_BAR_COLOR,
-  getNonce,
   getWebviewResource,
-  insertContext,
-  WebviewResources,
   RunningConfig,
 } from "./globals";
 import { TemplateEngine } from "./templateEngine";

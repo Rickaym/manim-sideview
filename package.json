@@ -12,7 +12,7 @@
     "name": "Ricky",
     "url": "https://github.com/Rickaym"
   },
-  "version": "0.0.13",
+  "version": "0.0.14",
   "publisher": "Rickaym",
   "engines": {
     "vscode": "^1.63.1"
@@ -32,7 +32,6 @@
     "onCommand:manim-sideview.refreshAllConfiguration",
     "onCommand:manim-sideview.refreshCurrentConfiguration",
     "onCommand:manim-sideview.setRenderingScene",
-    "onCommand:manim-sideview.setInTimeConfiguration",
     "onCommand:manim-sideview.showMobjectGallery",
     "onCommand:manim-sideview.syncMobjectGallery",
     "onCommand:manim-sideview.syncManimConfig"
@@ -144,10 +143,6 @@
         "title": "Manim: Set A New SceneName"
       },
       {
-        "command": "manim-sideview.setInTimeConfiguration",
-        "title": "Manim: Set A Configuration"
-      },
-      {
         "command": "manim-sideview.showMobjectGallery",
         "title": "Manim: Open MObject Gallery"
       },
@@ -172,10 +167,6 @@
         "when": "editorFocus"
       },
       {
-        "command": "manim-sideview.setInTimeConfiguration",
-        "key": "ctrl+' s"
-      },
-      {
         "command": "manim-sideview.setRenderingScene",
         "key": "ctrl+' c"
       }
@@ -191,23 +182,21 @@
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
-    "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^9.1.1",
-    "@types/node": "^18.7.3",
+    "@types/node": "^18.7.14",
     "@types/node-fetch": "^3.0.3",
     "@types/vscode": "^1.70.0",
-    "@typescript-eslint/eslint-plugin": "^5.33.0",
-    "@typescript-eslint/parser": "^5.33.0",
+    "@typescript-eslint/eslint-plugin": "^5.36.0",
+    "@typescript-eslint/parser": "^5.36.0",
     "@vscode/test-electron": "^2.1.5",
     "electron-rebuild": "^3.2.9",
-    "eslint": "^8.22.0",
+    "eslint": "^8.23.0",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
-    "typescript": "^4.7.4"
+    "typescript": "^4.8.2"
   },
   "dependencies": {
     "axios": "^0.27.2",
-    "js-yaml": "^4.1.0",
-    "node-pty": "^0.10.1"
+    "yaml": "^2.0.0"
   }
 }

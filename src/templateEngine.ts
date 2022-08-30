@@ -20,7 +20,7 @@ export class TemplateEngine {
   };
 
   static async renderDoc(fp: vscode.Uri, globals: { [varname: string]: any }) {
-    return TemplateEngine.trueRender(
+    return TemplateEngine.textRender(
       (await vscode.workspace.fs.readFile(fp)).toString(),
       globals
     );
@@ -30,21 +30,21 @@ export class TemplateEngine {
     return new RegExp(`${property}\s*:\s*(${pattern})\s*;`);
   }
 
-  static trueRender(htmlDoc: string, globals: { [varname: string]: any }) {
+  static textRender(text: string, globals: { [varname: string]: any }) {
     Object.keys(globals).forEach((varname) => {
       if (varname.startsWith(" ")) {
-        htmlDoc = htmlDoc.replace(
+        text = text.replace(
           new RegExp(varname.trim(), "gi"),
           globals[varname]
         );
       } else {
-        htmlDoc = htmlDoc.replace(
+        text = text.replace(
           new RegExp(`{{ ${varname} }}`, "gi"),
           globals[varname]
         );
       }
     });
-    return htmlDoc;
+    return text;
   }
 
   /**
@@ -61,8 +61,8 @@ export class TemplateEngine {
    * space.
    */
   async render(globals: { [varname: string]: any }) {
-    return TemplateEngine.trueRender(
-      TemplateEngine.trueRender(
+    return TemplateEngine.textRender(
+      TemplateEngine.textRender(
         (await vscode.workspace.fs.readFile(this.resource.html)).toString(),
         this.preamble
       ),

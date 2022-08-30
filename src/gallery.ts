@@ -7,7 +7,7 @@ import {
 import * as fs from "fs";
 import { promises as pfs } from "fs";
 import * as path from "path";
-import * as yaml from "js-yaml";
+import * as yaml from "yaml";
 import axios from "axios";
 import { TemplateEngine } from "./templateEngine";
 
@@ -208,10 +208,10 @@ export class Gallery {
 
     const root = PATHS.mobjImgs.fsPath;
     var {data} = await axios.get(GITHUB_ENTRY_FILE);
-    data = yaml.load(data) as any; // Parse yaml
-    
+    data = yaml.parse(data) as any; // Parse yaml
+
     let newVersion = data["user_content_version"];
-    
+
     // Related to https://github.com/kolibril13/mobject-gallery/issues/3
     const galleryParameters = data["gallery_parameters_path"];
 
@@ -233,8 +233,8 @@ export class Gallery {
 
     vscode.window.showInformationMessage(
       "Please wait a moment while we pull remote assets..."
-    ); 
-    
+    );
+
     var {data} = await axios.get(GITHUB_ROOT_DIR + galleryParameters);
 
     await pfs.writeFile(PATHS.mobjGalleryParameters.fsPath, JSON.stringify(data));

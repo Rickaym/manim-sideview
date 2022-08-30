@@ -1,64 +1,40 @@
-// ENTRY POINT OF THE EXTENSION
-
 import * as vscode from "vscode";
-import { loadGlobals } from "./globals";
+import { loadGlobals, Log } from "./globals";
 import { ManimSideview } from "./sideview";
 
 export async function activate(context: vscode.ExtensionContext) {
+  Log.info("Activating extension.");
   await loadGlobals(context);
-  const view = new ManimSideview(context);
+
+  const sideview = new ManimSideview(context);
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "manim-sideview.run",
-      async function (routine: boolean = false) {
-        await view.run(routine);
+      async function (onSave: boolean = false) {
+        await sideview.run(onSave);
       }
     ),
     vscode.commands.registerCommand(
       "manim-sideview.refreshAllConfiguration",
-      async function () {
-        await view.refreshAllConfiguration();
-      }
+      () => sideview.refreshAllConfiguration()
     ),
-    vscode.commands.registerCommand("manim-sideview.stop", async function () {
-      view.stop();
-    }),
-    vscode.commands.registerCommand(
-      "manim-sideview.setRenderingScene",
-      async function () {
-        await view.setRenderingScene();
-      }
-    ),
-    vscode.commands.registerCommand(
-      "manim-sideview.setInTimeConfiguration",
-      async function () {
-        await view.setInTimeConfiguration();
-      }
+    vscode.commands.registerCommand("manim-sideview.stop", () => sideview.stop()),
+    vscode.commands.registerCommand("manim-sideview.setRenderingScene", () =>
+      sideview.setRenderingScene()
     ),
     vscode.commands.registerCommand(
       "manim-sideview.refreshCurrentConfiguration",
-      async function () {
-        await view.refreshCurrentConfiguration();
-      }
+      () => sideview.refreshCurrentConfiguration()
     ),
-    vscode.commands.registerCommand(
-      "manim-sideview.showMobjectGallery",
-      async function () {
-        view.showMobjectGallery();
-      }
+    vscode.commands.registerCommand("manim-sideview.showMobjectGallery", () =>
+      sideview.showMobjectGallery()
     ),
-    vscode.commands.registerCommand(
-      "manim-sideview.syncMobjectGallery",
-      async function () {
-        view.syncMobjectGallery();
-      }
+    vscode.commands.registerCommand("manim-sideview.syncMobjectGallery", () =>
+      sideview.syncMobjectGallery()
     ),
-    vscode.commands.registerCommand(
-      "manim-sideview.syncManimConfig",
-      async function () {
-        await view.syncManimConfig();
-      }
+    vscode.commands.registerCommand("manim-sideview.syncManimConfig", () =>
+      sideview.syncFalllbackManimConfig()
     )
   );
 
@@ -75,10 +51,11 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   vscode.window.onDidChangeActiveTextEditor(
     (e) => {
-      view.updateJobStatus();
-      view.audit(e);
+      sideview.updateJobStatus();
+      sideview.audit(e);
     },
     null,
     context.subscriptions
   );
+  Log.info("Activated extension.");
 }
