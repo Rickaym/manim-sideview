@@ -1,77 +1,67 @@
 # Manim Sideview
 
-<a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Homepage" src="https://img.shields.io/badge/vscode-install%20Here-brightgreen?logo=visualstudiocode"></a> <a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Version" src="https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview"></a> <a href="https://discord.gg/UmnzdPgn6g/"><img src="https://img.shields.io/discord/793047973751554088.svg?label=Extension Support&color=blue&logo=discord" alt="Discord"></a> <a href="https://www.manim.community/discord/"><img src="https://img.shields.io/discord/581738731934056449.svg?label=Manim Community&color=yellow&logo=discord" alt="Discord"></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Homepage" src="https://img.shields.io/badge/vscode-install%20Here-brightgreen?style=for-the-badge&logo=visualstudiocode"></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Version" src="https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview?style=for-the-badge"></a> <a href="https://discord.gg/UmnzdPgn6g/"><img src="https://img.shields.io/discord/793047973751554088.svg?label=Extension Support&color=blue&style=for-the-badge&logo=discord" alt="Discord"></a> <a href="https://www.manim.community/discord/"><img src="https://img.shields.io/discord/581738731934056449.svg?label=Manim Community&style=for-the-badge&color=yellow&logo=discord" alt="Discord"></a>
 
-An extension for Visual Studio Code that provides a live preview and various other features in working with **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)**.
+An extension for Visual Studio Code that provides a live preview and various other features when working with **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)**.
+
+The extension assumes an installation of manim on `PATH` to work. If the executable is not on `PATH` you may set a custom path by following [this guide](#how-do-i-change-the-default-manim-executable-path).
 
 
-## Index
-
+# Index
 1. [Quickstart](#quickstart)
 2. [Rendering The Scene](#rendering)
-2. [Mobject Gallery](#mobject-gallery)
-3. [Context Variables](#context-variables)
-4. [Extension Settings](#extension-settings)
-5. [Status Bar Item](#utilities)
+3. [Config Files](#config-file)
+4. [Mobject Gallery](#mobject-gallery)
+5. [Default Configurations](#default-configurations)
 6. [Credits](#credits)
-
-## Frequently Asked Questions
-1. [How do I render on save?](#how-do-i-render-on-save)
-2. [How do I change the scene name after running?](#how-do-i-change-the-scene-name-after-running)
-3. [How do I change the default manim executable path?](#how-do-i-change-the-default-manim-executable-path)
+7. [Frequently Asked Questions](#frequently-asked-questions)
 
 ## Quickstart
-1. Install this Extension!
-2. Open up a Python file with the scene code
-3. Press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar to start rendering and preview the scene immediately! (or use `Ctrl+'` `r`)
+Open up a Python file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon (or) use `Ctrl+'` `r` from the menu bar to immediately start rendering a preview.
 
+**E.g.**
 ![](images/example_preview.gif)
 
 
 ## Rendering
 
-This extension does not come prepackaged with the Python manim executable or any of its necessary packages, it assumes an installation of manim on `PATH`, if the executable is not on `PATH` you may set a custom path by following [this guide](#how-do-i-change-the-default-manim-executable-path).
+When a scene is successfully rendered for the first time, the extension creates an active job tied to the source file, you can ensure this by finding a clickable icon inside the status bar
 
-When a scene is successfully rendered for the first time, the extension creates a active job tied to the source file, you can look at [this](#utilities) to make sure - as long as this job is active, all your settings will persist. Note that run on save does not get activated on files that don't have jobs.
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/statusbaritem.png"></image>
 
-#### Configuration
+Depending on the execution for rendering, this icon may change color to green or red for success or failure.
 
-It can be done in two ways.
-
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/settings.png" height="100%" width= "20px"> The first option is to provide in a runtime/in time (can be used interchangeably) configuration - where we'll ask you a few questions to tweak the settings on run time
-
-**HOTKEY** - `ctrl + '` `s` *press, release and then press s, this is not simultaneous*
-
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> For the second option you'll have to configure a `manim.cfg` with a few mandatory flags. Importantly, you must have the config file in the working directory.
-
-#### Preview
-
-To serve a live preview, the extension needs a relative path to the media file (it can be absolute for an intime configuration).
-
-Those using a `manim.cfg` file can skip this part as we derive programmatically where the media file will be with the given flags.
-
-For those using the runtime configurations, you'll have to provide the media path in the same dialog. When doing so, you can use a few context variables with as privillege as you can when changing the settings as provided [here](#variables).
-
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/video_dir.png"></image>
-* *figure taken from the in time configuration menu*
+## Config File
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> The extension recoginizes any manim configuration files as per [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) with a few mandatory flags. It is necessary to have the config file in the working directory.
 
 ## Mobject Gallery
 
-An Mobject gallery is a webview that allow users to insert code snippets for commonly used manim objects, e.g., shapes, text, etc...
+The Mobject gallery is a webview that allow users to insert code snippets for commonly used manim objects, like squares, text and also complex graphs.
 
-E.g.
+**E.g.**
 ![](images/example_of_mobject_gallery.gif)
 
-Open the command palette using `Shift + Command + P (Mac)` / `Ctrl + Shift + P` and use the command `Manim: Open MObject Gallery` to open the gallery.
+### How do I open the gallery?
+1. Open the command palette using `Shift + Command + P (Mac)` / `Ctrl + Shift + P`
+2. Use the command `Manim: Open MObject Gallery`
 
-Click on the shape you'd like to insert the Mobject code into a Python or Jupyter Notebook!
+You can place the cursor at a desired location and click the image of the manim object to insert the code into a Python file or Jupyter Notebook!
 
-## Context Variables
 
-Sometimes we don't want to set an absolute path to the media file. Context Variables can only be used in:
-* Configuration of `manim-sideview.videoDirectory`
+## Changing default Configuration
 
-The case of variable names matter.
+The extension needs a relative path to the media file to serve a live preview. Using a `manim.cfg` file makes it explicit in that the extension can use the default path, however, in some cases, you might want the extension to set the video output path or the live preview path to a different location.
+
+You can achieve this by opening the settings through
+ `File -> Preferences -> Settings` and changing the
+manim-sideview.commandLineArgs
+manim-sideview.videoDirectory
+manim-sideview.mediaDirectory
+
+### Context Variables
+
+These are variables you can use in the default configurations.
 #### Variables
 <table>
 <tr>
@@ -95,6 +85,10 @@ The case of variable names matter.
 Using unset variables will result in default values being used.
 
 ## Frequently Asked Questions
+1. [How do I render on save?](#how-do-i-render-on-save)
+2. [How do I change the scene name after running?](#how-do-i-change-the-scene-name-after-running)
+3. [How do I change the default manim executable path?](#how-do-i-change-the-default-manim-executable-path)
+
 
 ### How do I render on save?
 
@@ -113,14 +107,6 @@ Alternatively, you can also use the following default hotkey `Ctrl + '` `c`.
 You can set the default manim executable path by changing the `manim-sideview.defaultManimPath` configuration in `File -> Preferences -> Settings`.
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_defaultmanimpath.png"></image>
-
-## Utilities
-
-You can find a status bar item inside the status bar (the one at the very bottom) an icon that looks like:
-
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/statusbaritem.png"></image>
-
-This is a visual reminder that the file in current focus has an active renderer. Relevantly, this icon will change colors to either green or red depending on the results of an execution at times.
 
 ### Known Issues
 

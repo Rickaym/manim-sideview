@@ -51,13 +51,13 @@
           "type": "string",
           "scope": "application",
           "default": "-ql",
-          "description": "The command line arguments in running manim. Refer to manim documentation if you're unaware of existing arugments."
+          "description": "Command line arguments for running manim. Refer to the manim documentation if you're unaware of existing arguments."
         },
         "manim-sideview.videoDirectory": {
           "type": "string",
           "scope": "application",
           "default": "media/videos/{module_name}/480p15",
-          "description": "The video output directory. We can use context variables here to place them under the media directory. This does not include the .mp4 file itself."
+          "description": "The video output directory. We can use context variables here. This does not include the .mp4 file itself."
         },
         "manim-sideview.mediaDirectory": {
           "type": "string",
