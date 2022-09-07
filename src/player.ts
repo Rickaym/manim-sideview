@@ -39,7 +39,6 @@ export class VideoPlayer {
   }
 
   async showVideo(videoUri: vscode.Uri, runtimeConfig: RunningConfig) {
-    // const title = runtimeConfig.output.split("\\").pop() || "Untitled";
     const title = runtimeConfig.sceneName;
     if (this.panel) {
       return this.panel.webview.postMessage({

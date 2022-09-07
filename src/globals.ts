@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import * as vscode from "vscode";
 import * as fs from "fs";
 import path = require("path");
@@ -36,9 +38,10 @@ export class Log {
 
 // The key and value pairs that directly correlate to the output path
 export type ManimConfig = {
-  mediaDir: string;
-  videoDir: string;
+  media_dir: string;
+  video_dir: string;
   quality: string;
+  frame_rate: string;
 };
 
 /**
@@ -74,7 +77,7 @@ export function getOutputPath(
       "{module_name}": config.moduleName, // eslint-disable-line @typescript-eslint/naming-convention
       "{scene_name}": config.sceneName, // eslint-disable-line @typescript-eslint/naming-convention
     },
-    path.join(config.manimConfig.videoDir, config.sceneName + extension)
+    path.join(config.manimConfig.video_dir, config.sceneName + extension)
   );
 }
 
@@ -91,6 +94,7 @@ export type InternalManimCfg = {
   mediaDir: string;
   videoDir: string;
   quality: string;
+  frameRate: string;
   qualityMap: { [tp: string]: string };
   [exts: string]: string | { [tp: string]: string };
 };
@@ -100,6 +104,7 @@ export var FALLBACK_CONFIG: InternalManimCfg = {
   mediaDir: "./media",
   videoDir: "{media_dir}/videos/{module_name}/{quality}",
   quality: "low",
+  frameRate: "15",
   qualityMap: {
     fourk: "2160p60",
     production: "1440p60",

@@ -117,6 +117,7 @@ You can set the default manim executable path by changing the `manim-sideview.de
 + "Mobject" to "MObject" change extension-wide
 - Fontawesome CSS and JS files removed<br>
 + Complete rewrite of the readme file for less word content<br>
++ Extension now logs to an output channel called `Manim Sideview`
 
 #### 0.0.13
 

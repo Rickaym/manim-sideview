@@ -11,15 +11,15 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "manim-sideview.run",
-      async function (onSave: boolean = false) {
-        await sideview.run(onSave);
-      }
+      (onSave: boolean = false) => sideview.run(onSave)
     ),
     vscode.commands.registerCommand(
       "manim-sideview.refreshAllConfiguration",
       () => sideview.refreshAllConfiguration()
     ),
-    vscode.commands.registerCommand("manim-sideview.stop", () => sideview.stop()),
+    vscode.commands.registerCommand("manim-sideview.stop", () =>
+      sideview.stop()
+    ),
     vscode.commands.registerCommand("manim-sideview.setRenderingScene", () =>
       sideview.setRenderingScene()
     ),
@@ -34,7 +34,7 @@ export async function activate(context: vscode.ExtensionContext) {
       sideview.syncMobjectGallery()
     ),
     vscode.commands.registerCommand("manim-sideview.syncManimConfig", () =>
-      sideview.syncFalllbackManimConfig()
+      sideview.syncFallbackManimConfig()
     )
   );
 
