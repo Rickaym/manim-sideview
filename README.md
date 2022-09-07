@@ -8,19 +8,26 @@ An extension for Visual Studio Code that provides a live preview and various oth
 
 # Index
 1. [Quickstart](#quickstart)
-2. [Rendering The Scene](#rendering)
-3. [The Config File](#config-file)
+2. [The Config File](#config-file)
+3. [Rendering The Scene](#rendering)
 4. [Mobject Gallery](#mobject-gallery)
 5. [Default Configurations](#default-configurations)
 6. [FAQs](#frequently-asked-questions)
 7. [Credits](#credits)
 
 ## Quickstart
-Open the file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon (or) use `Ctrl+'` `r` from the menu bar to immediately start rendering a preview.
+Open the file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar (or) use `Ctrl+'` `r` to immediately start rendering a preview.
 
 ![](images/example_preview.gif)
 
 *That's it, folks!*
+
+## Config File
+
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image>
+If you're using a configuration file for your renders, worry not! the extension recognizes any manim configuration under the guideline [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) with a few mandatory flags.
+
+P.S. It is necessary to have the config current file in the working directory.
 
 ## Rendering
 
@@ -29,9 +36,6 @@ When a scene is successfully rendered for the first time, the extension creates 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/statusbaritem.png"></image>
 
 Depending on the execution for rendering, this icon may change also color to green or red for success or failure.
-
-## Config File
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> The extension recognizes any manim configuration files as per [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) with a few mandatory flags. It is necessary to have the config file in the working directory.
 
 ## Mobject Gallery
 

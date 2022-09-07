@@ -51,7 +51,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   vscode.window.onDidChangeActiveTextEditor(
     (e) => {
-      sideview.updateJobStatus();
+      sideview.refreshJobStatus();
       sideview.audit(e);
     },
     null,

@@ -11,7 +11,6 @@ import * as yaml from "yaml";
 import axios from "axios";
 import { TemplateEngine } from "./templateEngine";
 
-const VERSION_RE = /version_number\s*=\s*"([^"]+)";?/g;
 const GITHUB_ROOT_DIR =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
 // gallery synchronization files
@@ -177,7 +176,7 @@ export class Gallery {
       : Gallery.getPreviousEditor();
     if (!lastEditor) {
       return vscode.window.showErrorMessage(
-        "Select a document first and then use the gallery!"
+        "Manim Sideview: You need to place a cursor somewhere to insert the code."
       );
     }
 
@@ -218,13 +217,13 @@ export class Gallery {
     if (!forceDownload) {
       if (!newVersion) {
         vscode.window.showErrorMessage(
-          "Version descriptor in remote location missing. Please try again later."
+          "Manim Sideview: Version descriptor in remote location missing. Please try again later."
         );
         return;
       }
 
       if (newVersion === localVersion) {
-        vscode.window.showInformationMessage("You're already up to date!");
+        vscode.window.showInformationMessage("Manim Sideview: You're already up to date!");
         return;
       }
     } else if(!newVersion) {
@@ -232,7 +231,7 @@ export class Gallery {
     }
 
     vscode.window.showInformationMessage(
-      "Please wait a moment while we pull remote assets..."
+      "Manim Sideview: Please wait a moment while we pull remote assets..."
     );
 
     var {data} = await axios.get(GITHUB_ROOT_DIR + galleryParameters);
@@ -256,7 +255,7 @@ export class Gallery {
         if (index >= objectLists.length - 1) {
           await pfs.writeFile(PATHS.mobjVersion.fsPath, newVersion);
           vscode.window.showInformationMessage(
-            `Successfully downloaded all assets to version ${newVersion}! Please reload the webview.`
+            `Manim Sideview: Successfully downloaded all assets to version ${newVersion}! Please reload the webview.`
           );
         }
       }

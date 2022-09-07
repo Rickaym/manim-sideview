@@ -10,6 +10,7 @@ import {
   RunningConfig,
   BASE_ARGS,
   BASE_MANIM_EXE,
+  getDefaultMainConfig,
   FALLBACK_CONFIG,
   Log,
   ManimConfig,
@@ -17,28 +18,87 @@ import {
   updateFallbackManimCfg,
 } from "./globals";
 
-import { ConfigParser } from "./configparser";
+import { ConfigParser } from "./configParser";
 import { VideoPlayer } from "./player";
 import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 
-const LOCATE = { section: "CLI" };
-const SCENE_CLASSES = /class\s+(?<name>\w+)\(\w*Scene\w*\):/g;
-const CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
+const CONFIG_SECTION = "CLI";
+
+const RE_SCENE_CLASS = /class\s+(?<name>\w+)\(\w*Scene\w*\):/g;
+const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
 
 // a process will be killed if this message is seen
-const INPUT_REQUEST =
+const KILL_MSG =
   "Choose number corresponding to desired scene/arguments.\r\n(Use comma separated list for multiple entries)\r\nChoice(s):  ";
 
 type Job = {
   config: RunningConfig;
 };
 
+class JobStatusItemWrapper {
+  constructor() {
+    this.jobStatusItem = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left
+    );
+    this.jobStatusItem.name = "job-indicator";
+    this.jobStatusItem.command = "manim-sideview.refreshCurrentConfiguration";
+    this.jobStatusItem.tooltip = "Mainm Sideview - Press to stop session.";
+    this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
+    this.setActive();
+  }
+
+  private jobStatusItem: vscode.StatusBarItem;
+
+  getItem() {
+    return this.jobStatusItem;
+  }
+
+  private setIcon(themeIcon: String) {
+    this.jobStatusItem.text = `${themeIcon} Manim SV`;
+  }
+
+  setNew() {
+    this.jobStatusItem.color = new vscode.ThemeColor(
+      "minimapGutter.addedBackground"
+    );
+    this.setIcon("$(vm-active)");
+    this.setVisibility(true);
+  }
+
+  setRunning() {
+    this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
+    this.setIcon("$(sync~spin)");
+    this.setVisibility(true);
+  }
+
+  setActive() {
+    this.jobStatusItem.backgroundColor = new vscode.ThemeColor(
+      "button.hoverBackground"
+    );
+    this.setIcon("$(vm-active)");
+    this.setVisibility(true);
+  }
+
+  setError() {
+    this.jobStatusItem.color = new vscode.ThemeColor("minimap.errorHighlight");
+    this.setVisibility(true);
+  }
+
+  setVisibility(activeJob: boolean) {
+    if (activeJob) {
+      this.jobStatusItem.show();
+    } else {
+      this.jobStatusItem.hide();
+    }
+  }
+}
+
 export class ManimSideview {
   constructor(public readonly ctx: vscode.ExtensionContext) {
     this.ctx = ctx;
-    this.jobStatusItem = this.getJobStatusItem();
-    this.ctx.subscriptions.push(this.jobStatusItem);
+    this.jobStatusItem = new JobStatusItemWrapper();
+    this.ctx.subscriptions.push(this.jobStatusItem.getItem());
   }
 
   private manimCfgPath: string = "";
@@ -49,26 +109,19 @@ export class ManimSideview {
   );
   private gallery = new Gallery(this.ctx.extensionUri, this.ctx.subscriptions);
   private process: ChildProcess | undefined;
-  private jobStatusItem: vscode.StatusBarItem;
+  private jobStatusItem: JobStatusItemWrapper;
   private lastChosenSceneName: string | undefined;
 
   private outputChannel: vscode.OutputChannel =
     vscode.window.createOutputChannel("manim");
   private outputPseudoTerm: ManimPseudoTerm = new ManimPseudoTerm("manim");
 
-  private getJobStatusItem() {
-    const jobStatusItem = vscode.window.createStatusBarItem(
-      vscode.StatusBarAlignment.Left
-    );
-    jobStatusItem.name = "job-indicator";
-    jobStatusItem.text = "$(vm-active) Active Job";
-    jobStatusItem.command = "manim-sideview.refreshCurrentConfiguration";
-    jobStatusItem.backgroundColor = new vscode.ThemeColor(
-      "button.hoverBackground"
-    );
-    jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
-    jobStatusItem.tooltip = "Press To Deactivate Your Manim Job";
-    return jobStatusItem;
+  refreshJobStatus() {
+    if (this.getActiveJob() !== null) {
+      this.jobStatusItem.setActive();
+    } else {
+      this.jobStatusItem.setVisibility(false);
+    }
   }
 
   async run(onSave: boolean) {
@@ -107,21 +160,18 @@ export class ManimSideview {
 
       if (!activeJob || !activeJob.config.isUsingCfgFile) {
         // loaded the file config for the first time
-        vscode.window.showInformationMessage(
+        const choice = await vscode.window.showInformationMessage(
           Log.info(
-            "Found a mainm.cfg file in the source directory. The sideview is " +
-              "as configured appropriately, we just need the scene name now!"
-          )
+            "Manim Sideview: Would you like to use the configuration file from the current working directory?"
+          ), "Yes", "No"
         );
+        if (choice === "No") {
+          manimConfig = getDefaultMainConfig();
+        }
       }
     } else {
       // if we fail load it / we're not using a file: we'll use fallback values
-      manimConfig = {
-        video_dir: FALLBACK_CONFIG.videoDir,
-        media_dir: FALLBACK_CONFIG.mediaDir,
-        quality: FALLBACK_CONFIG.quality,
-        frame_rate: FALLBACK_CONFIG.frameRate,
-      };
+      manimConfig = getDefaultMainConfig();
     }
 
     // fix in the frame_rate value
@@ -130,12 +180,10 @@ export class ManimSideview {
       quality = quality.replace(quality.slice(-2), manimConfig.frame_rate);
     }
 
-    // insert video directory related variables
+    // insert video_dir related variables
     manimConfig.video_dir = insertContext(
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         "{quality}": quality,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         "{media_dir}": manimConfig.media_dir,
       },
       manimConfig.video_dir
@@ -161,7 +209,7 @@ export class ManimSideview {
       );
     }
 
-    this.executeRender(runningCfg);
+    this.renderShows(runningCfg);
   }
 
   stop(process?: ChildProcess) {
@@ -176,14 +224,14 @@ export class ManimSideview {
   async refreshAllConfiguration() {
     this.activeJobs = [];
     this.manimCfgPath = "";
-    this.updateJobStatus();
+    this.refreshJobStatus();
   }
 
   async refreshCurrentConfiguration() {
     const job = this.getActiveJob();
     if (job) {
       this.activeJobs.splice(this.activeJobs.indexOf(job), 1);
-      this.updateJobStatus();
+      this.refreshJobStatus();
     }
   }
 
@@ -226,7 +274,7 @@ export class ManimSideview {
       .replace(/\r/g, "")
       .replace(/\n/g, "");
 
-    const sceneClasses = [...contents.matchAll(SCENE_CLASSES)].map(
+    const sceneClasses = [...contents.matchAll(RE_SCENE_CLASS)].map(
       (m) => "$(run-all) " + m.groups?.name
     );
     const moreOption = "I'll provide it myself!";
@@ -246,9 +294,7 @@ export class ManimSideview {
       if (pick) {
         choice = pick;
       } else {
-        vscode.window.showErrorMessage(
-          Log.error("Try Again! You didn't pick a scene name.")
-        );
+        Log.error("Try Again! You didn't pick a scene name.");
         return;
       }
     }
@@ -261,9 +307,7 @@ export class ManimSideview {
       if (pick) {
         choice = pick;
       } else {
-        vscode.window.showErrorMessage(
-          Log.error("Try Again! You didn't input a custom scene name.")
-        );
+        Log.error("Try Again! You didn't input a custom scene name.");
         return;
       }
     }
@@ -276,26 +320,8 @@ export class ManimSideview {
     if (sceneName) {
       return sceneName;
     } else {
-      vscode.window.showErrorMessage(
-        Log.error("Try Again! You provided an invalid scene name.")
-      );
+      Log.error("Try Again! You provided an invalid scene name.");
       return;
-    }
-  }
-
-  updateJobStatus(color?: vscode.ThemeColor, text?: string) {
-    if (this.getActiveJob()) {
-      if (!text) {
-        text = "$(vm-active) Active Job";
-      }
-      if (!color) {
-        color = new vscode.ThemeColor("textLink.foreground");
-      }
-      this.jobStatusItem.color = color;
-      this.jobStatusItem.text = text;
-      this.jobStatusItem.show();
-    } else {
-      this.jobStatusItem.hide();
     }
   }
 
@@ -337,7 +363,7 @@ export class ManimSideview {
         return;
       }
 
-      const matches = payload?.match(CFG_OPTIONS);
+      const matches = payload?.match(RE_CFG_OPTIONS);
       if (!matches) {
         return;
       }
@@ -358,7 +384,7 @@ export class ManimSideview {
    *
    * @param conf the running config
    */
-  private async executeRender(conf: RunningConfig) {
+  private async renderShows(conf: RunningConfig) {
     let args = [conf.srcPath];
     if (!conf.isUsingCfgFile) {
       args.push(conf.cliArgs.trim());
@@ -426,10 +452,7 @@ export class ManimSideview {
 
     this.process = spawn(command, args, { cwd: cwd, shell: false });
 
-    this.updateJobStatus(
-      new vscode.ThemeColor("textLink.foreground"),
-      "$(sync~spin) Active Job"
-    );
+    this.jobStatusItem.setRunning();
 
     if (
       !this.process ||
@@ -456,7 +479,7 @@ export class ManimSideview {
         const outs = data.toString();
         outputChannel.append(outs);
 
-        if (outs.includes(INPUT_REQUEST)) {
+        if (outs.includes(KILL_MSG)) {
           this.stop(process);
           outputChannel.append("\n");
         }
@@ -499,7 +522,7 @@ export class ManimSideview {
 
       if (signal === "SIGTERM") {
         if (isMainProcess) {
-          this.updateJobStatus(new vscode.ThemeColor("minimap.errorHighlight"));
+          this.jobStatusItem.setError();
           this.process = undefined;
         }
         return;
@@ -513,11 +536,12 @@ export class ManimSideview {
         if (!fs.existsSync(mediaFp)) {
           vscode.window.showErrorMessage(
             Log.error(
-              `Couldn't find a video file at "${mediaFp}".` +
+              `Video file at "${mediaFp}" not found.` +
                 " Please make sure that the designated video and media directories" +
                 " are reflected in the extension log."
             )
           );
+          this.jobStatusItem.setError();
           return;
         }
 
@@ -536,22 +560,18 @@ export class ManimSideview {
           },
           (res) => {
             vscode.window.showErrorMessage(`${res}`);
-            this.updateJobStatus(
-              new vscode.ThemeColor("minimap.errorHighlight")
-            );
+            this.jobStatusItem.setError();
           }
         );
       } else {
-        this.updateJobStatus(new vscode.ThemeColor("minimap.errorHighlight"));
+        this.jobStatusItem.setError();
       }
     });
   }
 
   private newJob(conf: RunningConfig) {
     this.activeJobs.push({ config: conf });
-    this.updateJobStatus(
-      new vscode.ThemeColor("minimapGutter.addedBackground")
-    );
+    this.jobStatusItem.setNew();
   }
 
   /**
@@ -559,21 +579,21 @@ export class ManimSideview {
    * a source path if given.
    *
    * @param srcPath
-   * @returns Job | undefined
+   * @returns Job | null
    */
-  getActiveJob(srcPath?: string): Job | undefined {
+  getActiveJob(srcPath?: string): Job | null {
     let path: string;
     if (!srcPath) {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "python") {
-        return undefined;
+        return null;
       }
       path = editor.document.fileName;
     } else {
       path = srcPath;
     }
 
-    return this.activeJobs.find((j) => j.config.srcPath === path);
+    return this.activeJobs.find((j) => j.config.srcPath === path) || null;
   }
 
   /**
@@ -609,23 +629,18 @@ export class ManimSideview {
       return;
     }
 
-    if (!Object.keys(parsedConfig).includes(LOCATE.section)) {
+    if (!Object.keys(parsedConfig).includes(CONFIG_SECTION)) {
       vscode.window.showErrorMessage(
-        Log.error(`Config file is missing the [${LOCATE.section}] section.`)
+        Log.error(`Config file is missing the [${CONFIG_SECTION}] section.`)
       );
       return;
     }
 
-    const cliConfig = parsedConfig[LOCATE.section];
+    const cliConfig = parsedConfig[CONFIG_SECTION];
 
     // we always need a fully configured ManimConfig so this requires us to
     // start from fallback values
-    let manimConfig: ManimConfig = {
-      video_dir: FALLBACK_CONFIG.videoDir,
-      media_dir: FALLBACK_CONFIG.mediaDir,
-      quality: FALLBACK_CONFIG.quality,
-      frame_rate: FALLBACK_CONFIG.frameRate,
-    };
+    let manimConfig = getDefaultMainConfig();
 
     const relevantFlags = ["quality", "media_dir", "video_dir", "frame_rate"];
     for (const flag of relevantFlags) {

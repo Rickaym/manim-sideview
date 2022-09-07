@@ -44,6 +44,15 @@ export type ManimConfig = {
   frame_rate: string;
 };
 
+export function getDefaultMainConfig(): ManimConfig {
+  return {
+    video_dir: FALLBACK_CONFIG.videoDir,
+    media_dir: FALLBACK_CONFIG.mediaDir,
+    quality: FALLBACK_CONFIG.quality,
+    frame_rate: FALLBACK_CONFIG.frameRate,
+  };
+}
+
 /**
  * A configuration necessary to run a render.
  *
@@ -74,8 +83,8 @@ export function getOutputPath(
 ) {
   return insertContext(
     {
-      "{module_name}": config.moduleName, // eslint-disable-line @typescript-eslint/naming-convention
-      "{scene_name}": config.sceneName, // eslint-disable-line @typescript-eslint/naming-convention
+      "{module_name}": config.moduleName,
+      "{scene_name}": config.sceneName,
     },
     path.join(config.manimConfig.video_dir, config.sceneName + extension)
   );
@@ -99,7 +108,7 @@ export type InternalManimCfg = {
   [exts: string]: string | { [tp: string]: string };
 };
 
-// default fallback configurations
+// Default configurations.
 export var FALLBACK_CONFIG: InternalManimCfg = {
   mediaDir: "./media",
   videoDir: "{media_dir}/videos/{module_name}/{quality}",
