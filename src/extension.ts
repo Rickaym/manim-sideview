@@ -14,8 +14,8 @@ export async function activate(context: vscode.ExtensionContext) {
       (onSave: boolean = false) => sideview.run(onSave)
     ),
     vscode.commands.registerCommand(
-      "manim-sideview.refreshAllConfiguration",
-      () => sideview.refreshAllConfiguration()
+      "manim-sideview.removeAllJobs",
+      () => sideview.removeAllJobs()
     ),
     vscode.commands.registerCommand("manim-sideview.stop", () =>
       sideview.stop()
@@ -24,8 +24,8 @@ export async function activate(context: vscode.ExtensionContext) {
       sideview.setRenderingScene()
     ),
     vscode.commands.registerCommand(
-      "manim-sideview.refreshCurrentConfiguration",
-      () => sideview.refreshCurrentConfiguration()
+      "manim-sideview.removeCurrentJob",
+      () => sideview.removeCurrentJob()
     ),
     vscode.commands.registerCommand("manim-sideview.showMobjectGallery", () =>
       sideview.showMobjectGallery()

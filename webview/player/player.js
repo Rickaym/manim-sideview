@@ -1,8 +1,6 @@
 var timestatus = document.querySelector(".color-fill");
 var demostatus = document.querySelector(".demo-fill");
 var controls = document.querySelector(".controls");
-var valueReport = document.querySelector(".value");
-var moduleNameSpan = document.querySelector(".module-name");
 
 var video = document.getElementById("preview");
 
@@ -50,7 +48,7 @@ video.addEventListener("timeupdate", function () {
   timestatus.style.width = (video.currentTime / video.duration) * 100 + "%";
 });
 
-video.addEventListener('ended', function () {
+video.addEventListener("ended", function () {
   pauseVideo(false);
 });
 
@@ -71,8 +69,8 @@ window.addEventListener("message", function (e) {
     case "reload":
       video.setAttribute("src", message.resource);
       console.log("Set source to ", message.resource);
-      valueReport.innerHTML = `<b>Media File Path</b>: ${message.out}<br>`;
-      moduleNameSpan.innerHTML = `<b>${message.moduleName}</b>`;
+      document.getElementById("media-dir").innerText = message.out;
+      document.getElementById("module-name").innerText = message.moduleName;
       video.load();
       video.play();
   }

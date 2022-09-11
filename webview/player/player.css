@@ -81,6 +81,7 @@ section {
 
 .module-name {
   font-size: 1.5rem;
+  font-weight: bold;
   margin-top: 5px;
   overflow-wrap: break-word;
   font-weight: bold;

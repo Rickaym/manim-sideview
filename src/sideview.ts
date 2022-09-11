@@ -42,7 +42,7 @@ class JobStatusItemWrapper {
       vscode.StatusBarAlignment.Left
     );
     this.jobStatusItem.name = "job-indicator";
-    this.jobStatusItem.command = "manim-sideview.refreshCurrentConfiguration";
+    this.jobStatusItem.command = "manim-sideview.removeCurrentJob";
     this.jobStatusItem.tooltip = "Mainm Sideview - Press to stop session.";
     this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
     this.setActive();
@@ -82,6 +82,7 @@ class JobStatusItemWrapper {
 
   setError() {
     this.jobStatusItem.color = new vscode.ThemeColor("minimap.errorHighlight");
+    this.setIcon("$(vm-active)");
     this.setVisibility(true);
   }
 
@@ -163,16 +164,11 @@ export class ManimSideview {
 
       if (!activeJob || !activeJob.config.isUsingCfgFile) {
         // loaded the file config for the first time
-        const choice = await vscode.window.showInformationMessage(
+        vscode.window.showInformationMessage(
           Log.info(
-            "Manim Sideview: Would you like to use the configuration file from the current working directory?"
-          ),
-          "Yes",
-          "No"
+            "Manim Sideview: Extension successfully loaded a configuration file from the current working directory!"
+          )
         );
-        if (choice === "No") {
-          manimConfig = getDefaultMainConfig();
-        }
       }
     } else {
       // if we fail load it / we're not using a file: we'll use fallback values
@@ -214,7 +210,7 @@ export class ManimSideview {
       );
     }
 
-    this.renderShows(runningCfg);
+    this.runConfig(runningCfg);
   }
 
   stop(process?: ChildProcess) {
@@ -226,13 +222,13 @@ export class ManimSideview {
     }
   }
 
-  async refreshAllConfiguration() {
+  async removeAllJobs() {
     this.activeJobs = [];
     this.manimCfgPath = "";
     this.refreshJobStatus();
   }
 
-  async refreshCurrentConfiguration() {
+  async removeCurrentJob() {
     const job = this.getActiveJob();
     if (job) {
       this.activeJobs.splice(this.activeJobs.indexOf(job), 1);
@@ -293,7 +289,7 @@ export class ManimSideview {
       sceneClasses.push(moreOption);
 
       const pick = await vscode.window.showQuickPick(sceneClasses, {
-        title: "Pick The Name Of Your Scene",
+        title: "Manim Sideview: Pick your scene name!",
         placeHolder: "Search..",
       });
       if (pick) {
@@ -387,15 +383,21 @@ export class ManimSideview {
   /**
    * Creates necessary arguments and solutions to run per a running configuration.
    *
-   * @param conf the running config
+   * @param config the running config
    */
-  private async renderShows(conf: RunningConfig) {
-    Log.info(`Attempting to render via the running configuration ${conf}`);
-    let args = [conf.srcPath];
-    if (!conf.isUsingCfgFile) {
-      args.push(conf.cliArgs.trim());
+  private async runConfig(config: RunningConfig) {
+    Log.info(
+      `Attempting to render via the running configuration ${JSON.stringify(
+        config,
+        null,
+        4
+      )}`
+    );
+    let args = [config.srcPath];
+    if (!config.isUsingCfgFile) {
+      args.push(config.cliArgs.trim());
     }
-    args.push(conf.sceneName.trim());
+    args.push(config.sceneName.trim());
 
     let out: vscode.OutputChannel;
     if (
@@ -403,14 +405,14 @@ export class ManimSideview {
         .getConfiguration("manim-sideview")
         .get("outputToTerminal")
     ) {
-      this.outputPseudoTerm.cwd = conf.srcRootFolder;
+      this.outputPseudoTerm.cwd = config.srcRootFolder;
       this.outputPseudoTerm.isRunning = true;
       out = this.outputPseudoTerm;
     } else {
       out = this.outputChannel;
     }
 
-    this.executeTerminalCommand(args, conf, out);
+    this.executeTerminalCommand(args, config, out);
   }
 
   async executeTerminalCommand(
@@ -422,26 +424,8 @@ export class ManimSideview {
     const cwd = conf.srcRootFolder;
     const mediaFp = path.join(conf.srcRootFolder, getOutputPath(conf));
 
-    // Output channels will not keep historical logs
-    outputChannel.clear();
-
-    if (conf.isUsingCfgFile) {
-      outputChannel.appendLine(
-        Log.format("info", `Configuration status ${conf.isUsingCfgFile}`)
-      );
-    }
-
-    outputChannel.append(
-      Log.format("info", `Current working directory "${cwd}"\n`) +
-        Log.format("info", `Manim Executable Path at "${command}"\n`) +
-        Log.format("info", `Added arguments ${args.join(" | ")}\n`) +
-        Log.format(
-          "info",
-          `Relative Output Video Path at "${conf.manimConfig.video_dir}"\n`
-        ) +
-        Log.format("debug", `${command} ${args.join(" ")}\n`) +
-        Log.format("info", `Output Video Path at "${mediaFp}"\n`)
-    );
+    // mime command
+    outputChannel.append(`${command} ${args.join(" ")}\n`);
 
     if (
       vscode.workspace
@@ -542,7 +526,7 @@ export class ManimSideview {
         if (!fs.existsSync(mediaFp)) {
           vscode.window.showErrorMessage(
             Log.error(
-              `Video file at "${mediaFp}" not found.` +
+              `"${mediaFp}" Does not contain the output video file.` +
                 " Please make sure that the designated video and media directories" +
                 " are reflected in the extension log."
             )

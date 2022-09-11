@@ -16,45 +16,25 @@ import * as vscode from "vscode";
 
 type Config = { [name: string]: { [name: string]: string } };
 
-// [title]
-const section = /^\[(?<title>\w+)\]$/g;
 // key = value
-const keyValPair = /^(?<key>\w+)\s*=\s*(?<value>.+)$/g;
+const RE_KEYVALPAIR = /(?<key>\w+)\s*=\s*(?<value>.+)/g;
 
 export class ConfigParser {
   static async parse(uri: string): Promise<Config> {
-    var result: Config = {};
+    const result: Config = {};
 
     const contents = (
       await vscode.workspace.fs.readFile(vscode.Uri.file(uri))
     ).toString();
-    var curSection = "OUTCAST";
-    contents
-      .split("\n")
-      .map((ln) => {
-        let res = keyValPair.exec(ln.trim());
-        /* weird bug in .exec where even no lines
-           always returns null, a bit hacky fix to
-           execute it twice every time so we always land
-           on odd */
-        keyValPair.exec("skip");
-        if (!res) {
-          const sec = section.exec(ln.trim());
-          section.exec("skip");
-          if (sec && sec.groups) {
-            curSection = sec.groups.title;
-          }
+    const sect = "CLI";
+    [...contents.matchAll(RE_KEYVALPAIR)].forEach((r) => {
+      if (r && r.groups) {
+        if (!result[sect]) {
+          result[sect] = {};
         }
-        return res;
-      })
-      .forEach((r) => {
-        if (r && r.groups) {
-          if (!result[curSection]) {
-            result[curSection] = {};
-          }
-          result[curSection][r.groups.key] = r.groups.value;
-        }
-      });
+        result[sect][r.groups.key] = r.groups.value;
+      }
+    });
     return result;
   }
 }

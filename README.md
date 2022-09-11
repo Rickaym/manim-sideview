@@ -114,15 +114,16 @@ You can set the default manim executable path by changing the `manim-sideview.de
 
 #### 0.0.14
 
-+ Manim Gallery View now uses the `plywood-gallery-for-vsce` template engine.<br>
-+ Video player now uses the same template engine.<br>
-+ Video player revamped--now simple and straightforward <br>
-+ User Extension log format changed<br>
-+ "Mobject" to "MObject" change extension-wide
++ Extension terminal output format changed & added message persistence<br>
++ New GUI User Interface for the Video Player<br>
++ Uses the `plywood-gallery-for-vsce` template engine for MObject Gallery<br>
++ Uses the `plywood-gallery-for-vsce` template engine for Video Player<br>
++ Added a new output channel called `Manim Sideview` for the extension to log all window and debug information<br>
++ "Mobject" to "MObject" change extension-wide<br>
++ README write simplification and rewrite<br>
++ Added support to rendering scenes without loading the source file workspace<br>
 - Fontawesome CSS and JS files removed<br>
-+ Complete rewrite of the readme file for less word content<br>
-+ Extension now logs to an output channel called `Manim Sideview`
-+ Extension allows video rendering without loading the workspace for the python script
+- Extension excess terminal output changed<br>
 
 #### 0.0.13
 
