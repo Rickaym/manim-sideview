@@ -122,6 +122,7 @@ You can set the default manim executable path by changing the `manim-sideview.de
 - Fontawesome CSS and JS files removed<br>
 + Complete rewrite of the readme file for less word content<br>
 + Extension now logs to an output channel called `Manim Sideview`
++ Extension allows video rendering without loading the workspace for the python script
 
 #### 0.0.13
 

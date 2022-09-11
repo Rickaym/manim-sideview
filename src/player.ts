@@ -60,6 +60,10 @@ export class VideoPlayer {
         preserveFocus: true,
       },
       {
+        localResourceRoots: [
+          vscode.Uri.joinPath(vscode.Uri.file(videoUri.path), "../"),
+          this.extensionUri,
+        ],
         enableScripts: true,
       }
     );

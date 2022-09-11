@@ -129,7 +129,7 @@ export class ManimSideview {
     if (!editor) {
       if (!onSave) {
         await vscode.window.showErrorMessage(
-          "Hey! You need a valid Python file to run the sideview."
+          Log.error("Hey! You need a valid Python file to run the sideview.")
         );
       }
       return;
@@ -140,6 +140,9 @@ export class ManimSideview {
         (j) => j.config.srcPath === editor.document.fileName
       )
     ) {
+      Log.error(
+        `Triggered run with "onSave" on ${editor.document.fileName} but couldn't be found.`
+      );
       return;
     }
 
@@ -163,7 +166,9 @@ export class ManimSideview {
         const choice = await vscode.window.showInformationMessage(
           Log.info(
             "Manim Sideview: Would you like to use the configuration file from the current working directory?"
-          ), "Yes", "No"
+          ),
+          "Yes",
+          "No"
         );
         if (choice === "No") {
           manimConfig = getDefaultMainConfig();
@@ -385,6 +390,7 @@ export class ManimSideview {
    * @param conf the running config
    */
   private async renderShows(conf: RunningConfig) {
+    Log.info(`Attempting to render via the running configuration ${conf}`);
     let args = [conf.srcPath];
     if (!conf.isUsingCfgFile) {
       args.push(conf.cliArgs.trim());
@@ -619,7 +625,7 @@ export class ManimSideview {
       return;
     }
 
-    Log.error(`Parsing configuration file at ${filePath}.`);
+    Log.info(`Parsing configuration file at ${filePath}.`);
     try {
       var parsedConfig = await ConfigParser.parse(filePath);
     } catch (e) {
@@ -646,7 +652,7 @@ export class ManimSideview {
     for (const flag of relevantFlags) {
       if (Object.keys(cliConfig).includes(flag)) {
         manimConfig[flag as keyof ManimConfig] = cliConfig[flag];
-        Log.error(`Set flag "${flag}" to ${cliConfig[flag]}.`);
+        Log.info(`Set flag "${flag}" to ${cliConfig[flag]}.`);
       }
     }
 
