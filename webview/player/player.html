@@ -13,7 +13,7 @@
 <body>
   <div class="video-container">
       <div class="player">
-        <video {{ autoplay }} {{ loop }} id="preview" src="{{ videoSrc }}"></video>
+        <video {{ autoplay }} {{ loop }} id="preview" poster="{{ posterDir }}" src="{{ videoDir }}"></video>
         <div class="controls{{ previewShowProgressOnIdle }}">
           <div class="color-fill" {{ previewProgressStyle }}></div>
           <div class="demo-fill"></div>
@@ -26,7 +26,7 @@
           <div id="module-name" class="module-name">{{ moduleName }}</div>
           <div class="description-container">
             <span class="description-prefix">Config: </span><span class="description-header">Media Dir</span><br>
-            <span id="media-dir" class="description-value">{{ out }}</span><br>
+            <span id="media-dir" class="description-value">{{ mediaDir }}</span><br>
           </div>
         </div>
     </div>

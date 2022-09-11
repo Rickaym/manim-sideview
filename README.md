@@ -115,15 +115,17 @@ You can set the default manim executable path by changing the `manim-sideview.de
 #### 0.0.14
 
 + Extension terminal output format changed & added message persistence<br>
-+ New GUI User Interface for the Video Player<br>
++ Video Player renamed to "Media Player" and now handles both image and video media<br>
++ Added image support for rendering previews<br>
++ New GUI User Interface for the Media Player<br>
 + Uses the `plywood-gallery-for-vsce` template engine for MObject Gallery<br>
-+ Uses the `plywood-gallery-for-vsce` template engine for Video Player<br>
++ Uses the `plywood-gallery-for-vsce` template engine for Media Player<br>
 + Added a new output channel called `Manim Sideview` for the extension to log all window and debug information<br>
 + "Mobject" to "MObject" change extension-wide<br>
 + README write simplification and rewrite<br>
 + Added support to rendering scenes without loading the source file workspace<br>
 - Fontawesome CSS and JS files removed<br>
-- Extension excess terminal output changed<br>
+- Extension excess terminal output removed<br>
 
 #### 0.0.13
 

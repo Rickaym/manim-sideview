@@ -6,20 +6,19 @@ import * as fs from "fs";
 
 import { ChildProcess, spawn } from "child_process";
 import {
-  insertContext,
   RunningConfig,
   BASE_ARGS,
   BASE_MANIM_EXE,
   getDefaultMainConfig,
-  FALLBACK_CONFIG,
   Log,
   ManimConfig,
-  getOutputPath,
+  getVideoOutputPath,
   updateFallbackManimCfg,
+  getImageOutputPath,
 } from "./globals";
 
 import { ConfigParser } from "./configParser";
-import { VideoPlayer } from "./player";
+import { MediaPlayer, PlayableMediaType } from "./player";
 import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 
@@ -27,6 +26,8 @@ const CONFIG_SECTION = "CLI";
 
 const RE_SCENE_CLASS = /class\s+(?<name>\w+)\(\w*Scene\w*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
+const RE_FILE_READY = /File ready at '(?<path>[^']+)'/g;
+const RE_MANIM_VERSION = /Manim Community v(?<version>[.0-9]+)/g;
 
 // a process will be killed if this message is seen
 const KILL_MSG =
@@ -104,7 +105,7 @@ export class ManimSideview {
 
   private manimCfgPath: string = "";
   private activeJobs: Job[] = [];
-  private videoPlayer = new VideoPlayer(
+  private mediaPlayer = new MediaPlayer(
     this.ctx.extensionUri,
     this.ctx.subscriptions
   );
@@ -174,21 +175,6 @@ export class ManimSideview {
       // if we fail load it / we're not using a file: we'll use fallback values
       manimConfig = getDefaultMainConfig();
     }
-
-    // fix in the frame_rate value
-    let quality = FALLBACK_CONFIG.qualityMap[manimConfig.quality];
-    if (manimConfig.frame_rate !== quality.slice(-2)) {
-      quality = quality.replace(quality.slice(-2), manimConfig.frame_rate);
-    }
-
-    // insert video_dir related variables
-    manimConfig.video_dir = insertContext(
-      {
-        "{quality}": quality,
-        "{media_dir}": manimConfig.media_dir,
-      },
-      manimConfig.video_dir
-    );
 
     let runningCfg: RunningConfig;
     if (activeJob) {
@@ -391,7 +377,9 @@ export class ManimSideview {
         config,
         null,
         4
-      )}`
+      )}\n{\n"videoOutputPath": ${getVideoOutputPath(
+        config
+      )},\n"imageOutputPath": ${getImageOutputPath(config, "{version}")}\n}`
     );
     let args = [config.srcPath];
     if (!config.isUsingCfgFile) {
@@ -417,12 +405,13 @@ export class ManimSideview {
 
   async executeTerminalCommand(
     args: string[],
-    conf: RunningConfig,
+    config: RunningConfig,
     outputChannel: vscode.OutputChannel
   ) {
-    const command = conf.executablePath;
-    const cwd = conf.srcRootFolder;
-    const mediaFp = path.join(conf.srcRootFolder, getOutputPath(conf));
+    const command = config.executablePath;
+    const cwd = config.srcRootFolder;
+    var manimVersion: string | undefined;
+    var outputFileType: number | undefined;
 
     // mime command
     outputChannel.append(`${command} ${args.join(" ")}\n`);
@@ -441,7 +430,6 @@ export class ManimSideview {
     }
 
     this.process = spawn(command, args, { cwd: cwd, shell: false });
-
     this.jobStatusItem.setRunning();
 
     if (
@@ -450,13 +438,11 @@ export class ManimSideview {
       !this.process.stderr ||
       !this.process.stdin
     ) {
-      outputChannel.appendLine(
-        Log.format(
-          "info",
-          `Execution returned code=911 in Process: ${this.process}, stdout: ${this.process?.stdout}, stdout: ${this.process?.stderr}`
+      outputChannel.append(
+        Log.info(
+          `Execution returned code=911 in Process: ${this.process}, stdout: ${this.process?.stdout}, stdout: ${this.process?.stderr}\n`
         )
       );
-      outputChannel.append("\n");
       return vscode.window.showErrorMessage(
         "Fatal error, please look at the output channel."
       );
@@ -466,12 +452,39 @@ export class ManimSideview {
     const process = this.process;
     this.process.stdout.on("data", (data: string) => {
       if (!process.killed) {
-        const outs = data.toString();
-        outputChannel.append(outs);
+        const dataStr = data.toString();
+        outputChannel.append(dataStr);
 
-        if (outs.includes(KILL_MSG)) {
+        if (dataStr.includes(KILL_MSG)) {
           this.stop(process);
           outputChannel.append("\n");
+          return;
+        }
+
+        if (!outputFileType) {
+          const fileSignifier = [...dataStr.matchAll(RE_FILE_READY)];
+          if (!fileSignifier) {
+            return;
+          }
+
+          // Change output file type to image if the "File ready" message
+          // tells us that the media ready has the png extension.
+          if (
+            fileSignifier.some((m) =>
+              m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
+            )
+          ) {
+            outputFileType = PlayableMediaType.Image;
+          } else {
+            outputFileType = PlayableMediaType.Video;
+          }
+        }
+        if (!manimVersion) {
+          const versionSignifier = [...dataStr.matchAll(RE_MANIM_VERSION)];
+          if (!versionSignifier) {
+            return;
+          }
+          manimVersion = versionSignifier[0].groups?.version;
         }
       }
     });
@@ -497,8 +510,7 @@ export class ManimSideview {
       }
 
       outputChannel.appendLine(
-        Log.format(
-          "info",
+        Log.info(
           `Execution returned code=${code} in ${elapsedTime} seconds ${
             code === 1 ? "returned signal " + signal : ""
           } ${
@@ -508,6 +520,7 @@ export class ManimSideview {
           }\n`
         )
       );
+
       const isMainProcess = this.process && this.process.pid === process.pid;
 
       if (signal === "SIGTERM") {
@@ -523,33 +536,34 @@ export class ManimSideview {
       }
 
       if (code === 0) {
-        if (!fs.existsSync(mediaFp)) {
-          vscode.window.showErrorMessage(
-            Log.error(
-              `"${mediaFp}" Does not contain the output video file.` +
-                " Please make sure that the designated video and media directories" +
-                " are reflected in the extension log."
-            )
-          );
-          this.jobStatusItem.setError();
-          return;
-        }
+        const mediaFp = vscode.Uri.file(
+          path.join(
+            config.srcRootFolder,
+            outputFileType === PlayableMediaType.Video
+              ? getVideoOutputPath(config)
+              : getImageOutputPath(config, manimVersion || "")
+          )
+        );
 
-        vscode.workspace.fs.stat(vscode.Uri.file(mediaFp)).then(
+        vscode.workspace.fs.stat(mediaFp).then(
           (fs) => {
             // we'll open a side view if we can find the file
-            const res = vscode.Uri.file(mediaFp);
-            if (!res) {
-              vscode.window.showErrorMessage(
-                "The output file couldn't be found."
-              );
-            } else {
-              this.videoPlayer.showVideo(res, conf);
-            }
-            this.newJob(conf);
+            this.mediaPlayer.playMedia(
+              mediaFp,
+              config,
+              outputFileType || PlayableMediaType.Video
+            );
+            this.newJob(config);
           },
           (res) => {
-            vscode.window.showErrorMessage(`${res}`);
+            Log.error(`${res}`);
+            vscode.window.showErrorMessage(
+              Log.error(
+                `Manim Sideview: "${mediaFp}" does not exist to be loaded in the sideview.` +
+                  " Please make sure that the designated video and image directories" +
+                  " are reflected in the extension log."
+              )
+            );
             this.jobStatusItem.setError();
           }
         );

@@ -40,14 +40,16 @@ export class Log {
 export type ManimConfig = {
   media_dir: string;
   video_dir: string;
+  image_dir: string;
   quality: string;
   frame_rate: string;
 };
 
 export function getDefaultMainConfig(): ManimConfig {
   return {
-    video_dir: FALLBACK_CONFIG.videoDir,
     media_dir: FALLBACK_CONFIG.mediaDir,
+    video_dir: FALLBACK_CONFIG.videoDir,
+    image_dir: FALLBACK_CONFIG.imageDir,
     quality: FALLBACK_CONFIG.quality,
     frame_rate: FALLBACK_CONFIG.frameRate,
   };
@@ -77,16 +79,39 @@ export type RunningConfig = {
   manimConfig: ManimConfig;
 };
 
-export function getOutputPath(
+export function getVideoOutputPath(
   config: RunningConfig,
   extension: string = ".mp4"
 ) {
+  // fix in the frame_rate value
+  let quality = FALLBACK_CONFIG.qualityMap[config.manimConfig.quality];
+  if (config.manimConfig.frame_rate !== quality.slice(-2)) {
+    quality = quality.replace(quality.slice(-2), config.manimConfig.frame_rate);
+  }
+
   return insertContext(
     {
+      "{quality}": quality,
+      "{media_dir}": config.manimConfig.media_dir,
       "{module_name}": config.moduleName,
       "{scene_name}": config.sceneName,
     },
-    path.join(config.manimConfig.video_dir, config.sceneName + extension)
+    path.join(config.manimConfig.video_dir, `${config.sceneName}${extension}`)
+  );
+}
+
+export function getImageOutputPath(
+  config: RunningConfig,
+  manimVersion: string,
+  extension: string = ".png"
+) {
+  return insertContext(
+    {
+      "{media_dir}": config.manimConfig.media_dir,
+      "{module_name}": config.moduleName,
+      "{scene_name}": config.sceneName,
+    },
+    path.join(config.manimConfig.image_dir, `${config.sceneName}_ManimCE_v${manimVersion}${extension}`)
   );
 }
 
@@ -102,6 +127,7 @@ export type WebviewResources = {
 export type InternalManimCfg = {
   mediaDir: string;
   videoDir: string;
+  imageDir: string;
   quality: string;
   frameRate: string;
   qualityMap: { [tp: string]: string };
@@ -112,6 +138,7 @@ export type InternalManimCfg = {
 export var FALLBACK_CONFIG: InternalManimCfg = {
   mediaDir: "./media",
   videoDir: "{media_dir}/videos/{module_name}/{quality}",
+  imageDir: "{media_dir}/images/{module_name}",
   quality: "low",
   frameRate: "15",
   qualityMap: {

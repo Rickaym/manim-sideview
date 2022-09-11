@@ -1,3 +1,4 @@
+const vscode = acquireVsCodeApi();
 var timestatus = document.querySelector(".color-fill");
 var demostatus = document.querySelector(".demo-fill");
 var controls = document.querySelector(".controls");
@@ -67,11 +68,18 @@ window.addEventListener("message", function (e) {
   const message = e.data;
   switch (message.command) {
     case "reload":
-      video.setAttribute("src", message.resource);
       console.log("Set source to ", message.resource);
       document.getElementById("media-dir").innerText = message.out;
       document.getElementById("module-name").innerText = message.moduleName;
-      video.load();
-      video.play();
-  }
+
+      if (message.mediaType === 1) {
+        video.setAttribute("poster", message.resource);
+        video.removeAttribute("src");
+      } else {
+        video.setAttribute("src", message.resource);
+        video.removeAttribute("poster");
+        video.load();
+        video.play();
+      }
+    }
 });
