@@ -413,7 +413,7 @@ export class ManimSideview {
     var manimVersion: string | undefined;
     var outputFileType: number | undefined;
 
-    // mime command
+    // mime command without "
     outputChannel.append(`${command} ${args.join(" ")}\n`);
 
     if (
