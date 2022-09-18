@@ -18,7 +18,7 @@ An extension for Visual Studio Code that provides a live preview and various oth
 ## Quickstart
 Open the file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar (or) use `Ctrl+'` `r` to immediately start rendering a preview.
 
-![](images/example_preview.gif)
+<image src="https://raw.githubusercontent.com/Rickaym/manim-sideview/master/images/quickstart.gif">
 
 *That's it, folks!*
 
