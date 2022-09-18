@@ -20,8 +20,7 @@ export class MediaPlayer {
     public readonly disposables: any[]
   ) {}
 
-  private recentVideoPanel: vscode.WebviewPanel | undefined;
-  private recentImagePanel: vscode.WebviewPanel | undefined;
+  private recentMediaPanel: vscode.WebviewPanel | undefined;
 
   private manimIconsPath = {
     dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
@@ -47,36 +46,42 @@ export class MediaPlayer {
     return `style="background-color: ${colorStr}"`;
   }
 
+  asCacheBreakingWebviewUri(webveiw: vscode.Webview, uri: vscode.Uri) {
+    return `${webveiw.asWebviewUri(uri).toString()}?t=${new Date().getTime()}`;
+  }
+
   async playMedia(
     mediaUri: vscode.Uri,
     config: RunningConfig,
     mediaType: number
   ) {
-    if (mediaType === PlayableMediaType.Video && this.recentVideoPanel) {
-      return this.recentVideoPanel.webview.postMessage({
-        command: "reload",
-        mediaType: mediaType,
-        resource: this.recentVideoPanel.webview
-          .asWebviewUri(mediaUri)
-          .toString(),
-        pictureInPicture: vscode.workspace
-          .getConfiguration("manim-sideview")
-          .get("pictureInPictureOnStart"),
-        out: mediaUri.fsPath,
-        moduleName: config.sceneName,
-      });
-    }
+    if (this.recentMediaPanel) {
+      const resource = this.asCacheBreakingWebviewUri(
+        this.recentMediaPanel.webview,
+        mediaUri
+      );
+      if (mediaType === PlayableMediaType.Video) {
+        return this.recentMediaPanel.webview.postMessage({
+          command: "reload",
+          mediaType: mediaType,
+          resource: resource,
+          pictureInPicture: vscode.workspace
+            .getConfiguration("manim-sideview")
+            .get("pictureInPictureOnStart"),
+          out: mediaUri.fsPath,
+          moduleName: config.sceneName,
+        });
+      }
 
-    if (mediaType === PlayableMediaType.Image && this.recentImagePanel) {
-      return this.recentImagePanel.webview.postMessage({
-        command: "reload",
-        mediaType: mediaType,
-        resource: this.recentImagePanel.webview
-          .asWebviewUri(mediaUri)
-          .toString(),
-        out: mediaUri.fsPath,
-        moduleName: config.sceneName,
-      });
+      if (mediaType === PlayableMediaType.Image) {
+        return this.recentMediaPanel.webview.postMessage({
+          command: "reload",
+          mediaType: mediaType,
+          resource: resource,
+          out: mediaUri.fsPath,
+          moduleName: config.sceneName,
+        });
+      }
     }
 
     const panel = vscode.window.createWebviewPanel(
@@ -104,17 +109,24 @@ export class MediaPlayer {
       "player"
     );
     const prefs = vscode.workspace.getConfiguration("manim-sideview");
-    const targetKey =
-      mediaType === PlayableMediaType.Video ? "videoDir" : "posterDir";
-    const toBeHid =
+
+    // the property key to set the resource url to
+    const srcReplacementKey =
+      mediaType === PlayableMediaType.Video ? "videoDir" : "imageDir";
+
+    // the property variable key from the HTML document to hide
+    const hideKey =
       mediaType === PlayableMediaType.Video
-        ? "posterHideState"
+        ? "imageHideState"
         : "videoHideState";
 
     panel.iconPath = this.manimIconsPath;
     panel.webview.html = await engine.render({
-      [targetKey]: panel.webview.asWebviewUri(mediaUri).toString(),
-      [toBeHid]: "hidden",
+      [srcReplacementKey]: this.asCacheBreakingWebviewUri(
+        panel.webview,
+        mediaUri
+      ),
+      [hideKey]: "hidden",
       mediaDir: mediaUri.fsPath,
       moduleName: config.sceneName,
       previewShowProgressOnIdle: prefs.get("previewShowProgressOnIdle")
@@ -127,40 +139,28 @@ export class MediaPlayer {
       autoplay: prefs.get("previewAutoPlay") ? "autoplay" : "",
     });
 
-    panel.webview.onDidReceiveMessage(
-      (message) => {
-        if (message.command === "reload-webviews") {
-          vscode.commands.executeCommand(
-            "workbench.action.webview.reloadWebviewAction"
-          );
-        }
-      },
-      undefined,
-      this.disposables
-    );
+    // panel.webview.onDidReceiveMessage(
+    //   (message) => {
+    //     if (message.command === "reload-webviews") {
+    //       vscode.commands.executeCommand(
+    //         "workbench.action.webview.reloadWebviewAction"
+    //       );
+    //     }
+    //   },
+    //   undefined,
+    //   this.disposables
+    // );
 
     panel.onDidDispose(
       () => {
-        if (
-          mediaType === PlayableMediaType.Image &&
-          panel === this.recentImagePanel
-        ) {
-          this.recentImagePanel = undefined;
-        } else if (
-          mediaType === PlayableMediaType.Video &&
-          panel === this.recentVideoPanel
-        ) {
-          this.recentVideoPanel = undefined;
+        if (panel === this.recentMediaPanel) {
+          this.recentMediaPanel = undefined;
         }
       },
       undefined,
       this.disposables
     );
 
-    if (mediaType === PlayableMediaType.Image) {
-      this.recentImagePanel = panel;
-    } else if (mediaType === PlayableMediaType.Video) {
-      this.recentVideoPanel = panel;
-    }
+    this.recentMediaPanel = panel;
   }
 }

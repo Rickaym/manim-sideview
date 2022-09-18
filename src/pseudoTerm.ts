@@ -40,7 +40,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
   private prompt = `${defPrompt} ${this.cwd}>`;
   private intro = "Manim Extension XTerm\n\rServes as a terminal for logging purpose." +
               "\n\r\n\rUtilize the powershell for anything else.\n\r\n\r" +
-              `Extension Version ${EXTENSION_VERSION}\n\r`;
+              `Extension Version ${EXTENSION_VERSION}\n\r\n\r${this.prompt}`;
   public isRunning = false;
   private content = "";
   public writeEmitter = new vscode.EventEmitter<string>();

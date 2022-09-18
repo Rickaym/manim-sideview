@@ -383,7 +383,7 @@ export class ManimSideview {
     );
     let args = [config.srcPath];
     if (!config.isUsingCfgFile) {
-      args.push(config.cliArgs.trim());
+      args.push(...config.cliArgs.trim().split(" "));
     }
     args.push(config.sceneName.trim());
 

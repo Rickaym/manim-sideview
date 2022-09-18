@@ -3,7 +3,10 @@ var timestatus = document.querySelector(".color-fill");
 var demostatus = document.querySelector(".demo-fill");
 var controls = document.querySelector(".controls");
 
-var video = document.getElementById("preview");
+var videoPlayer = document.getElementById("video-media-player");
+var video = document.getElementById("video-preview");
+var imagePlayer = document.getElementById("image-media-player");
+var image = document.getElementById("image-preview");
 
 togglePlayPause(false);
 
@@ -73,13 +76,16 @@ window.addEventListener("message", function (e) {
       document.getElementById("module-name").innerText = message.moduleName;
 
       if (message.mediaType === 1) {
-        video.setAttribute("poster", message.resource);
-        video.removeAttribute("src");
+        image.setAttribute("src", message.resource);
+        videoPlayer.hidden = true;
+        imagePlayer.hidden = false;
       } else {
         video.setAttribute("src", message.resource);
         video.removeAttribute("poster");
         video.load();
         video.play();
+        imagePlayer.hidden = true;
+        videoPlayer.hidden = false;
       }
     }
 });
