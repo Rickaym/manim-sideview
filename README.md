@@ -83,24 +83,24 @@ These are variables you can use for setting the default configurations.
 Using unset variables will result in default values being used.
 
 ## Frequently Asked Questions
-1. [How do I render on save?](#how-do-i-render-on-save)
-2. [How do I change the scene name after running?](#how-do-i-change-the-scene-name-after-running)
-3. [How do I change the default manim executable path?](#how-do-i-change-the-default-manim-executable-path)
+1. [How do I render on save?](#1-how-do-i-render-on-save)
+2. [How do I change the scene name after running?](#2-how-do-i-change-the-scene-name-after-running)
+3. [How do I change the default manim executable path?](#3-how-do-i-change-the-default-manim-executable-path)
 
 
-### How do I render on save?
+### 1. How do I render on save?
 
 Enable the `manim-sideview.runOnSave` settings inside vscode `File -> Preferences -> Settings` menu.
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_runonsave.png"></image>
 
-### How do I change the scene name after running?
+### 2. How do I change the scene name after running?
 
 You can change the scene name after a job by using the `Manim: Set A New SceneName` command through the command palette `Shift + Command + P (Mac)` / `Ctrl + Shift + P`.
 
 Alternatively, you can also use the following default hotkey `Ctrl + '` `c`.
 
-### How do I change the default manim executable path?
+### 3. How do I change the default manim executable path?
 
 You can set the default manim executable path by changing the `manim-sideview.defaultManimPath` configuration in `File -> Preferences -> Settings`.
 
