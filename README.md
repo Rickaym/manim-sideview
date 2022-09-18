@@ -125,9 +125,7 @@ You can set the default manim executable path by changing the `manim-sideview.de
 + Added support to rendering scenes without loading the source file workspace<br>
 - Fontawesome CSS and JS files removed<br>
 - Extension excess terminal output removed<br>
-+ Extension run command now takes in `srcPath` as an argument.<br>
-+ Rendering on save now uses `srcPath` arg instead of boolean `onSave`<br>
-+ `manim-sideview.setRenderingSceneName` command name changed to `manim-sideview.renderNewScene`<br>
++ Changed command `manim-sideview.setRenderingSceneName` name to `manim-sideview.renderNewScene`<br>
 + Added command `manim-sideview.showOutputChannel` command for opening the log output channel<br>
 
 #### 0.0.13
