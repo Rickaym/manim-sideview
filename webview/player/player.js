@@ -1,7 +1,9 @@
 const vscode = acquireVsCodeApi();
 var timestatus = document.querySelector(".color-fill");
 var demostatus = document.querySelector(".demo-fill");
-var controls = document.querySelector(".controls");
+var controls = document.querySelector(".progress-bar");
+
+var controlButtons = document.getElementsByClassName("control-button");
 
 var videoPlayer = document.getElementById("video-media-player");
 var video = document.getElementById("video-preview");
@@ -44,6 +46,32 @@ async function enterPictureInPicture() {
   }
 }
 
+for (const button of controlButtons) {
+  button.addEventListener("click", function () {
+    switch (button.getAttribute("title")) {
+      case "Render a New Scene":
+        const srcPath = document.getElementById("source-file").innerText;
+        vscode.postMessage({
+          command: "executeSelfCommand",
+          name: "renderNewScene",
+          args: [srcPath],
+          srcPath: srcPath,
+        });
+        break;
+      case "Picture In Picture":
+        if (videoPlayer.hidden) {
+          vscode.postMessage({
+            command: "errorMessage",
+            text: "Manim Sideview: Picture In Picture is not supported on images.",
+          });
+        } else {
+          enterPictureInPicture();
+        }
+        break;
+    }
+  });
+}
+
 video.addEventListener("click", function () {
   togglePlayPause();
 });
@@ -72,7 +100,7 @@ window.addEventListener("message", function (e) {
   switch (message.command) {
     case "reload":
       console.log("Set source to ", message.resource);
-      document.getElementById("media-dir").innerText = message.out;
+      document.getElementById("output-file").innerText = message.out;
       document.getElementById("module-name").innerText = message.moduleName;
 
       if (message.mediaType === 1) {
@@ -87,5 +115,6 @@ window.addEventListener("message", function (e) {
         imagePlayer.hidden = true;
         videoPlayer.hidden = false;
       }
-    }
+      break;
+  }
 });

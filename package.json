@@ -31,10 +31,11 @@
     "onCommand:manim-sideview.stop",
     "onCommand:manim-sideview.removeAllJobs",
     "onCommand:manim-sideview.removeCurrentJob",
-    "onCommand:manim-sideview.setRenderingScene",
+    "onCommand:manim-sideview.renderNewScene",
     "onCommand:manim-sideview.showMobjectGallery",
     "onCommand:manim-sideview.syncMobjectGallery",
-    "onCommand:manim-sideview.syncManimConfig"
+    "onCommand:manim-sideview.syncManimConfig",
+    "onCommand:manim-sideview.showOutputChannel"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -139,20 +140,24 @@
         "title": "Manim: Removes The Current File's Active Job"
       },
       {
-        "command": "manim-sideview.setRenderingScene",
-        "title": "Manim: Set A New SceneName"
+        "command": "manim-sideview.renderNewScene",
+        "title": "Manim: Renders a New Scene"
       },
       {
         "command": "manim-sideview.showMobjectGallery",
-        "title": "Manim: Open MObject Gallery"
+        "title": "Manim: Open Mobject Gallery"
       },
       {
         "command": "manim-sideview.syncMobjectGallery",
-        "title": "Manim: Find MObject Gallery Updates"
+        "title": "Manim: Find Mobject Gallery Updates"
       },
       {
         "command": "manim-sideview.syncManimConfig",
         "title": "Manim: Updates Internal Manim Config With Local Executable"
+      },
+      {
+        "command": "manim-sideview.showOutputChannel",
+        "title": "Manim: Show Output Channel"
       }
     ],
     "keybindings": [
@@ -167,7 +172,7 @@
         "when": "editorFocus"
       },
       {
-        "command": "manim-sideview.setRenderingScene",
+        "command": "manim-sideview.renderNewScene",
         "key": "ctrl+' c"
       }
     ]
@@ -189,6 +194,7 @@
     "@typescript-eslint/eslint-plugin": "^5.36.0",
     "@typescript-eslint/parser": "^5.36.0",
     "@vscode/test-electron": "^2.1.5",
+    "@vscode/codicons": "0.0.20",
     "electron-rebuild": "^3.2.9",
     "eslint": "^8.23.0",
     "glob": "^8.0.3",

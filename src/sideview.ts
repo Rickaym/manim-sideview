@@ -114,42 +114,36 @@ export class ManimSideview {
   private jobStatusItem: JobStatusItemWrapper;
   private lastChosenSceneName: string | undefined;
 
-  private outputChannel: vscode.OutputChannel =
-    vscode.window.createOutputChannel("manim");
-  private outputPseudoTerm: ManimPseudoTerm = new ManimPseudoTerm("manim");
+  // the following channels are only created when necessary
+  private outputChannel?: vscode.OutputChannel;
+  private outputPseudoTerm?: ManimPseudoTerm;
 
-  refreshJobStatus() {
-    if (this.getActiveJob() !== null) {
-      this.jobStatusItem.setActive();
+  async run(srcPath?: vscode.Uri | string) {
+    let activeJob = srcPath
+      ? this.getActiveJob(
+          typeof srcPath === "string" ? srcPath : srcPath.fsPath
+        )!
+      : null;
+    let doc: vscode.TextDocument;
+
+    // If we couldn't obtain the active job by the srcPath provided (if it has been)
+    // We fallback to fetching the active text editor's document without the
+    // requirement for active jobs.
+    if (activeJob) {
+      doc = activeJob.config.document;
     } else {
-      this.jobStatusItem.setVisibility(false);
-    }
-  }
-
-  async run(onSave: boolean) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      if (!onSave) {
-        await vscode.window.showErrorMessage(
-          Log.error("Hey! You need a valid Python file to run the sideview.")
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showErrorMessage(
+          Log.error(
+            "Manim Sideview: You need to select a valid Python source file."
+          )
         );
+        return;
       }
-      return;
+      doc = editor.document;
+      activeJob = this.getActiveJob(doc.fileName);
     }
-    if (
-      onSave === true &&
-      !this.activeJobs.find(
-        (j) => j.config.srcPath === editor.document.fileName
-      )
-    ) {
-      Log.error(
-        `Triggered run with "onSave" on ${editor.document.fileName} but couldn't be found.`
-      );
-      return;
-    }
-
-    const doc = editor.document;
-    const activeJob = this.getActiveJob(doc.fileName);
 
     let manimConfig: ManimConfig | undefined;
     let isUsingCfgFile = false;
@@ -222,6 +216,14 @@ export class ManimSideview {
     }
   }
 
+  refreshJobStatus() {
+    if (this.getActiveJob() !== null) {
+      this.jobStatusItem.setActive();
+    } else {
+      this.jobStatusItem.setVisibility(false);
+    }
+  }
+
   async setConfigFilePath() {
     const uri = await vscode.window.showOpenDialog({
       canSelectFolders: false,
@@ -236,11 +238,13 @@ export class ManimSideview {
     }
   }
 
-  async setRenderingScene() {
-    const job = this.getActiveJob();
+  async renderNewScene(runningCfgSrcPath?: string) {
+    const job = this.getActiveJob(runningCfgSrcPath);
     if (!job) {
       vscode.window.showErrorMessage(
-        Log.error("You need an active job to set a new scenename!")
+        Log.error(
+          "Manim Sideview: Select a Python source file before you set a new scenename."
+        )
       );
       return;
     }
@@ -251,6 +255,7 @@ export class ManimSideview {
       return;
     }
     job.config.sceneName = newSceneName;
+    this.run(runningCfgSrcPath);
   }
 
   private async getRenderingSceneName(
@@ -262,7 +267,7 @@ export class ManimSideview {
       .replace(/\n/g, "");
 
     const sceneClasses = [...contents.matchAll(RE_SCENE_CLASS)].map(
-      (m) => "$(run-all) " + m.groups?.name
+      (m) => `$(run-all) ${m.groups?.name}`
     );
     const moreOption = "I'll provide it myself!";
 
@@ -270,14 +275,19 @@ export class ManimSideview {
     let choice = moreOption;
     if (sceneClasses) {
       if (this.lastChosenSceneName) {
+        const lastChosenAsNewName = `$(run-all) ${this.lastChosenSceneName}`;
+        if (sceneClasses.includes(lastChosenAsNewName)) {
+          sceneClasses.splice(sceneClasses.indexOf(lastChosenAsNewName), 1);
+        }
         sceneClasses.push(`$(refresh) ${this.lastChosenSceneName}`);
       }
-      sceneClasses.push(moreOption);
 
+      sceneClasses.push(moreOption);
       const pick = await vscode.window.showQuickPick(sceneClasses, {
         title: "Manim Sideview: Pick your scene name!",
         placeHolder: "Search..",
       });
+
       if (pick) {
         choice = pick;
       } else {
@@ -305,6 +315,7 @@ export class ManimSideview {
       .trim();
 
     if (sceneName) {
+      this.lastChosenSceneName = sceneName;
       return sceneName;
     } else {
       Log.error("Try Again! You provided an invalid scene name.");
@@ -320,7 +331,7 @@ export class ManimSideview {
     this.gallery.synchronize(true);
   }
 
-  audit(editor: vscode.TextEditor | undefined) {
+  auditTextEditorChange(editor: vscode.TextEditor | undefined) {
     if (editor && editor.document.languageId === "python") {
       this.gallery.setLastActiveEditor(editor);
     }
@@ -377,9 +388,9 @@ export class ManimSideview {
         config,
         null,
         4
-      )}\n{\n"videoOutputPath": ${getVideoOutputPath(
+      )},\n{\n\t"videoOutputPath": ${getVideoOutputPath(
         config
-      )},\n"imageOutputPath": ${getImageOutputPath(config, "{version}")}\n}`
+      )},\n\t"imageOutputPath": ${getImageOutputPath(config, "{version}")}\n}`
     );
     let args = [config.srcPath];
     if (!config.isUsingCfgFile) {
@@ -393,11 +404,12 @@ export class ManimSideview {
         .getConfiguration("manim-sideview")
         .get("outputToTerminal")
     ) {
-      this.outputPseudoTerm.cwd = config.srcRootFolder;
-      this.outputPseudoTerm.isRunning = true;
-      out = this.outputPseudoTerm;
+      this.ensureOutputChannelCreation();
+      this.outputPseudoTerm!.cwd = config.srcRootFolder;
+      this.outputPseudoTerm!.isRunning = true;
+      out = this.outputPseudoTerm!;
     } else {
-      out = this.outputChannel;
+      out = this.outputChannel!;
     }
 
     this.executeTerminalCommand(args, config, out);
@@ -413,7 +425,7 @@ export class ManimSideview {
     var manimVersion: string | undefined;
     var outputFileType: number | undefined;
 
-    // mime command without "
+    // mime command without
     outputChannel.append(`${command} ${args.join(" ")}\n`);
 
     if (
@@ -438,9 +450,9 @@ export class ManimSideview {
       !this.process.stderr ||
       !this.process.stdin
     ) {
-      outputChannel.append(
+      outputChannel.appendLine(
         Log.info(
-          `Execution returned code=911 in Process: ${this.process}, stdout: ${this.process?.stdout}, stdout: ${this.process?.stderr}\n`
+          `Execution returned code=911 in Process: ${this.process}, stdout: ${this.process?.stdout}, stdout: ${this.process?.stderr}`
         )
       );
       return vscode.window.showErrorMessage(
@@ -457,7 +469,7 @@ export class ManimSideview {
 
         if (dataStr.includes(KILL_MSG)) {
           this.stop(process);
-          outputChannel.append("\n");
+          outputChannel.appendLine("");
           return;
         }
 
@@ -578,9 +590,19 @@ export class ManimSideview {
     this.jobStatusItem.setNew();
   }
 
+  private ensureOutputChannelCreation() {
+    if (!this.outputChannel) {
+      this.outputChannel = vscode.window.createOutputChannel("manim");
+    }
+    if (!this.outputPseudoTerm || this.outputPseudoTerm.isClosed()) {
+      this.outputPseudoTerm = new ManimPseudoTerm("manim");
+    }
+  }
+
   /**
    * Evaluate a job if it exists from the currently active document or from
-   * a source path if given.
+   * a source path if given. If the currently active document is the manim
+   * sideview webview, the last job will be returned.
    *
    * @param srcPath
    * @returns Job | null

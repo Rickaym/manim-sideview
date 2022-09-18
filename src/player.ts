@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import {
   BASE_PROGRESS_BAR_COLOR,
   getWebviewResource,
+  Log,
   RunningConfig,
 } from "./globals";
 import { TemplateEngine } from "./templateEngine";
@@ -83,7 +84,6 @@ export class MediaPlayer {
         });
       }
     }
-
     const panel = vscode.window.createWebviewPanel(
       mediaUri.path,
       "Manim Sideview",
@@ -106,10 +106,10 @@ export class MediaPlayer {
     const engine = new TemplateEngine(
       panel.webview,
       getWebviewResource(this.extensionUri, "player"),
-      "player"
+      "player",
+      this.extensionUri
     );
     const prefs = vscode.workspace.getConfiguration("manim-sideview");
-
     // the property key to set the resource url to
     const srcReplacementKey =
       mediaType === PlayableMediaType.Video ? "videoDir" : "imageDir";
@@ -127,7 +127,8 @@ export class MediaPlayer {
         mediaUri
       ),
       [hideKey]: "hidden",
-      mediaDir: mediaUri.fsPath,
+      outputFile: mediaUri.fsPath,
+      srcFile: config.srcPath,
       moduleName: config.sceneName,
       previewShowProgressOnIdle: prefs.get("previewShowProgressOnIdle")
         ? ""
@@ -139,17 +140,27 @@ export class MediaPlayer {
       autoplay: prefs.get("previewAutoPlay") ? "autoplay" : "",
     });
 
-    // panel.webview.onDidReceiveMessage(
-    //   (message) => {
-    //     if (message.command === "reload-webviews") {
-    //       vscode.commands.executeCommand(
-    //         "workbench.action.webview.reloadWebviewAction"
-    //       );
-    //     }
-    //   },
-    //   undefined,
-    //   this.disposables
-    // );
+    panel.webview.onDidReceiveMessage(
+      (message) => {
+        switch (message.command) {
+          // Executes a manim-sideview command and then executes run command
+          case "executeSelfCommand":
+            Log.info(
+              `Executing command "manim-sideview.${message.name}" as requested by webview.`
+            );
+            vscode.commands.executeCommand(
+              `manim-sideview.${message.name}`,
+              ...message.args
+            );
+            break;
+          case "errorMessage":
+            vscode.window.showErrorMessage(Log.error(message.text));
+            break;
+        }
+      },
+      undefined,
+      this.disposables
+    );
 
     panel.onDidDispose(
       () => {

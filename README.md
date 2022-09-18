@@ -45,7 +45,7 @@ The Mobject gallery is a web view that allows users to insert code snippets for 
 
 ### How do I open the gallery?
 1. Open the command palette using `Shift + Command + P (Mac)` / `Ctrl + Shift + P`
-2. Use the command `Manim: Open MObject Gallery`
+2. Use the command `Manim: Open Mobject Gallery`
 
 You can place the cursor at the desired location and click the image of the manim object to insert the code into a Python file or Jupyter Notebook!
 
@@ -118,14 +118,17 @@ You can set the default manim executable path by changing the `manim-sideview.de
 + Video Player renamed to "Media Player" and now handles both image and video media<br>
 + Added image support for rendering previews<br>
 + New GUI User Interface for the Media Player<br>
-+ Uses the `plywood-gallery-for-vsce` template engine for MObject Gallery<br>
++ Uses the `plywood-gallery-for-vsce` template engine for Mobject Gallery<br>
 + Uses the `plywood-gallery-for-vsce` template engine for Media Player<br>
 + Added a new output channel called `Manim Sideview` for the extension to log all window and debug information<br>
-+ "Mobject" to "MObject" change extension-wide<br>
 + README write simplification and rewrite<br>
 + Added support to rendering scenes without loading the source file workspace<br>
 - Fontawesome CSS and JS files removed<br>
 - Extension excess terminal output removed<br>
++ Extension run command now takes in `srcPath` as an argument.<br>
++ Rendering on save now uses `srcPath` arg instead of boolean `onSave`<br>
++ `manim-sideview.setRenderingSceneName` command name changed to `manim-sideview.renderNewScene`<br>
++ Added command `manim-sideview.showOutputChannel` command for opening the log output channel<br>
 
 #### 0.0.13
 

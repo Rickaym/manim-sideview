@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { loadGlobals, Log } from "./globals";
+import { loadGlobals, Log, LOGGER } from "./globals";
 import { ManimSideview } from "./sideview";
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -9,23 +9,21 @@ export async function activate(context: vscode.ExtensionContext) {
   const sideview = new ManimSideview(context);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "manim-sideview.run",
-      (onSave: boolean = false) => sideview.run(onSave)
+    vscode.commands.registerCommand("manim-sideview.run", (...args) =>
+      sideview.run(...args)
     ),
-    vscode.commands.registerCommand(
-      "manim-sideview.removeAllJobs",
-      () => sideview.removeAllJobs()
+    vscode.commands.registerCommand("manim-sideview.removeAllJobs", () =>
+      sideview.removeAllJobs()
     ),
     vscode.commands.registerCommand("manim-sideview.stop", () =>
       sideview.stop()
     ),
-    vscode.commands.registerCommand("manim-sideview.setRenderingScene", () =>
-      sideview.setRenderingScene()
-    ),
     vscode.commands.registerCommand(
-      "manim-sideview.removeCurrentJob",
-      () => sideview.removeCurrentJob()
+      "manim-sideview.renderNewScene",
+      (...args) => sideview.renderNewScene(...args)
+    ),
+    vscode.commands.registerCommand("manim-sideview.removeCurrentJob", () =>
+      sideview.removeCurrentJob()
     ),
     vscode.commands.registerCommand("manim-sideview.showMobjectGallery", () =>
       sideview.showMobjectGallery()
@@ -35,7 +33,10 @@ export async function activate(context: vscode.ExtensionContext) {
     ),
     vscode.commands.registerCommand("manim-sideview.syncManimConfig", () =>
       sideview.syncFallbackManimConfig()
-    )
+    ),
+    vscode.commands.registerCommand("manim-sideview.showOutputChannel", () =>
+      LOGGER.show(true)
+    ),
   );
 
   vscode.workspace.onDidSaveTextDocument(
@@ -43,7 +44,7 @@ export async function activate(context: vscode.ExtensionContext) {
       if (
         vscode.workspace.getConfiguration("manim-sideview").get("runOnSave")
       ) {
-        vscode.commands.executeCommand("manim-sideview.run", true);
+        vscode.commands.executeCommand("manim-sideview.run", e.fileName);
       }
     },
     null,
@@ -52,7 +53,7 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeActiveTextEditor(
     (e) => {
       sideview.refreshJobStatus();
-      sideview.audit(e);
+      sideview.auditTextEditorChange(e);
     },
     null,
     context.subscriptions

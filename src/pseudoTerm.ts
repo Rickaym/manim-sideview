@@ -36,20 +36,23 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
     this.name = name;
   }
 
-  public cwd = path.dirname(vscode.workspace.textDocuments[0]?.fileName || process.cwd());
-  private prompt = `${defPrompt} ${this.cwd}>`;
-  private intro = "Manim Extension XTerm\n\rServes as a terminal for logging purpose." +
-              "\n\r\n\rUtilize the powershell for anything else.\n\r\n\r" +
-              `Extension Version ${EXTENSION_VERSION}\n\r\n\r${this.prompt}`;
+  public cwd = path.dirname(
+    vscode.workspace.textDocuments[0]?.fileName || process.cwd()
+  );
   public isRunning = false;
-  private content = "";
+
   public writeEmitter = new vscode.EventEmitter<string>();
+  private prompt = `${defPrompt} ${this.cwd}>`;
+  private intro =
+    "Manim Extension XTerm\n\rServes as a terminal for logging purpose." +
+    "\n\r\n\rUtilize the powershell for anything else.\n\r\n\r" +
+    `Extension Version ${EXTENSION_VERSION}\n\r\n\r${this.prompt}`;
+  private content = "";
+  public appendedBefore = false;
+  private stickyNotes = "";
   private pty: vscode.Pseudoterminal = {
     onDidWrite: this.writeEmitter.event,
-    open: () =>
-      this.writeEmitter.fire(
-        `${this.intro}\n${this.prompt}`
-      ),
+    open: () => this.writeEmitter.fire(this.intro),
     close: () => {},
     handleInput: async (char: string) => {
       if (this.isRunning) {
@@ -103,13 +106,46 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
     pty: this.pty,
   });
 
+  /**
+   * Appends the string directly if the terminal has been appended to before.
+   * Else waits until another `append` call is made.
+   * This ensures that early append calls are made through.
+   *
+   * @param value
+   */
   append(value: string): void {
-    this.writeEmitter.fire(value.replace(/\n/g, "\n\r"));
+    if (!this.appendedBefore) {
+      this.stickyNotes += value;
+      this.appendedBefore = true;
+      return;
+    }
+
+    this.writeEmitter.fire(
+      `${this.stickyNotes}${value}`.replace(/\n/g, "\n\r")
+    );
+    this.stickyNotes = "";
   }
 
+  /**
+   * Appends the string directly if the terminal has been appended to before.
+   * Else waits until another `append` call is made.
+   * This ensures that early append calls are made through.
+   * Additionally append the prompt.
+   *
+   * @param value
+   */
   appendLine(value: string): void {
-    this.writeEmitter.fire(value.replace(/\n/g, "\n\r"));
+    if (!this.appendedBefore) {
+      this.stickyNotes += value;
+      this.appendedBefore = true;
+      return;
+    }
+
+    this.writeEmitter.fire(
+      `${this.stickyNotes}${value}`.replace(/\n/g, "\n\r")
+    );
     this.newPrompt();
+    this.stickyNotes = "";
   }
 
   newPrompt(): void {
@@ -120,8 +156,8 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
   }
 
   replace(value: string): void {
-      this.clear();
-      this.writeEmitter.fire(value);
+    this.clear();
+    this.writeEmitter.fire(value);
   }
 
   clear(): void {
@@ -139,5 +175,9 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
 
   dispose(): void {
     this.terminal.dispose();
+  }
+
+  isClosed(): boolean {
+    return !!this.terminal.exitStatus;
   }
 }

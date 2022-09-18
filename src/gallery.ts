@@ -57,7 +57,7 @@ export class Gallery {
   async show() {
     this.panel = vscode.window.createWebviewPanel(
       "mobject-gallery",
-      "MObject Gallery",
+      "Mobject Gallery",
       {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true,
@@ -88,7 +88,8 @@ export class Gallery {
     const engine = new TemplateEngine(
       this.panel.webview,
       this.loads,
-      "gallery"
+      "gallery",
+      this.extensionUri
     );
 
     this.panel.iconPath = this.manimIconsPath;

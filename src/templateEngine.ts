@@ -5,18 +5,33 @@ export class TemplateEngine {
   constructor(
     public readonly webview: vscode.Webview,
     public readonly resource: WebviewResources,
-    public readonly name: String
+    public readonly name: String,
+    public readonly extensionUri: vscode.Uri
   ) {}
 
   private resMap = {
     js: ` ${this.name}.js`,
     css: ` ${this.name}.css`,
   };
+
+  /**
+   * A list of preamble context variables that will be rendered without
+   * explicit instructions.
+   */
   private preamble = {
     cspSource: this.webview.cspSource,
     [this.resMap.js]: this.webview.asWebviewUri(this.resource.js).toString(),
     [this.resMap.css]: this.webview.asWebviewUri(this.resource.css).toString(),
     nonce: getNonce(),
+    "codicon.css": this.webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.extensionUri,
+        "node_modules",
+        "@vscode/codicons",
+        "dist",
+        "codicon.css"
+      )
+    ),
   };
 
   static async renderDoc(fp: vscode.Uri, globals: { [varname: string]: any }) {
@@ -33,10 +48,7 @@ export class TemplateEngine {
   static textRender(text: string, globals: { [varname: string]: any }) {
     Object.keys(globals).forEach((varname) => {
       if (varname.startsWith(" ")) {
-        text = text.replace(
-          new RegExp(varname.trim(), "gi"),
-          globals[varname]
-        );
+        text = text.replace(new RegExp(varname.trim(), "gi"), globals[varname]);
       } else {
         text = text.replace(
           new RegExp(`{{ ${varname} }}`, "gi"),
