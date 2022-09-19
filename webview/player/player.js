@@ -99,8 +99,9 @@ window.addEventListener("message", function (e) {
   switch (message.command) {
     case "reload":
       console.log("Set source to ", message.resource);
-      document.getElementById("output-file").innerText = message.out;
+      document.getElementById("output-file").innerText = message.outputFile;
       document.getElementById("module-name").innerText = message.moduleName;
+      document.getElementById("source-file").innerText = message.sourceFile;
 
       if (message.mediaType === 1) {
         image.setAttribute("src", message.resource);

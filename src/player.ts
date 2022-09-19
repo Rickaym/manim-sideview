@@ -61,28 +61,17 @@ export class MediaPlayer {
         this.recentMediaPanel.webview,
         mediaUri
       );
-      if (mediaType === PlayableMediaType.Video) {
-        return this.recentMediaPanel.webview.postMessage({
-          command: "reload",
-          mediaType: mediaType,
-          resource: resource,
-          pictureInPicture: vscode.workspace
-            .getConfiguration("manim-sideview")
-            .get("pictureInPictureOnStart"),
-          out: mediaUri.fsPath,
-          moduleName: config.sceneName,
-        });
-      }
-
-      if (mediaType === PlayableMediaType.Image) {
-        return this.recentMediaPanel.webview.postMessage({
-          command: "reload",
-          mediaType: mediaType,
-          resource: resource,
-          out: mediaUri.fsPath,
-          moduleName: config.sceneName,
-        });
-      }
+      return this.recentMediaPanel.webview.postMessage({
+        command: "reload",
+        mediaType: mediaType,
+        resource: resource,
+        pictureInPicture: vscode.workspace
+          .getConfiguration("manim-sideview")
+          .get("pictureInPictureOnStart"),
+        outputFile: mediaUri.fsPath,
+        sourceFile: config.srcPath,
+        moduleName: config.sceneName,
+      });
     }
     const panel = vscode.window.createWebviewPanel(
       mediaUri.path,
@@ -128,7 +117,7 @@ export class MediaPlayer {
       ),
       [hideKey]: "hidden",
       outputFile: mediaUri.fsPath,
-      srcFile: config.srcPath,
+      sourceFile: config.srcPath,
       moduleName: config.sceneName,
       previewShowProgressOnIdle: prefs.get("previewShowProgressOnIdle")
         ? ""

@@ -590,8 +590,15 @@ export class ManimSideview {
     });
   }
 
-  private newJob(conf: RunningConfig) {
-    this.activeJobs[conf.srcPath] = { config: conf };
+  private newJob(config: RunningConfig) {
+    Log.info(
+      `New job added for "${config.srcPath}" as ${JSON.stringify(
+        config,
+        null,
+        4
+      )}`
+    );
+    this.activeJobs[config.srcPath] = { config: config };
     this.jobStatusItem.setNew();
   }
 
