@@ -400,7 +400,7 @@ export class ManimSideview {
     let args = [config.srcPath];
     if (!config.isUsingCfgFile) {
       args.push(
-        ...(this.getPreferenceValue("commandLineArgs") || BASE_ARGS)
+        ...(this.getPreferenceValue("commandLineArgs") ?? BASE_ARGS)
           .trim()
           .split(" ")
       );
@@ -437,7 +437,7 @@ export class ManimSideview {
     outputChannel: vscode.OutputChannel
   ) {
     const command = path.normalize(
-      this.getPreferenceValue("defaultManimPath") || BASE_MANIM_EXE
+      this.getPreferenceValue("defaultManimPath") ?? BASE_MANIM_EXE
     );
     const cwd = config.srcRootFolder;
     var manimVersion: string | undefined;
