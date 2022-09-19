@@ -399,8 +399,13 @@ export class ManimSideview {
     );
     let args = [config.srcPath];
     if (!config.isUsingCfgFile) {
-      args.push(...config.cliArgs.trim().split(" "));
+      args.push(
+        ...(this.getPreferenceValue("commandLineArgs") || BASE_ARGS)
+          .trim()
+          .split(" ")
+      );
     }
+
     args.push(config.sceneName.trim());
 
     let out: vscode.OutputChannel;
@@ -420,12 +425,20 @@ export class ManimSideview {
     this.executeTerminalCommand(args, config, out);
   }
 
+  getPreferenceValue(key: string) {
+    return vscode.workspace
+      .getConfiguration("manim-sideview")
+      .get(key) as string;
+  }
+
   async executeTerminalCommand(
     args: string[],
     config: RunningConfig,
     outputChannel: vscode.OutputChannel
   ) {
-    const command = config.executablePath;
+    const command = path.normalize(
+      this.getPreferenceValue("defaultManimPath") || BASE_MANIM_EXE
+    );
     const cwd = config.srcRootFolder;
     var manimVersion: string | undefined;
     var outputFileType: number | undefined;
@@ -700,15 +713,10 @@ export class ManimSideview {
     const srcPath = doc.uri.fsPath;
     Log.info(`Creating a new configuration for file at path ${srcPath}`);
 
-    const settings = vscode.workspace.getConfiguration("manim-sideview");
     const moduleName = path.basename(srcPath).slice(0, -3);
     const root = path.join(doc.uri.fsPath, "../");
 
     return {
-      executablePath: path.normalize(
-        settings.get("defaultManimPath") || BASE_MANIM_EXE
-      ),
-      cliArgs: settings.get("commandLineArgs") || BASE_ARGS,
       srcRootFolder: root,
       srcPath: srcPath,
       moduleName: moduleName,

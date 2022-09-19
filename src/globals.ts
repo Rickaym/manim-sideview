@@ -68,11 +68,9 @@ export function getDefaultMainConfig(): ManimConfig {
  * isUsingCfgFile: whether if this is running using a configuration file
  */
 export type RunningConfig = {
-  executablePath: string;
   srcPath: string;
   sceneName: string;
   moduleName: string;
-  cliArgs: string;
   srcRootFolder: string;
   document: vscode.TextDocument;
   isUsingCfgFile: boolean;
