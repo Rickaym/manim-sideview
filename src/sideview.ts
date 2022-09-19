@@ -104,7 +104,7 @@ export class ManimSideview {
   }
 
   private manimCfgPath: string = "";
-  private activeJobs: Job[] = [];
+  private activeJobs: { [fsPath: string]: Job } = {};
   private mediaPlayer = new MediaPlayer(
     this.ctx.extensionUri,
     this.ctx.subscriptions
@@ -112,7 +112,7 @@ export class ManimSideview {
   private gallery = new Gallery(this.ctx.extensionUri, this.ctx.subscriptions);
   private process: ChildProcess | undefined;
   private jobStatusItem: JobStatusItemWrapper;
-  private lastChosenSceneName: string | undefined;
+  private lastChosenSceneNames: { [fsPath: string]: string } = {};
 
   // the following channels are only created when necessary
   private outputChannel?: vscode.OutputChannel;
@@ -203,7 +203,7 @@ export class ManimSideview {
   }
 
   async removeAllJobs() {
-    this.activeJobs = [];
+    this.activeJobs = {};
     this.manimCfgPath = "";
     this.refreshJobStatus();
   }
@@ -211,7 +211,7 @@ export class ManimSideview {
   async removeCurrentJob() {
     const job = this.getActiveJob();
     if (job) {
-      this.activeJobs.splice(this.activeJobs.indexOf(job), 1);
+      delete this.activeJobs[job.config.srcPath];
       this.refreshJobStatus();
     }
   }
@@ -243,7 +243,7 @@ export class ManimSideview {
     if (!job) {
       vscode.window.showErrorMessage(
         Log.error(
-          "Manim Sideview: Select a Python source file before you set a new scenename."
+          "Manim Sideview: Select a Python source file to render a new scene."
         )
       );
       return;
@@ -274,12 +274,17 @@ export class ManimSideview {
     // we will let the user input custom names by default
     let choice = moreOption;
     if (sceneClasses) {
-      if (this.lastChosenSceneName) {
-        const lastChosenAsNewName = `$(run-all) ${this.lastChosenSceneName}`;
-        if (sceneClasses.includes(lastChosenAsNewName)) {
-          sceneClasses.splice(sceneClasses.indexOf(lastChosenAsNewName), 1);
+      if (Object.keys(this.lastChosenSceneNames).includes(srcFileUri.fsPath)) {
+        const lastChosenSceneName =
+          this.lastChosenSceneNames[srcFileUri.fsPath];
+        const decorlastChosenSceneName = `$(run-all) ${lastChosenSceneName}`;
+        if (sceneClasses.includes(decorlastChosenSceneName)) {
+          sceneClasses.splice(
+            sceneClasses.indexOf(decorlastChosenSceneName),
+            1
+          );
         }
-        sceneClasses.push(`$(refresh) ${this.lastChosenSceneName}`);
+        sceneClasses.push(`$(refresh) ${lastChosenSceneName}`);
       }
 
       sceneClasses.push(moreOption);
@@ -315,7 +320,7 @@ export class ManimSideview {
       .trim();
 
     if (sceneName) {
-      this.lastChosenSceneName = sceneName;
+      this.lastChosenSceneNames[srcFileUri.fsPath] = sceneName;
       return sceneName;
     } else {
       Log.error("Try Again! You provided an invalid scene name.");
@@ -586,7 +591,7 @@ export class ManimSideview {
   }
 
   private newJob(conf: RunningConfig) {
-    this.activeJobs.push({ config: conf });
+    this.activeJobs[conf.srcPath] = { config: conf };
     this.jobStatusItem.setNew();
   }
 
@@ -619,7 +624,7 @@ export class ManimSideview {
       path = srcPath;
     }
 
-    return this.activeJobs.find((j) => j.config.srcPath === path) || null;
+    return this.activeJobs[path] || null;
   }
 
   /**

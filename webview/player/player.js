@@ -50,12 +50,11 @@ for (const button of controlButtons) {
   button.addEventListener("click", function () {
     switch (button.getAttribute("title")) {
       case "Render a New Scene":
-        const srcPath = document.getElementById("source-file").innerText;
+        const srcPath = document.getElementById("source-file").innerHTML;
         vscode.postMessage({
           command: "executeSelfCommand",
           name: "renderNewScene",
           args: [srcPath],
-          srcPath: srcPath,
         });
         break;
       case "Picture In Picture":
