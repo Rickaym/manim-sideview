@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import {
   BASE_PROGRESS_BAR_COLOR,
+  getUserConfiguration,
   getWebviewResource,
   Log,
   RunningConfig,
@@ -65,9 +66,6 @@ export class MediaPlayer {
         command: "reload",
         mediaType: mediaType,
         resource: resource,
-        pictureInPicture: vscode.workspace
-          .getConfiguration("manim-sideview")
-          .get("pictureInPictureOnStart"),
         outputFile: mediaUri.fsPath,
         sourceFile: config.srcPath,
         moduleName: config.sceneName,
@@ -98,7 +96,6 @@ export class MediaPlayer {
       "player",
       this.extensionUri
     );
-    const prefs = vscode.workspace.getConfiguration("manim-sideview");
     // the property key to set the resource url to
     const srcReplacementKey =
       mediaType === PlayableMediaType.Video ? "videoDir" : "imageDir";
@@ -119,14 +116,14 @@ export class MediaPlayer {
       outputFile: mediaUri.fsPath,
       sourceFile: config.srcPath,
       moduleName: config.sceneName,
-      previewShowProgressOnIdle: prefs.get("previewShowProgressOnIdle")
+      previewShowProgressOnIdle: getUserConfiguration("previewShowProgressOnIdle")
         ? ""
         : " hidden-controls",
       previewProgressStyle: this.parseProgressStyle(
-        prefs.get("previewProgressColor")
+        getUserConfiguration("previewProgressColor")
       ),
-      loop: prefs.get("previewLooping") ? "loop" : "",
-      autoplay: prefs.get("previewAutoPlay") ? "autoplay" : "",
+      loop: getUserConfiguration("previewLooping") ? "loop" : "",
+      autoplay: getUserConfiguration("previewAutoPlay") ? "autoplay" : "",
     });
 
     panel.webview.onDidReceiveMessage(

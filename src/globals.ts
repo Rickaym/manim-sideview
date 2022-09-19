@@ -98,18 +98,44 @@ export function getVideoOutputPath(
   );
 }
 
+/**
+ * Gets the user set configuration property, if it's not found somehow, will
+ * fallback to using package.json set valus.
+ *
+ * @param property
+ * @returns
+ */
+export function getUserConfiguration<T>(property: string): T {
+  let value = vscode.workspace.getConfiguration("manim-sideview").get(property);
+
+  if (value === undefined) {
+    const propertyDict =
+      PACKAGE_JSON["contributes"]["configuration"]["properties"][
+        `manim-sideview.${property}`
+      ];
+    if (propertyDict["type"] === "boolean") {
+      return (propertyDict["default"] === "true" ? true : false) as T;
+    }
+  }
+  return value as T;
+}
+
 export function getImageOutputPath(
   config: RunningConfig,
-  manimVersion: string,
+  imageName: string,
   extension: string = ".png"
 ) {
   return insertContext(
     {
       "{media_dir}": config.manimConfig.media_dir,
+      "{image_name}": imageName,
       "{module_name}": config.moduleName,
+      // fallback inference variables
+      "{version}": `ManimCE_${getUserConfiguration("manimExecutableVersion")}`,
       "{scene_name}": config.sceneName,
+      "{extension}": extension,
     },
-    path.join(config.manimConfig.image_dir, `${config.sceneName}_ManimCE_v${manimVersion}${extension}`)
+    config.manimConfig.image_dir
   );
 }
 
@@ -168,6 +194,8 @@ export function updateFallbackManimCfg(
 
 export var EXTENSION_VERSION: string | undefined;
 
+export var PACKAGE_JSON: { [key: string]: any } = {};
+
 export async function loadGlobals(ctx: vscode.ExtensionContext) {
   Log.info("Loading globals.");
 
@@ -187,8 +215,7 @@ export async function loadGlobals(ctx: vscode.ExtensionContext) {
     (await vscode.workspace.fs.readFile(PATHS.cfgMap!)).toString()
   );
   updateFallbackManimCfg(cfg, false);
-
-  var PACKAGE_JSON: { [key: string]: string } = JSON.parse(
+  PACKAGE_JSON = JSON.parse(
     fs
       .readFileSync(
         vscode.Uri.joinPath(ctx.extensionUri, "package.json").fsPath
@@ -200,10 +227,6 @@ export async function loadGlobals(ctx: vscode.ExtensionContext) {
 }
 
 // base values for running in-time configurations
-export const BASE_VIDEO_DIR = "media/videos/{module_name}/480p15";
-export const BASE_MEDIA_DIR = "media";
-export const BASE_ARGS = "-ql";
-export const BASE_MANIM_EXE = "manim";
 export const BASE_PROGRESS_BAR_COLOR = "var(--vscode-textLink-foreground)";
 
 /**

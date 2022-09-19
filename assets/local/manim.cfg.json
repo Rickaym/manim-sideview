@@ -1,9 +1,9 @@
 {
     "mediaDir": "./media",
     "videoDir": "{media_dir}/videos/{module_name}/{quality}",
-    "imageDir" : "{media_dir}/images/{module_name}",
+    "imageDir" : "{media_dir}/images/{module_name}/{image_name}",
     "quality": "high",
-    "frameRate": "15",
+    "frameRate": "60",
     "qualityMap": {
         "fourk": "2160p60",
         "production": "1440p60",

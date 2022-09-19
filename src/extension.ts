@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { loadGlobals, Log, LOGGER } from "./globals";
+import { getUserConfiguration, loadGlobals, Log, LOGGER } from "./globals";
 import { ManimSideview } from "./sideview";
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -42,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidSaveTextDocument(
     (e) => {
       if (
-        vscode.workspace.getConfiguration("manim-sideview").get("runOnSave")
+        getUserConfiguration<boolean>("runOnSave")
       ) {
         vscode.commands.executeCommand("manim-sideview.run", e.fileName);
       }

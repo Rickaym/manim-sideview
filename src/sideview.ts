@@ -7,14 +7,13 @@ import * as fs from "fs";
 import { ChildProcess, spawn } from "child_process";
 import {
   RunningConfig,
-  BASE_ARGS,
-  BASE_MANIM_EXE,
   getDefaultMainConfig,
   Log,
   ManimConfig,
   getVideoOutputPath,
   updateFallbackManimCfg,
   getImageOutputPath,
+  getUserConfiguration,
 } from "./globals";
 
 import { ConfigParser } from "./configParser";
@@ -26,8 +25,7 @@ const CONFIG_SECTION = "CLI";
 
 const RE_SCENE_CLASS = /class\s+(?<name>\w+)\(\w*Scene\w*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
-const RE_FILE_READY = /File ready at '(?<path>[^']+)'/g;
-const RE_MANIM_VERSION = /Manim Community v(?<version>[.0-9]+)/g;
+const RE_FILE_READY = /File\s*ready\s*at[^']*'(?<path>[^']*)'/g;
 
 // a process will be killed if this message is seen
 const KILL_MSG =
@@ -263,8 +261,7 @@ export class ManimSideview {
   ): Promise<string | undefined> {
     const contents = (await vscode.workspace.fs.readFile(srcFileUri))
       .toString()
-      .replace(/\r/g, "")
-      .replace(/\n/g, "");
+      .replace(/\r|\n/g, "");
 
     const sceneClasses = [...contents.matchAll(RE_SCENE_CLASS)].map(
       (m) => `$(run-all) ${m.groups?.name}`
@@ -348,7 +345,7 @@ export class ManimSideview {
     );
     const conf = vscode.workspace.getConfiguration("manim-sideview");
     const process = spawn(
-      path.normalize(conf.get("defaultManimPath") || BASE_MANIM_EXE),
+      path.normalize(getUserConfiguration("defaultManimPath")),
       ["cfg", "show"]
     );
 
@@ -399,21 +396,16 @@ export class ManimSideview {
     );
     let args = [config.srcPath];
     if (!config.isUsingCfgFile) {
-      args.push(
-        ...(this.getPreferenceValue("commandLineArgs") ?? BASE_ARGS)
-          .trim()
-          .split(" ")
-      );
+      getUserConfiguration<string>("commandLineArgs")
+        .trim()
+        .split(" ")
+        .forEach((arg) => (arg ? args.push(arg) : undefined));
     }
 
     args.push(config.sceneName.trim());
 
     let out: vscode.OutputChannel;
-    if (
-      vscode.workspace
-        .getConfiguration("manim-sideview")
-        .get("outputToTerminal")
-    ) {
+    if (getUserConfiguration("outputToTerminal")) {
       this.ensureOutputChannelCreation();
       this.outputPseudoTerm!.cwd = config.srcRootFolder;
       this.outputPseudoTerm!.isRunning = true;
@@ -425,32 +417,24 @@ export class ManimSideview {
     this.executeTerminalCommand(args, config, out);
   }
 
-  getPreferenceValue(key: string) {
-    return vscode.workspace
-      .getConfiguration("manim-sideview")
-      .get(key) as string;
-  }
-
   async executeTerminalCommand(
     args: string[],
     config: RunningConfig,
     outputChannel: vscode.OutputChannel
   ) {
-    const command = path.normalize(
-      this.getPreferenceValue("defaultManimPath") ?? BASE_MANIM_EXE
-    );
+    const command = path.normalize(getUserConfiguration("defaultManimPath"));
     const cwd = config.srcRootFolder;
-    var manimVersion: string | undefined;
+
+    // we can easily infer the video file name, but for the image name, it
+    // should be parsed out from the logs, but we'll set it to context vars
+    // in case where we may not be able to parse it out
+    var imageName = "{scene_name}_{version}{extension}";
     var outputFileType: number | undefined;
 
     // mime command without
     outputChannel.append(`${command} ${args.join(" ")}\n`);
 
-    if (
-      vscode.workspace
-        .getConfiguration("manim-sideview")
-        .get("focusOutputOnRun")
-    ) {
+    if (getUserConfiguration("focusOutputOnRun")) {
       outputChannel.show(true);
     }
 
@@ -492,29 +476,28 @@ export class ManimSideview {
         }
 
         if (!outputFileType) {
-          const fileSignifier = [...dataStr.matchAll(RE_FILE_READY)];
-          if (!fileSignifier) {
+          const fileReSignifier = [...dataStr.matchAll(RE_FILE_READY)];
+          if (fileReSignifier.length === 0) {
             return;
           }
 
           // Change output file type to image if the "File ready" message
           // tells us that the media ready has the png extension.
-          if (
-            fileSignifier.some((m) =>
-              m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
-            )
-          ) {
+          const fileIdentifier = fileReSignifier.find((m) =>
+            m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
+          );
+
+          if (fileIdentifier && fileIdentifier.groups?.path.endsWith(".png")) {
             outputFileType = PlayableMediaType.Image;
-          } else {
-            outputFileType = PlayableMediaType.Video;
+            imageName =
+              fileIdentifier.groups?.path
+                .replace(/ |\r|\n/g, "")
+                .split(/\\|\//g)
+                .pop() ?? imageName;
+            Log.info(
+              `Image output detected. Have set the image file name to "${imageName}"`
+            );
           }
-        }
-        if (!manimVersion) {
-          const versionSignifier = [...dataStr.matchAll(RE_MANIM_VERSION)];
-          if (!versionSignifier) {
-            return;
-          }
-          manimVersion = versionSignifier[0].groups?.version;
         }
       }
     });
@@ -553,25 +536,26 @@ export class ManimSideview {
 
       const isMainProcess = this.process && this.process.pid === process.pid;
 
-      if (signal === "SIGTERM") {
-        if (isMainProcess) {
-          this.jobStatusItem.setError();
-          this.process = undefined;
-        }
-        return;
-      }
-
       if (isMainProcess) {
         this.process = undefined;
       }
 
+      if (signal === "SIGTERM") {
+        if (isMainProcess) {
+          this.jobStatusItem.setError();
+        }
+        return;
+      }
+
       if (code === 0) {
+        outputFileType = outputFileType ?? PlayableMediaType.Video;
+
         const mediaFp = vscode.Uri.file(
           path.join(
             config.srcRootFolder,
             outputFileType === PlayableMediaType.Video
               ? getVideoOutputPath(config)
-              : getImageOutputPath(config, manimVersion || "")
+              : getImageOutputPath(config, imageName)
           )
         );
 

@@ -106,6 +106,12 @@
           "scope": "application",
           "default": "true",
           "description": "Whether to relay output to a terminal. If False, an output channel rather than a terminal is used to display text."
+        },
+        "manim-sideview.manimExecutableVersion": {
+          "type": "boolean",
+          "scope": "application",
+          "default": "v0.16.0.post0",
+          "description": "(DO NOT CHANGE THIS) The lower bound manim version that the extension supports."
         }
       }
     },
