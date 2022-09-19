@@ -476,27 +476,21 @@ export class ManimSideview {
         }
 
         if (!outputFileType) {
-          const fileReSignifier = [...dataStr.matchAll(RE_FILE_READY)];
-          if (fileReSignifier.length === 0) {
-            return;
-          }
-
           // Change output file type to image if the "File ready" message
           // tells us that the media ready has the png extension.
-          const fileIdentifier = fileReSignifier.find((m) =>
-            m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
-          );
-
-          if (fileIdentifier && fileIdentifier.groups?.path.endsWith(".png")) {
+          const fileReSignifier = [...dataStr.matchAll(RE_FILE_READY)];
+          if (
+            fileReSignifier.length > 0 &&
+            fileReSignifier.some((m) =>
+              m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
+            )
+          ) {
             outputFileType = PlayableMediaType.Image;
-            imageName =
-              fileIdentifier.groups?.path
-                .replace(/ |\r|\n/g, "")
-                .split(/\\|\//g)
-                .pop() ?? imageName;
             Log.info(
               `Image output detected. Have set the image file name to "${imageName}"`
             );
+          } else {
+            outputFileType = PlayableMediaType.Video;
           }
         }
       }
@@ -514,7 +508,7 @@ export class ManimSideview {
       }
     });
 
-    this.process.on("close", (code: number, signal: string) => {
+    this.process.on("close", async (code: number, signal: string) => {
       const elapsedTime = (new Date().getTime() - startTime.getTime()) / 1000;
 
       // This process has been user-terminated
@@ -548,7 +542,16 @@ export class ManimSideview {
       }
 
       if (code === 0) {
-        outputFileType = outputFileType ?? PlayableMediaType.Video;
+        const waitUntilFileTypeDetermined: any = new Promise(
+          (resolve, reject) => {
+            const loop: any = () =>
+              outputFileType !== undefined
+                ? resolve(outputFileType)
+                : setTimeout(loop);
+            loop();
+          }
+        );
+        await waitUntilFileTypeDetermined;
 
         const mediaFp = vscode.Uri.file(
           path.join(
