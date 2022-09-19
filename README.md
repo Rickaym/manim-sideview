@@ -14,6 +14,7 @@ A VSCode extension that provides a live preview for rendering and a gallery-base
 5. [Default Configurations](#default-configurations)
 6. [FAQs](#frequently-asked-questions)
 7. [Credits](#credits)
+8. [Changelog](#changelog)
 
 ## Quickstart
 Open the file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar (or) use `Ctrl+'` `r` to immediately start rendering a preview.
@@ -106,13 +107,18 @@ You can set the default manim executable path by changing the `manim-sideview.de
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_defaultmanimpath.png"></image>
 
-### Known Issues
+## Credits
 
-... None
+Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, [mobject gallery](https://github.com/kolibril13/mobject-gallery/) by [kolibril13](https://github.com/kolibril13) and ofcourse the logo by the [manim](https://raw.githubusercontent.com/3b1b/manim)/[community](https://raw.githubusercontent.com/ManimCommunity/manim/) project themselves!
+
+**Made and Maintained with <3 by Ricky**
+Consider supporting this project through starring the repository or buying me a coffee!!
+
+<a href="https://www.buymeacoffee.com/rickaym"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=rickaym&button_colour=90e0ef&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00"></a>
 
 ## Changelog
 
-#### 0.0.14
+#### 0.0.14 [Latest]
 
 + Extension terminal output format changed & added message persistence<br>
 + Video Player renamed to "Media Player" and now handles both image and video media<br>
@@ -193,9 +199,3 @@ You can set the default manim executable path by changing the `manim-sideview.de
 #### 0.0.1 - 0.0.2
 
 The initial release of Manim Sideview.
-
-## Credits
-
-Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, [mobject gallery](https://github.com/kolibril13/mobject-gallery/) by [kolibril13](https://github.com/kolibril13) and ofcourse the logo by the [manim](https://raw.githubusercontent.com/3b1b/manim)/[community](https://raw.githubusercontent.com/ManimCommunity/manim/) project themselves!
-
-**Made with <3 by Ricky,**
