@@ -2,7 +2,7 @@
     "mediaDir": "./media",
     "videoDir": "{media_dir}/videos/{module_name}/{quality}",
     "imageDir" : "{media_dir}/images/{module_name}",
-    "quality": "low",
+    "quality": "high",
     "frameRate": "15",
     "qualityMap": {
         "fourk": "2160p60",

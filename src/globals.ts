@@ -134,19 +134,12 @@ export type InternalManimCfg = {
 
 // Default configurations.
 export var FALLBACK_CONFIG: InternalManimCfg = {
-  mediaDir: "./media",
-  videoDir: "{media_dir}/videos/{module_name}/{quality}",
-  imageDir: "{media_dir}/images/{module_name}",
-  quality: "low",
-  frameRate: "15",
-  qualityMap: {
-    fourk: "2160p60",
-    production: "1440p60",
-    high: "1080p60",
-    medium: "720p30",
-    low: "480p15",
-    example: "480p30",
-  },
+  mediaDir: "",
+  videoDir: "",
+  imageDir: "",
+  quality: "",
+  frameRate: "",
+  qualityMap: {},
 };
 
 // Loaded on activation
