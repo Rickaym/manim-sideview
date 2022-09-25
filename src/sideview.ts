@@ -479,18 +479,19 @@ export class ManimSideview {
           // Change output file type to image if the "File ready" message
           // tells us that the media ready has the png extension.
           const fileReSignifier = [...dataStr.matchAll(RE_FILE_READY)];
-          if (
-            fileReSignifier.length > 0 &&
-            fileReSignifier.some((m) =>
-              m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
-            )
-          ) {
-            outputFileType = PlayableMediaType.Image;
-            Log.info(
-              `Image output detected. Have set the image file name to "${imageName}"`
-            );
-          } else {
-            outputFileType = PlayableMediaType.Video;
+          if (fileReSignifier.length > 0) {
+            if (
+              fileReSignifier.some((m) =>
+                m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
+              )
+            ) {
+              outputFileType = PlayableMediaType.Image;
+              Log.info(
+                `Image output detected. Have set the image file name to "${imageName}"`
+              );
+            } else {
+              outputFileType = PlayableMediaType.Video;
+            }
           }
         }
       }
