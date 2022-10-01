@@ -12,7 +12,7 @@
     "name": "Ricky",
     "url": "https://github.com/Rickaym"
   },
-  "version": "0.0.14",
+  "version": "0.1.0",
   "publisher": "Rickaym",
   "engines": {
     "vscode": "^1.63.1"
@@ -35,7 +35,8 @@
     "onCommand:manim-sideview.showMobjectGallery",
     "onCommand:manim-sideview.syncMobjectGallery",
     "onCommand:manim-sideview.syncManimConfig",
-    "onCommand:manim-sideview.showOutputChannel"
+    "onCommand:manim-sideview.showOutputChannel",
+    "onCommand:manim-sideview.showExtensionManimConfig"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -52,18 +53,6 @@
           "scope": "application",
           "default": "-ql",
           "description": "Command line arguments for running manim. Refer to the manim documentation if you're unaware of existing arguments."
-        },
-        "manim-sideview.videoDirectory": {
-          "type": "string",
-          "scope": "application",
-          "default": "media/videos/{module_name}/480p15",
-          "description": "The video output directory. We can use context variables here. This does not include the .mp4 file itself."
-        },
-        "manim-sideview.mediaDirectory": {
-          "type": "string",
-          "scope": "application",
-          "default": "media",
-          "description": "The root folder for all media output."
         },
         "manim-sideview.runOnSave": {
           "type": "boolean",
@@ -164,6 +153,10 @@
       {
         "command": "manim-sideview.showOutputChannel",
         "title": "Manim: Show Output Channel"
+      },
+      {
+        "command": "manim-sideview.showExtensionManimConfig",
+        "title": "Manim: Show Extension's internal Manim Config"
       }
     ],
     "keybindings": [

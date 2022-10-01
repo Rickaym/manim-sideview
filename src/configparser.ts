@@ -14,7 +14,7 @@ import * as vscode from "vscode";
  *                            ||   } }
  */
 
-type Config = { [name: string]: { [name: string]: string } };
+type Config = { [name: string]: { [name: string]: any } };
 
 // key = value
 const RE_KEYVALPAIR = /(?<key>\w+)\s*=\s*(?<value>.+)/g;

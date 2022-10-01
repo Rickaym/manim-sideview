@@ -40,32 +40,42 @@ export class Log {
 export type ManimConfig = {
   media_dir: string;
   video_dir: string;
-  image_dir: string;
+  images_dir: string;
   quality: string;
   frame_rate: string;
 };
 
-export function getDefaultMainConfig(): ManimConfig {
-  return {
-    media_dir: FALLBACK_CONFIG.mediaDir,
-    video_dir: FALLBACK_CONFIG.videoDir,
-    image_dir: FALLBACK_CONFIG.imageDir,
-    quality: FALLBACK_CONFIG.quality,
-    frame_rate: FALLBACK_CONFIG.frameRate,
-  };
+// The key and value pairs that directly correlate to the output path
+type ManimConfigExtras = {
+  image_name: string;
+  quality_map: { [tp: string]: string };
+};
+
+// default configurations, these values are set through ./local/manim.cfg.json
+export var FALLBACK_CONFIG: ManimConfig & ManimConfigExtras = {
+  media_dir: "",
+  video_dir: "",
+  images_dir: "",
+  quality: "",
+  frame_rate: "",
+  image_name: "",
+  quality_map: {},
+};
+
+export function getDefaultMainConfig() {
+  return { ...FALLBACK_CONFIG };
 }
 
 /**
  * A configuration necessary to run a render.
  *
- * executablePath: the absolute path to the manim.exe executable
  * srcPath: the absolute path to the running Python file
  * sceneName: the name of the scene to be rendered
  * moduleName: the module name of the source file
- * cliArgs: any extra command line arguments
  * srcRootFolder: the absolute path to the root directory
  * document: the vscode.TextDocument for the Python file
  * isUsingCfgFile: whether if this is running using a configuration file
+ * manimConfig: manim config tied to the running config
  */
 export type RunningConfig = {
   srcPath: string;
@@ -82,7 +92,7 @@ export function getVideoOutputPath(
   extension: string = ".mp4"
 ) {
   // fix in the frame_rate value
-  let quality = FALLBACK_CONFIG.qualityMap[config.manimConfig.quality];
+  let quality = FALLBACK_CONFIG.quality_map![config.manimConfig.quality];
   if (config.manimConfig.frame_rate !== quality.slice(-2)) {
     quality = quality.replace(quality.slice(-2), config.manimConfig.frame_rate);
   }
@@ -92,9 +102,35 @@ export function getVideoOutputPath(
       "{quality}": quality,
       "{media_dir}": config.manimConfig.media_dir,
       "{module_name}": config.moduleName,
-      "{scene_name}": config.sceneName,
     },
     path.join(config.manimConfig.video_dir, `${config.sceneName}${extension}`)
+  );
+}
+
+/**
+ * @param config running config that provides the output path
+ * @param loggedImageName logged name of the image file
+ * @param extension extension of the image file
+ * @returns
+ */
+export function getImageOutputPath(
+  config: RunningConfig,
+  loggedImageName?: string,
+  extension: string = ".png"
+) {
+  return insertContext(
+    {
+      "{media_dir}": config.manimConfig.media_dir,
+      "{module_name}": config.moduleName,
+      // fallback inference variables
+      "{version}": `ManimCE_${getUserConfiguration("manimExecutableVersion")}`,
+      "{scene_name}": config.sceneName,
+      "{extension}": extension,
+    },
+    path.join(
+      config.manimConfig.images_dir,
+      loggedImageName || FALLBACK_CONFIG.image_name
+    )
   );
 }
 
@@ -120,25 +156,6 @@ export function getUserConfiguration<T>(property: string): T {
   return value as T;
 }
 
-export function getImageOutputPath(
-  config: RunningConfig,
-  imageName: string,
-  extension: string = ".png"
-) {
-  return insertContext(
-    {
-      "{media_dir}": config.manimConfig.media_dir,
-      "{image_name}": imageName,
-      "{module_name}": config.moduleName,
-      // fallback inference variables
-      "{version}": `ManimCE_${getUserConfiguration("manimExecutableVersion")}`,
-      "{scene_name}": config.sceneName,
-      "{extension}": extension,
-    },
-    config.manimConfig.image_dir
-  );
-}
-
 export type ContextVars = { [k: string]: string };
 
 export type WebviewResources = {
@@ -147,39 +164,18 @@ export type WebviewResources = {
   css: vscode.Uri;
 };
 
-// internal in this context means internal to the extension
-export type InternalManimCfg = {
-  mediaDir: string;
-  videoDir: string;
-  imageDir: string;
-  quality: string;
-  frameRate: string;
-  qualityMap: { [tp: string]: string };
-  [exts: string]: string | { [tp: string]: string };
-};
-
-// Default configurations.
-export var FALLBACK_CONFIG: InternalManimCfg = {
-  mediaDir: "",
-  videoDir: "",
-  imageDir: "",
-  quality: "",
-  frameRate: "",
-  qualityMap: {},
-};
-
 // Loaded on activation
 export const PATHS: { [tp: string]: vscode.Uri } = {};
 
 export function updateFallbackManimCfg(
   updated: {
-    [tp: string]: string;
+    [tp: string]: any;
   },
   saveUpdated: boolean = true
 ) {
   Object.keys(FALLBACK_CONFIG).forEach((ky) => {
     if (updated[ky]) {
-      FALLBACK_CONFIG[ky] = updated[ky];
+      FALLBACK_CONFIG[ky as keyof ManimConfig] = updated[ky];
     }
   });
 

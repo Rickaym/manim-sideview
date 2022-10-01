@@ -22,7 +22,13 @@ import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 
 const CONFIG_SECTION = "CLI";
-
+const RELEVANT_CONF_FLAGS = [
+  "quality",
+  "media_dir",
+  "video_dir",
+  "images_dir",
+  "frame_rate",
+];
 const RE_SCENE_CLASS = /class\s+(?<name>\w+)\(\w*Scene\w*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
 const RE_FILE_READY = /File\s*ready\s*at[^']*'(?<path>[^']*)'/g;
@@ -31,8 +37,16 @@ const RE_FILE_READY = /File\s*ready\s*at[^']*'(?<path>[^']*)'/g;
 const KILL_MSG =
   "Choose number corresponding to desired scene/arguments.\r\n(Use comma separated list for multiple entries)\r\nChoice(s):  ";
 
+const enum JobStatus {
+  Error,
+  Active,
+  Running,
+  New,
+}
+
 type Job = {
   config: RunningConfig;
+  status: JobStatus;
 };
 
 class JobStatusItemWrapper {
@@ -43,8 +57,6 @@ class JobStatusItemWrapper {
     this.jobStatusItem.name = "job-indicator";
     this.jobStatusItem.command = "manim-sideview.removeCurrentJob";
     this.jobStatusItem.tooltip = "Mainm Sideview - Press to stop session.";
-    this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
-    this.setActive();
   }
 
   private jobStatusItem: vscode.StatusBarItem;
@@ -58,20 +70,6 @@ class JobStatusItemWrapper {
   }
 
   setNew() {
-    this.jobStatusItem.color = new vscode.ThemeColor(
-      "minimapGutter.addedBackground"
-    );
-    this.setIcon("$(vm-active)");
-    this.setVisibility(true);
-  }
-
-  setRunning() {
-    this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
-    this.setIcon("$(sync~spin)");
-    this.setVisibility(true);
-  }
-
-  setActive() {
     this.jobStatusItem.backgroundColor = new vscode.ThemeColor(
       "button.hoverBackground"
     );
@@ -79,9 +77,47 @@ class JobStatusItemWrapper {
     this.setVisibility(true);
   }
 
-  setError() {
+  restoreStatus(job: Job) {
+    switch (job.status) {
+      case JobStatus.New:
+        this.setNew();
+        break;
+      case JobStatus.Active:
+        this.setActive(job);
+        break;
+      case JobStatus.Error:
+        this.setError(job);
+        break;
+      case JobStatus.Running:
+        this.setRunning(job);
+        break;
+    }
+  }
+
+  setRunning(job: Job | null) {
+    if (job) {
+      job.status = JobStatus.Running;
+    }
+    this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
+    this.setIcon("$(sync~spin)");
+    this.setVisibility(true);
+  }
+
+  setActive(job: Job | null) {
+    if (job) {
+      job.status = JobStatus.Active;
+    }
+    this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
+    this.setIcon("$(vm-running)");
+    this.setVisibility(true);
+  }
+
+  setError(job: Job | null) {
+    if (job) {
+      job.status = JobStatus.Error;
+    }
     this.jobStatusItem.color = new vscode.ThemeColor("minimap.errorHighlight");
-    this.setIcon("$(vm-active)");
+    this.setIcon("$(vm-outline)");
     this.setVisibility(true);
   }
 
@@ -143,14 +179,9 @@ export class ManimSideview {
       activeJob = this.getActiveJob(doc.fileName);
     }
 
-    let manimConfig: ManimConfig | undefined;
+    // load/reload every time the program is running
+    let manimConfig = await this.getManimConfigFile(doc.uri.fsPath);
     let isUsingCfgFile = false;
-
-    // load/reload the file config if this is the first time or if the active job
-    // uses a config file
-    if (!activeJob || (activeJob && activeJob.config.isUsingCfgFile)) {
-      manimConfig = await this.getManimConfigFile(doc.uri.fsPath);
-    }
 
     if (manimConfig) {
       isUsingCfgFile = true;
@@ -215,8 +246,9 @@ export class ManimSideview {
   }
 
   refreshJobStatus() {
-    if (this.getActiveJob() !== null) {
-      this.jobStatusItem.setActive();
+    const activeJob = this.getActiveJob();
+    if (activeJob !== null) {
+      this.jobStatusItem.restoreStatus(activeJob);
     } else {
       this.jobStatusItem.setVisibility(false);
     }
@@ -343,7 +375,6 @@ export class ManimSideview {
     vscode.window.showInformationMessage(
       Log.info("Preparing to sync fallback manim configurations...")
     );
-    const conf = vscode.workspace.getConfiguration("manim-sideview");
     const process = spawn(
       path.normalize(getUserConfiguration("defaultManimPath")),
       ["cfg", "show"]
@@ -354,7 +385,7 @@ export class ManimSideview {
       fullStdout += data.toString();
     });
 
-    process.on("close", function (code: number, signal: string) {
+    process.on("close", function (_, __) {
       const payload = fullStdout
         .split("\r\n\r\n\r\n")
         .find((p) => p.includes("CLI"))
@@ -390,9 +421,12 @@ export class ManimSideview {
         config,
         null,
         4
-      )},\n{\n\t"videoOutputPath": ${getVideoOutputPath(
+      )},\n{\n\t"predictedVideoOutputPath": ${getVideoOutputPath(
         config
-      )},\n\t"imageOutputPath": ${getImageOutputPath(config, "{version}")}\n}`
+      )},\n\t"predictedImageOutputPath": ${getImageOutputPath(
+        config,
+        "{version}"
+      )}\n}`
     );
     let args = [config.srcPath];
     if (!config.isUsingCfgFile) {
@@ -425,12 +459,6 @@ export class ManimSideview {
     const command = path.normalize(getUserConfiguration("defaultManimPath"));
     const cwd = config.srcRootFolder;
 
-    // we can easily infer the video file name, but for the image name, it
-    // should be parsed out from the logs, but we'll set it to context vars
-    // in case where we may not be able to parse it out
-    var imageName = "{scene_name}_{version}{extension}";
-    var outputFileType: number | undefined;
-
     // mime command without
     outputChannel.append(`${command} ${args.join(" ")}\n`);
 
@@ -442,9 +470,10 @@ export class ManimSideview {
     if (this.process) {
       this.stop();
     }
-
-    this.process = spawn(command, args, { cwd: cwd, shell: false });
-    this.jobStatusItem.setRunning();
+    const process = spawn(command, args, { cwd: cwd, shell: false });
+    Log.info(`[${process.pid}] Spawned a new process for command execution.`);
+    this.process = process;
+    this.jobStatusItem.setRunning(this.getActiveJob(config.srcPath));
 
     if (
       !this.process ||
@@ -454,7 +483,7 @@ export class ManimSideview {
     ) {
       outputChannel.appendLine(
         Log.info(
-          `Execution returned code=911 in Process: ${this.process}, stdout: ${this.process?.stdout}, stdout: ${this.process?.stderr}`
+          `[${process.pid}] Execution returned code=911 in Process: ${process.pid}, stdout: ${process.stdout}, stdout: ${process.stderr}`
         )
       );
       return vscode.window.showErrorMessage(
@@ -463,53 +492,43 @@ export class ManimSideview {
     }
     // We'll keep a closure because this.process is capable of going undefined
     // at any given time, but we still want valid references
-    const process = this.process;
-    this.process.stdout.on("data", (data: string) => {
+    let stdoutLogbook = "";
+    process.stdout.on("data", (data: string) => {
       if (!process.killed) {
         const dataStr = data.toString();
+        stdoutLogbook += dataStr;
+
+        Log.info(
+          `[${process.pid}] Relaying stdout output "${dataStr
+            .replace(/\r\n/g, "\\n")
+            .replace(/    /g, "\\t")}"`
+        );
         outputChannel.append(dataStr);
 
         if (dataStr.includes(KILL_MSG)) {
+          Log.error(
+            `[${process.pid}] Kill message is sent, ending the process.`
+          );
           this.stop(process);
           outputChannel.appendLine("");
           return;
         }
-
-        if (!outputFileType) {
-          // Change output file type to image if the "File ready" message
-          // tells us that the media ready has the png extension.
-          const fileReSignifier = [...dataStr.matchAll(RE_FILE_READY)];
-          if (fileReSignifier.length > 0) {
-            if (
-              fileReSignifier.some((m) =>
-                m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
-              )
-            ) {
-              outputFileType = PlayableMediaType.Image;
-              Log.info(
-                `Image output detected. Have set the image file name to "${imageName}"`
-              );
-            } else {
-              outputFileType = PlayableMediaType.Video;
-            }
-          }
-        }
       }
     });
 
-    this.process.stderr.on("data", (data: string) => {
+    process.stderr.on("data", (data: string) => {
       if (!process.killed) {
         outputChannel.append(data.toString());
       }
     });
 
-    this.process.on("error", (err: Error) => {
+    process.on("error", (err: Error) => {
       if (!process.killed) {
         outputChannel.append(err.toString());
       }
     });
 
-    this.process.on("close", async (code: number, signal: string) => {
+    process.on("close", async (code: number, signal: string) => {
       const elapsedTime = (new Date().getTime() - startTime.getTime()) / 1000;
 
       // This process has been user-terminated
@@ -519,14 +538,16 @@ export class ManimSideview {
 
       outputChannel.appendLine(
         Log.info(
-          `Execution returned code=${code} in ${elapsedTime} seconds ${
+          `[${
+            process.pid
+          }] Execution returned code=${code} in ${elapsedTime} seconds ${
             code === 1 ? "returned signal " + signal : ""
           } ${
             signal === "SIGTERM"
               ? "Cause: An old process has been terminated due to a termination signal."
               : ""
-          }\n`
-        )
+          }`
+        ) + "\n"
       );
 
       const isMainProcess = this.process && this.process.pid === process.pid;
@@ -537,70 +558,109 @@ export class ManimSideview {
 
       if (signal === "SIGTERM") {
         if (isMainProcess) {
-          this.jobStatusItem.setError();
+          this.jobStatusItem.setError(this.getActiveJob(config.srcPath));
         }
         return;
       }
 
       if (code === 0) {
-        const waitUntilFileTypeDetermined: any = new Promise(
-          (resolve, reject) => {
-            const loop: any = () =>
-              outputFileType !== undefined
-                ? resolve(outputFileType)
-                : setTimeout(loop);
-            loop();
+        // parse out outputFileType and loggedImageName from the logbook
+        let outputFileType: number | undefined;
+        let loggedImageName: string | undefined;
+
+        const fileReSignifier = [...stdoutLogbook.matchAll(RE_FILE_READY)];
+        if (fileReSignifier.length > 0) {
+          const fileIdentifier = fileReSignifier.find((m) =>
+            m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
+          );
+          if (fileIdentifier) {
+            outputFileType = PlayableMediaType.Image;
+            loggedImageName = fileIdentifier.groups?.path
+              .replace(/ |\r|\n/g, "")
+              .split(/\\|\//g)
+              .pop();
+          } else {
+            outputFileType = PlayableMediaType.Video;
           }
-        );
-        await waitUntilFileTypeDetermined;
+          Log.info(
+            `[${process.pid}] ${
+              outputFileType === PlayableMediaType.Image ? "Image" : "Video"
+            } output detected.`
+          );
+        }
+
+        if (outputFileType === undefined) {
+          const fileType = await vscode.window.showWarningMessage(
+            Log.warn(
+              `Manim Sideview: Unable to infer the file-type for "${config.sceneName}". Please select below.`
+            ),
+            "Video",
+            "Image"
+          );
+          if (!fileType) {
+            return;
+          }
+          outputFileType =
+            fileType === "Video"
+              ? PlayableMediaType.Video
+              : PlayableMediaType.Image;
+        }
 
         const mediaFp = vscode.Uri.file(
           path.join(
             config.srcRootFolder,
             outputFileType === PlayableMediaType.Video
               ? getVideoOutputPath(config)
-              : getImageOutputPath(config, imageName)
+              : getImageOutputPath(config, loggedImageName)
           )
         );
-
-        vscode.workspace.fs.stat(mediaFp).then(
-          (fs) => {
-            // we'll open a side view if we can find the file
-            this.mediaPlayer.playMedia(
-              mediaFp,
-              config,
-              outputFileType || PlayableMediaType.Video
-            );
-            this.newJob(config);
-          },
-          (res) => {
-            Log.error(`${res}`);
-            vscode.window.showErrorMessage(
+        if (!fs.existsSync(mediaFp.fsPath)) {
+          vscode.window
+            .showErrorMessage(
               Log.error(
-                `Manim Sideview: "${mediaFp}" does not exist to be loaded in the sideview.` +
-                  " Please make sure that the designated video and image directories" +
-                  " are reflected in the extension log."
-              )
+                `Manim Sideview: Estimated output file does not exist at "${mediaFp.fsPath}"` +
+                  " Make sure that the designated video directories are reflected" +
+                  " in the extension log."
+              ),
+              "Show Log"
+            )
+            .then((value) =>
+              value === "Show Log"
+                ? vscode.commands.executeCommand(
+                    "manim-sideview.showOutputChannel"
+                  )
+                : null
             );
-            this.jobStatusItem.setError();
-          }
+          this.jobStatusItem.setError(this.getActiveJob(config.srcPath));
+          return;
+        }
+        // we'll open a side view if we can find the file
+        this.mediaPlayer.playMedia(
+          mediaFp,
+          config,
+          outputFileType || PlayableMediaType.Video
         );
+
+        if (!Object.keys(this.activeJobs).includes(config.srcPath)) {
+          Log.info(
+            `New job added for "${config.srcPath}" as ${JSON.stringify(
+              config,
+              null,
+              4
+            )}`
+          );
+          this.activeJobs[config.srcPath] = {
+            config: config,
+            status: JobStatus.New,
+          };
+          this.jobStatusItem.setNew();
+        } else {
+          this.jobStatusItem.setActive(this.getActiveJob(config.srcPath));
+        }
       } else {
-        this.jobStatusItem.setError();
+        this.jobStatusItem.setError(this.getActiveJob(config.srcPath));
       }
     });
-  }
-
-  private newJob(config: RunningConfig) {
-    Log.info(
-      `New job added for "${config.srcPath}" as ${JSON.stringify(
-        config,
-        null,
-        4
-      )}`
-    );
-    this.activeJobs[config.srcPath] = { config: config };
-    this.jobStatusItem.setNew();
   }
 
   private ensureOutputChannelCreation() {
@@ -681,8 +741,7 @@ export class ManimSideview {
     // start from fallback values
     let manimConfig = getDefaultMainConfig();
 
-    const relevantFlags = ["quality", "media_dir", "video_dir", "frame_rate"];
-    for (const flag of relevantFlags) {
+    for (const flag of RELEVANT_CONF_FLAGS) {
       if (Object.keys(cliConfig).includes(flag)) {
         manimConfig[flag as keyof ManimConfig] = cliConfig[flag];
         Log.info(`Set flag "${flag}" to ${cliConfig[flag]}.`);

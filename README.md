@@ -17,11 +17,15 @@ A VSCode extension that provides a live preview for rendering and a gallery-base
 8. [Changelog](#changelog)
 
 ## Quickstart
-Open the file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar (or) use `Ctrl+'` `r` to immediately start rendering a preview.
+After installing the extension, open the source file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar (or) use `Ctrl+'` `r` to immediately start rendering and launching a preview.
 
 <image src="https://raw.githubusercontent.com/Rickaym/manim-sideview/master/images/quickstart.gif">
 
 *That's it, folks!*
+
+If you have any questions or find any issues, create a github issue [here](https://github.com/Rickaym/manim-sideview/issues/new), seek support through the extension
+[development discord server](https://discord.gg/UmnzdPgn6g/) or you can ping `@Neo#1844` with a question
+on the official manim community discord server.
 
 ## Config File
 
@@ -118,11 +122,11 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
-#### 0.0.14 [Latest]
+#### 0.1.0 [Latest]
 
 + Extension terminal output format changed & added message persistence<br>
 + Video Player renamed to "Media Player" and now handles both image and video media<br>
-+ Added image support for rendering previews<br>
++ Added image support for rendering previews and its corresponding config flags<br>
 + New GUI User Interface for the Media Player<br>
 + Uses the `plywood-gallery-for-vsce` template engine for Mobject Gallery<br>
 + Uses the `plywood-gallery-for-vsce` template engine for Media Player<br>
@@ -133,6 +137,7 @@ Consider supporting this project through starring the repository or buying me a 
 - Extension excess terminal output removed<br>
 + Changed command `manim-sideview.setRenderingSceneName` name to `manim-sideview.renderNewScene`<br>
 + Added command `manim-sideview.showOutputChannel` command for opening the log output channel<br>
++ `manim.cfg` files are reloaded every run
 
 #### 0.0.13
 

@@ -1,3 +1,4 @@
+import path = require("path");
 import * as vscode from "vscode";
 import { getUserConfiguration, loadGlobals, Log, LOGGER } from "./globals";
 import { ManimSideview } from "./sideview";
@@ -37,13 +38,20 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("manim-sideview.showOutputChannel", () =>
       LOGGER.show(true)
     ),
+    vscode.commands.registerCommand(
+      "manim-sideview.showExtensionManimConfig",
+      () =>
+        vscode.workspace
+          .openTextDocument(
+            path.join(context.extensionPath, "./assets/local/manim.cfg.json")
+          )
+          .then((doc) => vscode.window.showTextDocument(doc))
+    )
   );
 
   vscode.workspace.onDidSaveTextDocument(
     (e) => {
-      if (
-        getUserConfiguration<boolean>("runOnSave")
-      ) {
+      if (getUserConfiguration<boolean>("runOnSave")) {
         vscode.commands.executeCommand("manim-sideview.run", e.fileName);
       }
     },

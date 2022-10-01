@@ -98,7 +98,6 @@ window.addEventListener("message", function (e) {
   const message = e.data;
   switch (message.command) {
     case "reload":
-      console.log("Set source to ", message.resource);
       document.getElementById("output-file").innerText = message.outputFile;
       document.getElementById("module-name").innerText = message.moduleName;
       document.getElementById("source-file").innerText = message.sourceFile;

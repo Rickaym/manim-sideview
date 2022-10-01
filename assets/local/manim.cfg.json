@@ -1,10 +1,11 @@
 {
-    "mediaDir": "./media",
-    "videoDir": "{media_dir}/videos/{module_name}/{quality}",
-    "imageDir" : "{media_dir}/images/{module_name}/{image_name}",
+    "media_dir": "media",
+    "image_name": "{scene_name}_{version}{extension}",
     "quality": "high",
-    "frameRate": "60",
-    "qualityMap": {
+    "frame_rate": "60",
+    "video_dir": "{media_dir}/videos/{module_name}/{quality}",
+    "images_dir" : "{media_dir}/images/{module_name}",
+    "quality_map": {
         "fourk": "2160p60",
         "production": "1440p60",
         "high": "1080p60",
