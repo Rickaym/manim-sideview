@@ -5,7 +5,7 @@
 
 A Visual Studio code extension with rich support for working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework, providing features such as video and image live previews, gallery-based code snippet catalogs, etc... with completely flexible configurations.
 
-The extension assumes an installation of manim on `PATH`. Follow [this guide](https://docs.manim.community/en/stable/installation.html) to install manim and [this guide](#how-do-i-change-the-default-manim-executable-path) to set a custom path to the executable file.
+The extension assumes an installation of manim on `PATH`. Follow [this guide](https://docs.manim.community/en/stable/installation.html) to install manim (if you haven't) and [this guide](#how-do-i-change-the-default-manim-executable-path) to set a custom path to the executable file.
 
 
 # Index
