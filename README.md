@@ -3,7 +3,9 @@
 <a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Homepage" src="https://img.shields.io/badge/vscode-install%20Here-brightgreen?style=for-the-badge&logo=visualstudiocode"></a>
 <a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Version" src="https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview?style=for-the-badge"></a> <a href="https://discord.gg/UmnzdPgn6g/"><img src="https://img.shields.io/discord/793047973751554088.svg?label=Extension Support&color=blue&style=for-the-badge&logo=discord" alt="Discord"></a> <a href="https://www.manim.community/discord/"><img src="https://img.shields.io/discord/581738731934056449.svg?label=Manim Community&style=for-the-badge&color=yellow&logo=discord" alt="Discord"></a>
 
-A VSCode extension that provides a live preview for rendering and a gallery-based code snippet catalog when working with **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)**. The extension assumes an installation of manim on `PATH` to work. If the executable is not on `PATH` you may set a custom path by following [this guide](#how-do-i-change-the-default-manim-executable-path).
+A Visual Studio code extension with rich support for working with the **[manim](https://raw.githubusercontent.com/ManimCommunity/manim)** framework, providing features such as video and image live previews, gallery-based code snippet catalogs, etc... with completely flexible configurations.
+
+The extension assumes an installation of manim on `PATH`. Follow [this guide](https://docs.manim.community/en/stable/installation.html) to install manim and [this guide](#how-do-i-change-the-default-manim-executable-path) to set a custom path to the executable file.
 
 
 # Index
@@ -23,7 +25,7 @@ After installing the extension, open the source file with the scene classes and 
 
 *That's it, folks!*
 
-If you have any questions or find any issues, create a github issue [here](https://github.com/Rickaym/manim-sideview/issues/new), seek support through the extension
+If you have any questions or find any issues, create a GitHub issue [here](https://github.com/Rickaym/manim-sideview/issues/new), seek support through the extension
 [development discord server](https://discord.gg/UmnzdPgn6g/) or you can ping `@Neo#1844` with a question
 on the official manim community discord server.
 
@@ -46,7 +48,7 @@ If a `manim.cfg` file is found, all command line arguments given through
 
 ## Rendering Scenes
 
-After a scene is successfully rendered for the first time, the extension creates an active job tied to the source file to ensure persistence in scene names, output directories.
+After a scene is successfully rendered for the first time, the extension creates an active job tied to the source file to ensure persistence in scene names, and output directories.
 
 You can reset this cache by clicking on the icon.
 
@@ -117,6 +119,7 @@ Consider supporting this project through starring the repository or buying me a 
 + Added support to rendering scenes without loading the source file workspace<br>
 - Fontawesome CSS and JS files removed<br>
 - Extension excess terminal output removed<br>
+- Just in-time configuration
 + Changed command `manim-sideview.setRenderingSceneName` name to `manim-sideview.renderNewScene`<br>
 + Added command `manim-sideview.showOutputChannel` command for opening the log output channel<br>
 + `manim.cfg` files are reloaded every run

@@ -2,7 +2,7 @@
   "name": "manim-sideview",
   "displayName": "Manim Sideview",
   "icon": "assets/images/logo.png",
-  "description": "A video sideview for the Python animations library manim.",
+  "description": "Video/Image live previews and code snippets for manim.",
   "repository": {
     "url": "https://github.com/Rickaym/Manim-Sideview",
     "type": "git",
@@ -184,23 +184,23 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/glob": "^7.2.0",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^18.7.14",
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^18.8.0",
     "@types/node-fetch": "^3.0.3",
-    "@types/vscode": "^1.70.0",
-    "@typescript-eslint/eslint-plugin": "^5.36.0",
-    "@typescript-eslint/parser": "^5.36.0",
+    "@types/vscode": "^1.71.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
     "@vscode/test-electron": "^2.1.5",
-    "@vscode/codicons": "0.0.20",
+    "@vscode/codicons": "0.0.32",
     "electron-rebuild": "^3.2.9",
-    "eslint": "^8.23.0",
+    "eslint": "^8.24.0",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.4"
   },
   "dependencies": {
     "axios": "^0.27.2",
-    "yaml": "^2.0.0"
+    "yaml": "^2.1.2"
   }
 }
