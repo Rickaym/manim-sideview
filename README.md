@@ -10,16 +10,15 @@ The extension assumes an installation of manim on `PATH`. Follow [this guide](ht
 
 # Index
 1. [Quickstart](#quickstart)
-2. [Configuring](#configuring)
-3. [Rendering Scenes](#rendering-scenes)
+2. [Rendering Scenes](#rendering-scenes)
+3. [Configuring](#configuring)
 4. [Mobject Gallery](#mobject-gallery)
-5. [Default Configurations](#default-configurations)
-6. [FAQs](#frequently-asked-questions)
-7. [Credits](#credits)
-8. [Changelog](#changelog)
+5. [FAQs](#frequently-asked-questions)
+6. [Credits](#credits)
+7. [Changelog](#changelog)
 
 ## Quickstart
-After installing the extension, open the source file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar (or) use `Ctrl+'` `r` to immediately start rendering and launching a preview.
+After the extension is installed, open the source file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar or use `Ctrl+'` `r` to immediately start rendering with a live preview!
 
 <image src="https://raw.githubusercontent.com/Rickaym/manim-sideview/master/images/quickstart.gif">
 
@@ -29,9 +28,24 @@ If you have any questions or find any issues, create a GitHub issue [here](https
 [development discord server](https://discord.gg/UmnzdPgn6g/) or you can ping `@Neo#1844` with a question
 on the official manim community discord server.
 
+## Rendering Scenes
+
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> **We've looked at how to render a scene in quickstart, now how do work with multiple scenes?**
+
+In any event, the extension creates a job tied to the source file to ensure persistence in scene names, and configurations right after it is rendered for the first time.
+
+**Changing the scene name!**
+
+Manim Sideview is made to render a single scene at any given moment recurrently. To hop from scene to scene, you'll have to explicitly change the scene name through:
+
+1. Using the `Manim: Set A New SceneName` command through the command palette `Shift + Command + P (Mac)` / `Ctrl + Shift + P`.
+2. Using the following default hotkey `Ctrl + '` `c`.
+3. Using the render-change icon from the sideview
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/render-change.png"></image>
+
 ## Configuring
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image>
-There are two main ways to configure your manim render whilst using
+There are two main ways to configure your render using
 manim-sideview:
 1. `manim-sideview.commandLineArgs`
 
@@ -39,32 +53,11 @@ By setting this configuration through `File -> Preferences -> Settings` you can 
 
 2. `manim.cfg` file
 
-
 If you're using a configuration file for your renders, worry not! the extension recognizes any manim configuration under the guideline [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) that exists
 in the current working directory.
 
 If a `manim.cfg` file is found, all command line arguments given through
 `manim-sideview.commandLineArgs` is ignored.
-
-## Rendering Scenes
-
-After a scene is successfully rendered for the first time, the extension creates an active job tied to the source file to ensure persistence in scene names, and output directories.
-
-You can reset this cache by clicking on the icon.
-
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/statusbaritem.png"></image>
-
-Protip: This icon may change color to green or red for success or failure
-depending on the rendering process.
-
-### Changing the Scene name
-
-Manim Sideview is made to render a single scene recurrently. You must explicitly change the scene name to render different scenes. You can achieve this in a few ways:
-
-1. Using the `Manim: Set A New SceneName` command through the command palette `Shift + Command + P (Mac)` / `Ctrl + Shift + P`.
-2. Using the following default hotkey `Ctrl + '` `c`.
-3. Using the render-change icon from the sideview
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/render-change.png"></image>
 
 ## Mobject Gallery
 
@@ -80,7 +73,7 @@ You can place the cursor at the desired location and click the image of the mani
 
 ## Frequently Asked Questions
 1. [How do I render on save?](#1-how-do-i-render-on-save)
-2. [How do I change the default manim executable path?](#3-how-do-i-change-the-default-manim-executable-path)
+2. [How do I change the default manim executable path?](#2-how-do-i-change-the-default-manim-executable-path)
 
 
 ### 1. How do I render on save?
@@ -89,7 +82,7 @@ Enable the `manim-sideview.runOnSave` settings inside vscode `File -> Preference
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_runonsave.png"></image>
 
-### 3. How do I change the default manim executable path?
+### 2. How do I change the default manim executable path?
 
 You can set the default manim executable path by changing the `manim-sideview.defaultManimPath` configuration in `File -> Preferences -> Settings`.
 
