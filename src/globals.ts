@@ -40,19 +40,19 @@ export class Log {
 export type ManimConfig = {
   media_dir: string;
   video_dir: string;
-  images_dir: string;
   quality: string;
+  images_dir: string;
   frame_rate: string;
 };
 
 // The key and value pairs that directly correlate to the output path
-type ManimConfigExtras = {
+type FallbackConfig = {
   image_name: string;
   quality_map: { [tp: string]: string };
 };
 
 // default configurations, these values are set through ./local/manim.cfg.json
-export var FALLBACK_CONFIG: ManimConfig & ManimConfigExtras = {
+export var FALLBACK_CONFIG: ManimConfig & FallbackConfig = {
   media_dir: "",
   video_dir: "",
   images_dir: "",
@@ -92,8 +92,12 @@ export function getVideoOutputPath(
   extension: string = ".mp4"
 ) {
   // fix in the frame_rate value
-  let quality = FALLBACK_CONFIG.quality_map![config.manimConfig.quality];
-  if (config.manimConfig.frame_rate !== quality.slice(-2)) {
+  let quality =
+    FALLBACK_CONFIG.quality_map![config.manimConfig.quality];
+  if (
+    config.manimConfig &&
+    config.manimConfig.frame_rate !== quality.slice(-2)
+  ) {
     quality = quality.replace(quality.slice(-2), config.manimConfig.frame_rate);
   }
 

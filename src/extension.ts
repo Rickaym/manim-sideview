@@ -24,7 +24,7 @@ export async function activate(context: vscode.ExtensionContext) {
       (...args) => sideview.renderNewScene(...args)
     ),
     vscode.commands.registerCommand("manim-sideview.removeCurrentJob", () =>
-      sideview.removeCurrentJob()
+      sideview.removeJob()
     ),
     vscode.commands.registerCommand("manim-sideview.showMobjectGallery", () =>
       sideview.showMobjectGallery()
@@ -52,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidSaveTextDocument(
     (e) => {
       if (getUserConfiguration<boolean>("runOnSave")) {
-        vscode.commands.executeCommand("manim-sideview.run", e.fileName);
+        vscode.commands.executeCommand("manim-sideview.run", e.fileName, true);
       }
     },
     null,

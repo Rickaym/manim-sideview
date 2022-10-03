@@ -1,7 +1,7 @@
 {
     "media_dir": "media",
     "image_name": "{scene_name}_{version}{extension}",
-    "quality": "high",
+    "quality": "high_quality",
     "frame_rate": "60",
     "video_dir": "{media_dir}/videos/{module_name}/{quality}",
     "images_dir" : "{media_dir}/images/{module_name}",

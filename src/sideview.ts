@@ -152,7 +152,13 @@ export class ManimSideview {
   private outputChannel?: vscode.OutputChannel;
   private outputPseudoTerm?: ManimPseudoTerm;
 
-  async run(srcPath?: vscode.Uri | string) {
+  /**
+   * @param srcPath optional path to the source file for directed rendering,
+   * if left empty, the active text document is used
+   * @param autoRun optional boolean to denote whether if this call is from
+   * an automated process like RunOnSave
+   */
+  async run(srcPath?: vscode.Uri | string, autoRun?: boolean) {
     let activeJob = srcPath
       ? this.getActiveJob(
           typeof srcPath === "string" ? srcPath : srcPath.fsPath
@@ -168,11 +174,13 @@ export class ManimSideview {
     } else {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
-        vscode.window.showErrorMessage(
-          Log.error(
-            "Manim Sideview: You need to select a valid Python source file."
-          )
-        );
+        if (!autoRun) {
+          vscode.window.showErrorMessage(
+            Log.error(
+              "Manim Sideview: You need to select a valid Python source file."
+            )
+          );
+        }
         return;
       }
       doc = editor.document;
@@ -190,7 +198,7 @@ export class ManimSideview {
         // loaded the file config for the first time
         vscode.window.showInformationMessage(
           Log.info(
-            "Manim Sideview: Extension successfully loaded a configuration file from the current working directory!"
+            "Manim Sideview: Successfully loaded a configuration file from the current working directory!"
           )
         );
       }
@@ -237,8 +245,8 @@ export class ManimSideview {
     this.refreshJobStatus();
   }
 
-  async removeCurrentJob() {
-    const job = this.getActiveJob();
+  async removeJob(srcPath?: string | undefined) {
+    const job = this.getActiveJob(srcPath);
     if (job) {
       delete this.activeJobs[job.config.srcPath];
       this.refreshJobStatus();
@@ -312,8 +320,8 @@ export class ManimSideview {
             sceneClasses.indexOf(decorlastChosenSceneName),
             1
           );
+          sceneClasses.push(`$(refresh) ${lastChosenSceneName}`);
         }
-        sceneClasses.push(`$(refresh) ${lastChosenSceneName}`);
       }
 
       sceneClasses.push(moreOption);
@@ -514,12 +522,19 @@ export class ManimSideview {
         );
         outputChannel.append(dataStr);
 
-        if (dataStr.includes(KILL_MSG)) {
+        if (stdoutLogbook.includes(KILL_MSG)) {
           Log.error(
             `[${process.pid}] Kill message is sent, ending the process.`
           );
+          outputChannel.append(
+            "\r\n" +
+              Log.error(
+                `[${process.pid}] Your selected scene name class no longer exists in the source file.`
+              ) +
+              "\r\n"
+          );
+          this.removeJob(config.srcPath);
           this.stop(process);
-          outputChannel.appendLine("");
           return;
         }
       }
@@ -732,14 +747,18 @@ export class ManimSideview {
       var parsedConfig = await ConfigParser.parse(filePath);
     } catch (e) {
       vscode.window.showErrorMessage(
-        Log.error("Manim Sideview: Failed parsing the manim.cfg file, ignoring the file.")
+        Log.error(
+          "Manim Sideview: Failed parsing the manim.cfg file, ignoring the file."
+        )
       );
       return;
     }
 
     if (!Object.keys(parsedConfig).includes(CONFIG_SECTION)) {
       vscode.window.showErrorMessage(
-        Log.error(`Manim Sideview: Config file is missing the [${CONFIG_SECTION}] section.`)
+        Log.error(
+          `Manim Sideview: Config file is missing the [${CONFIG_SECTION}] section.`
+        )
       );
       return;
     }
