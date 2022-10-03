@@ -51,8 +51,7 @@
         "manim-sideview.commandLineArgs": {
           "type": "string",
           "scope": "application",
-          "default": "-ql",
-          "description": "Command line arguments for running manim. Refer to the manim documentation if you're unaware of existing arguments."
+          "description": "Refer to the manim documentation for existing CLI args."
         },
         "manim-sideview.runOnSave": {
           "type": "boolean",

@@ -6,11 +6,11 @@
     "video_dir": "{media_dir}/videos/{module_name}/{quality}",
     "images_dir" : "{media_dir}/images/{module_name}",
     "quality_map": {
-        "fourk": "2160p60",
-        "production": "1440p60",
-        "high": "1080p60",
-        "medium": "720p30",
-        "low": "480p15",
-        "example": "480p30"
+        "fourk_quality": "2160p60",
+        "production_quality": "1440p60",
+        "high_quality": "1080p60",
+        "medium_quality": "720p30",
+        "low_quality": "480p15",
+        "example_quality": "480p30"
     }
 }

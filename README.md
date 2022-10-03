@@ -8,8 +8,8 @@ A VSCode extension that provides a live preview for rendering and a gallery-base
 
 # Index
 1. [Quickstart](#quickstart)
-2. [The Config File](#config-file)
-3. [Rendering The Scene](#rendering)
+2. [Configuring](#configuring)
+3. [Rendering Scenes](#rendering-scenes)
 4. [Mobject Gallery](#mobject-gallery)
 5. [Default Configurations](#default-configurations)
 6. [FAQs](#frequently-asked-questions)
@@ -27,20 +27,42 @@ If you have any questions or find any issues, create a github issue [here](https
 [development discord server](https://discord.gg/UmnzdPgn6g/) or you can ping `@Neo#1844` with a question
 on the official manim community discord server.
 
-## Config File
-
+## Configuring
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image>
-If you're using a configuration file for your renders, worry not! the extension recognizes any manim configuration under the guideline [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) with a few mandatory flags.
+There are two main ways to configure your manim render whilst using
+manim-sideview:
+1. `manim-sideview.commandLineArgs`
 
-P.S. It is necessary to have the config current file in the working directory.
+By setting this configuration through `File -> Preferences -> Settings` you can pass CLI arguments to the `manim.exe` call.
 
-## Rendering
+2. `manim.cfg` file
 
-When a scene is successfully rendered for the first time, the extension creates an active job tied to the source file, this ensures persistence in scene names, video directories, and media directories for rendering. You can reset this cache by clicking on the icon.
+
+If you're using a configuration file for your renders, worry not! the extension recognizes any manim configuration under the guideline [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) that exists
+in the current working directory.
+
+If a `manim.cfg` file is found, all command line arguments given through
+`manim-sideview.commandLineArgs` is ignored.
+
+## Rendering Scenes
+
+After a scene is successfully rendered for the first time, the extension creates an active job tied to the source file to ensure persistence in scene names, output directories.
+
+You can reset this cache by clicking on the icon.
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/statusbaritem.png"></image>
 
-Depending on the execution for rendering, this icon may change also color to green or red for success or failure.
+Protip: This icon may change color to green or red for success or failure
+depending on the rendering process.
+
+### Changing the Scene name
+
+Manim Sideview is made to render a single scene recurrently. You must explicitly change the scene name to render different scenes. You can achieve this in a few ways:
+
+1. Using the `Manim: Set A New SceneName` command through the command palette `Shift + Command + P (Mac)` / `Ctrl + Shift + P`.
+2. Using the following default hotkey `Ctrl + '` `c`.
+3. Using the render-change icon from the sideview
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/render-change.png"></image>
 
 ## Mobject Gallery
 
@@ -54,43 +76,9 @@ The Mobject gallery is a web view that allows users to insert code snippets for 
 
 You can place the cursor at the desired location and click the image of the manim object to insert the code into a Python file or Jupyter Notebook!
 
-## Default Configurations
-
-The extension requires a few flags such as the `videoDir` and `mediaDir` to be set to load the video file. Using a `manim.cfg` file with these flags makes it explicit, however, in some cases, you might not want to use the configuration file. To get around this issue, you can change the default configurations for the extension rendered through the settings `File -> Preferences -> Settings` to custom values.
-
-1. `manim-sideview.commandLineArgs`
-2. `manim-sideview.videoDirectory`
-3. `manim-sideview.mediaDirectory`
-
-### Context Variables
-
-These are variables you can use for setting the default configurations.
-#### Variables
-<table>
-<tr>
-    <th>Variable</th>
-    <th>Description</th>
-</tr>
-<tr>
-    <td>{module_name}</td>
-    <td>The name of the file being run.</td>
-</tr>
-<tr>
-    <td>{media_dir}</td>
-    <td>The directory of the media files.</td>
-</tr>
-<tr>
-    <td>{scene_name}</td>
-    <td>The name of the scene being run.</td>
-</tr>
-</table>
-
-Using unset variables will result in default values being used.
-
 ## Frequently Asked Questions
 1. [How do I render on save?](#1-how-do-i-render-on-save)
-2. [How do I change the scene name after running?](#2-how-do-i-change-the-scene-name-after-running)
-3. [How do I change the default manim executable path?](#3-how-do-i-change-the-default-manim-executable-path)
+2. [How do I change the default manim executable path?](#3-how-do-i-change-the-default-manim-executable-path)
 
 
 ### 1. How do I render on save?
@@ -98,12 +86,6 @@ Using unset variables will result in default values being used.
 Enable the `manim-sideview.runOnSave` settings inside vscode `File -> Preferences -> Settings` menu.
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_runonsave.png"></image>
-
-### 2. How do I change the scene name after running?
-
-You can change the scene name after a job by using the `Manim: Set A New SceneName` command through the command palette `Shift + Command + P (Mac)` / `Ctrl + Shift + P`.
-
-Alternatively, you can also use the following default hotkey `Ctrl + '` `c`.
 
 ### 3. How do I change the default manim executable path?
 
