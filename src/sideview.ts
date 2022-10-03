@@ -333,7 +333,7 @@ export class ManimSideview {
     const isCustomInput = choice === moreOption;
     if (isCustomInput || !sceneClasses) {
       const pick = await vscode.window.showInputBox({
-        prompt: "Input the name of your scene",
+        prompt: "Manim Sideview: Input the name of your scene",
       });
       if (pick) {
         choice = pick;
@@ -373,7 +373,9 @@ export class ManimSideview {
 
   async syncFallbackManimConfig() {
     vscode.window.showInformationMessage(
-      Log.info("Preparing to sync fallback manim configurations...")
+      Log.info(
+        "Manim Sideview: Preparing to sync fallback manim configurations..."
+      )
     );
     const process = spawn(
       path.normalize(getUserConfiguration("defaultManimPath")),
@@ -405,7 +407,7 @@ export class ManimSideview {
       });
       updateFallbackManimCfg(cfgOptions);
       vscode.window.showInformationMessage(
-        "Successfully updated internal defaults for manim.cfg files."
+        "Manim Sideview: Successfully updated internal defaults for manim.cfg files."
       );
     });
   }
@@ -486,9 +488,16 @@ export class ManimSideview {
           `[${process.pid}] Execution returned code=911 in Process: ${process.pid}, stdout: ${process.stdout}, stdout: ${process.stderr}`
         )
       );
-      return vscode.window.showErrorMessage(
-        "Fatal error, please look at the output channel."
-      );
+      return vscode.window
+        .showErrorMessage(
+          "Manim Sideview: Fatal error, please look at the output channel.",
+          "Show Log"
+        )
+        .then((value) =>
+          value === "Show Log"
+            ? vscode.commands.executeCommand("manim-sideview.showOutputChannel")
+            : null
+        );
     }
     // We'll keep a closure because this.process is capable of going undefined
     // at any given time, but we still want valid references
@@ -723,14 +732,14 @@ export class ManimSideview {
       var parsedConfig = await ConfigParser.parse(filePath);
     } catch (e) {
       vscode.window.showErrorMessage(
-        Log.error("Failed parsing the manim.cfg file, ignoring the file...")
+        Log.error("Manim Sideview: Failed parsing the manim.cfg file, ignoring the file.")
       );
       return;
     }
 
     if (!Object.keys(parsedConfig).includes(CONFIG_SECTION)) {
       vscode.window.showErrorMessage(
-        Log.error(`Config file is missing the [${CONFIG_SECTION}] section.`)
+        Log.error(`Manim Sideview: Config file is missing the [${CONFIG_SECTION}] section.`)
       );
       return;
     }

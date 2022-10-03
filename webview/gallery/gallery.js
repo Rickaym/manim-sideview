@@ -1,7 +1,6 @@
 const vscode = acquireVsCodeApi();
 const container = document.getElementById("Mobjects");
 const updates = document.getElementById("updates");
-const fdownload = document.getElementById("download-again");
 
 
 container.addEventListener("click", (event) => {
@@ -16,11 +15,5 @@ container.addEventListener("click", (event) => {
 updates.addEventListener("click", (event) => {
   vscode.postMessage({
     command: "update",
-  });
-});
-
-fdownload.addEventListener("click", (event) => {
-  vscode.postMessage({
-    command: "download-again",
   });
 });
