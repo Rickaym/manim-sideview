@@ -10,5 +10,5 @@ src/**
 **/*.ts
 
 .vsix-publish.bat
-.pre-release.bat
+.release.bat
 .update-npm.bat
