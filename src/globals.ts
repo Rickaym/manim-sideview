@@ -42,7 +42,7 @@ export type ManimConfig = {
   video_dir: string;
   quality: string;
   images_dir: string;
-  frame_rate: string;
+  frame_rate?: string;
 };
 
 // The key and value pairs that directly correlate to the output path
@@ -57,7 +57,6 @@ export var FALLBACK_CONFIG: ManimConfig & FallbackConfig = {
   video_dir: "",
   images_dir: "",
   quality: "",
-  frame_rate: "",
   image_name: "",
   quality_map: {},
 };
@@ -91,15 +90,20 @@ export function getVideoOutputPath(
   config: RunningConfig,
   extension: string = ".mp4"
 ) {
-  // fix in the frame_rate value
-  let quality =
-    FALLBACK_CONFIG.quality_map![config.manimConfig.quality];
   if (
-    config.manimConfig &&
-    config.manimConfig.frame_rate !== quality.slice(-2)
+    !Object.keys(FALLBACK_CONFIG.quality_map).includes(
+      config.manimConfig.quality
+    )
   ) {
-    quality = quality.replace(quality.slice(-2), config.manimConfig.frame_rate);
+    vscode.window.showErrorMessage(
+      Log.error(
+        `Manim Sideview: The quality "${config.manimConfig.quality}" provided in the configuration is invalid.`
+      )
+    );
+    return;
   }
+
+  let quality = FALLBACK_CONFIG.quality_map![config.manimConfig.quality];
 
   return insertContext(
     {

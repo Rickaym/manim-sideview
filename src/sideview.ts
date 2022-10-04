@@ -630,19 +630,21 @@ export class ManimSideview {
               : PlayableMediaType.Image;
         }
 
-        const mediaFp = vscode.Uri.file(
-          path.join(
-            config.srcRootFolder,
-            outputFileType === PlayableMediaType.Video
-              ? getVideoOutputPath(config)
-              : getImageOutputPath(config, loggedImageName)
-          )
+        const mediaPath =
+          outputFileType === PlayableMediaType.Video
+            ? getVideoOutputPath(config)
+            : getImageOutputPath(config, loggedImageName);
+        if (!mediaPath) {
+          return;
+        }
+        const fullMediaPath = vscode.Uri.file(
+          path.join(config.srcRootFolder, mediaPath)
         );
-        if (!fs.existsSync(mediaFp.fsPath)) {
+        if (!fs.existsSync(fullMediaPath.fsPath)) {
           vscode.window
             .showErrorMessage(
               Log.error(
-                `Manim Sideview: Estimated output file does not exist at "${mediaFp.fsPath}"` +
+                `Manim Sideview: Estimated output file does not exist at "${fullMediaPath.fsPath}"` +
                   " Make sure that the designated video directories are reflected" +
                   " in the extension log."
               ),
@@ -660,7 +662,7 @@ export class ManimSideview {
         }
         // we'll open a side view if we can find the file
         this.mediaPlayer.playMedia(
-          mediaFp,
+          fullMediaPath,
           config,
           outputFileType || PlayableMediaType.Video
         );

@@ -99,7 +99,16 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
-#### 0.1.0 [Latest]
+#### 0.1.2 [Latest]
+
++ (Bugfix) `frame_rate` assumed as 60 on every quality
+- Temporarily dropped `frame_rate` key in `manim.cfg` for output directory name
+
+#### 0.1.1 [Latest]
+
++ `@vscode/codicons` dependency changed from devDependency to general dependency
+
+#### 0.1.0
 
 + Extension terminal output format changed & added message persistence<br>
 + Video Player renamed to "Media Player" and now handles both image and video media<br>
