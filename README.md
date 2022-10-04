@@ -99,7 +99,15 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
-#### 0.1.2 [Latest]
+#### 0.1.4
+
++ Source JS files repackaged
+
+#### 0.1.3
+
++ Targeted vscode engine downgraded to `1.62.3`
+
+#### 0.1.2
 
 + (Bugfix) `frame_rate` assumed as 60 on every quality
 - Temporarily dropped `frame_rate` key in `manim.cfg` for output directory name

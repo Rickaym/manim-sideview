@@ -150,7 +150,9 @@ export function getImageOutputPath(
  * @returns
  */
 export function getUserConfiguration<T>(property: string): T {
-  let value = vscode.workspace.getConfiguration("manim-sideview").get(property);
+  let value: T | undefined = vscode.workspace
+    .getConfiguration("manim-sideview")
+    .get(property);
 
   if (value === undefined) {
     const propertyDict =
@@ -158,10 +160,12 @@ export function getUserConfiguration<T>(property: string): T {
         `manim-sideview.${property}`
       ];
     if (propertyDict["type"] === "boolean") {
-      return (propertyDict["default"] === "true" ? true : false) as T;
+      return (propertyDict["default"] === "true"
+        ? true
+        : false) as unknown as T;
     }
   }
-  return value as T;
+  return value!;
 }
 
 export type ContextVars = { [k: string]: string };
