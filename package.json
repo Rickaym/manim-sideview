@@ -15,7 +15,7 @@
   "version": "0.1.2",
   "publisher": "Rickaym",
   "engines": {
-    "vscode": "^1.63.1"
+    "vscode": "^1.62.3"
   },
   "categories": [
     "Visualization",
@@ -176,11 +176,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
-    "esbuild": "npm run esbuild-base -- --sourcemap",
-    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-    "test-compile": "tsc -p ./",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
@@ -192,7 +188,7 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.8.0",
     "@types/node-fetch": "^3.0.3",
-    "@types/vscode": "^1.63.1",
+    "@types/vscode": "^1.62.3",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",
     "@vscode/test-electron": "^2.1.5",
