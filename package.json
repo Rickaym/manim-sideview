@@ -44,62 +44,57 @@
       "properties": {
         "manim-sideview.defaultManimPath": {
           "type": "string",
-          "scope": "application",
           "default": "manim",
           "description": "The absolute path to the manim executable."
         },
         "manim-sideview.commandLineArgs": {
           "type": "string",
-          "scope": "application",
           "description": "Refer to the manim documentation for existing CLI args."
         },
         "manim-sideview.runOnSave": {
           "type": "boolean",
-          "scope": "application",
           "default": "false",
           "description": "Whether to run on save for a file that has been run before."
         },
         "manim-sideview.focusOutputOnRun": {
           "type": "boolean",
-          "scope": "application",
           "default": "true",
           "description": "Whether to focus on the output when run."
         },
         "manim-sideview.previewShowProgressOnIdle": {
           "type": "boolean",
-          "scope": "application",
           "default": "true",
           "description": "Whether to display the video progress bar in the video player when the job is idle."
         },
         "manim-sideview.previewProgressColor": {
           "type": "string",
-          "scope": "application",
           "default": "textLink.foreground",
           "description": "The color of the progress bar. You can use theme colors here. Either specify hex colors `#F1F1F1` or theme colors `button.border`"
         },
         "manim-sideview.previewAutoPlay": {
           "type": "boolean",
-          "scope": "application",
           "default": "true",
           "description": "Whether to auto-play the preview right after rendering."
         },
         "manim-sideview.previewLooping": {
           "type": "boolean",
-          "scope": "application",
           "default": "true",
           "description": "Whether to loop the preview at the end."
         },
         "manim-sideview.outputToTerminal": {
           "type": "boolean",
-          "scope": "application",
           "default": "true",
           "description": "Whether to relay output to a terminal. If False, an output channel rather than a terminal is used to display text."
         },
         "manim-sideview.manimExecutableVersion": {
           "type": "boolean",
-          "scope": "application",
           "default": "v0.16.0.post0",
           "description": "(DO NOT CHANGE THIS) The lower bound manim version that the extension supports."
+        },
+        "manim-sideview.terminalCommand": {
+          "type": "string",
+          "default": "{defaultManimPath} {sourcePath} {sceneName} {commandLineArgs} | vscePlay {sourcePath}",
+          "description": "The terminal command to invoke when a render is called."
         }
       }
     },
