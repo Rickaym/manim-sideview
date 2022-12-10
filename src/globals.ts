@@ -5,7 +5,7 @@ import * as fs from "fs";
 import path = require("path");
 
 export const LOGGER = vscode.window.createOutputChannel("Manim Sideview");
-
+export const DefaultTerminalName = "manim-exc";
 type FormatHandlerFn = (level: string, msg: string) => string;
 
 export class Log {
