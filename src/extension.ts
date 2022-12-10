@@ -1,6 +1,6 @@
 import path = require("path");
 import * as vscode from "vscode";
-import { getUserConfiguration, loadGlobals, Log, LOGGER } from "./globals";
+import { getUserConfiguration, DefaultTerminalName, loadGlobals, Log, LOGGER } from "./globals";
 import { ManimSideview } from "./sideview";
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -17,7 +17,7 @@ export async function activate(context: vscode.ExtensionContext) {
       sideview.removeAllJobs()
     ),
     vscode.commands.registerCommand("manim-sideview.stop", () =>
-      sideview.stop()
+      sideview.stopProcess()
     ),
     vscode.commands.registerCommand(
       "manim-sideview.renderNewScene",
@@ -46,6 +46,18 @@ export async function activate(context: vscode.ExtensionContext) {
             path.join(context.extensionPath, "./assets/local/manim.cfg.json")
           )
           .then((doc) => vscode.window.showTextDocument(doc))
+    ),
+    vscode.commands.registerCommand(
+      "manim-sideview.showManimExecTerminal",
+      () => {
+        const cli = vscode.window.terminals.find(
+        (t) => t.name === DefaultTerminalName);
+        if (cli) {
+          cli.show();
+        } else {
+          vscode.window.showErrorMessage("Manim Sideview: There is no internal execution terminal open.");
+        }
+      }
     )
   );
 
