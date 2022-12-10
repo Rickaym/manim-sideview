@@ -36,7 +36,8 @@
     "onCommand:manim-sideview.syncMobjectGallery",
     "onCommand:manim-sideview.syncManimConfig",
     "onCommand:manim-sideview.showOutputChannel",
-    "onCommand:manim-sideview.showExtensionManimConfig"
+    "onCommand:manim-sideview.showExtensionManimConfig",
+    "onCommand:manim-sideview.showManimExecTerminal"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -87,14 +88,18 @@
           "description": "Whether to relay output to a terminal. If False, an output channel rather than a terminal is used to display text."
         },
         "manim-sideview.manimExecutableVersion": {
-          "type": "boolean",
+          "type": "string",
           "default": "v0.16.0.post0",
-          "description": "(DO NOT CHANGE THIS) The lower bound manim version that the extension supports."
+          "description": "(sensitive*) The lower bound manim version that the extension supports."
         },
         "manim-sideview.terminalCommand": {
           "type": "string",
-          "default": "{defaultManimPath} {sourcePath} {sceneName} {commandLineArgs} | vscePlay {sourcePath}",
-          "description": "The terminal command to invoke when a render is called."
+          "description": "The terminal command to invoke after a render is called."
+        },
+        "manim-sideview.autoPreview": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Whether to display the preview after being rendered."
         }
       }
     },
@@ -151,6 +156,10 @@
       {
         "command": "manim-sideview.showExtensionManimConfig",
         "title": "Manim: Show Extension's internal Manim Config"
+      },
+      {
+        "command": "manim-sideview.showManimExecTerminal",
+        "title": "Manim: Show Extension's internal execution terminal"
       }
     ],
     "keybindings": [
