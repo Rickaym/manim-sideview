@@ -90,11 +90,11 @@
         "manim-sideview.manimExecutableVersion": {
           "type": "string",
           "default": "v0.16.0.post0",
-          "description": "(sensitive*) The lower bound manim version that the extension supports."
+          "description": "The manim executable version that runs on the extension."
         },
         "manim-sideview.terminalCommand": {
           "type": "string",
-          "description": "The terminal command to invoke after a render is called."
+          "description": "A terminal command to invoke after a render is called. Available variables are: {outputPath}, {sourcePath} and {sceneName}."
         },
         "manim-sideview.autoPreview": {
           "type": "boolean",
