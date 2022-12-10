@@ -74,7 +74,7 @@ You can place the cursor at the desired location and click the image of the mani
 ## Frequently Asked Questions
 1. [How do I render on save?](#1-how-do-i-render-on-save)
 2. [How do I change the default manim executable path?](#2-how-do-i-change-the-default-manim-executable-path)
-3. [How do I execute a command after the rendering is done?](#3-how-do-i-execute-a-command-after-the-rendering-is-done)
+3. [How do I execute a command after the rendering is finished?](#3-how-do-i-execute-a-command-after-the-rendering-is-finished)
 
 ### 1. How do I render on save?
 
@@ -88,11 +88,13 @@ You can set the default manim executable path by changing the `manim-sideview.de
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_defaultmanimpath.png"></image>
 
-### 3. How do I execute a command after the rendering is done?
+### 3. How do I execute a command after the rendering is finished?
 
-We can use the extension preference `manim-sideview.terminalCommand` which accepts a text field to provide a command to execute after the rendering is finished.
+We can achieve this via the extension preference `manim-sideview.terminalCommand` that accepts a command string.
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_terminalcommand.png"></image>
+
+The command is executed in an external terminal as soon as all the rendering is finished.
 
 You can use the following variables in your terminal command:
 1. `{outputPath}` - the path to the rendered media output (video/image)
