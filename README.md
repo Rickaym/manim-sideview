@@ -114,8 +114,10 @@ Consider supporting this project through starring the repository or buying me a 
 
 #### 0.1.5
 
-+ Added `manim-sideview.autoPreview`
-+ Added `manim-sideview.terminalCommand`
++ Added `manim-sideview.autoPreview` command
++ Added `manim-sideview.terminalCommand` command
++ Added `manim-sideview.showManimExecTerminal` option
++ Users are able to execute a terminal command at the end of a render
 
 #### 0.1.4
 
