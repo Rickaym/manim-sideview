@@ -201,7 +201,7 @@ export class ManimSideview {
         // loaded the file config for the first time
         vscode.window.showInformationMessage(
           Log.info(
-            "Manim Sideview: Successfully loaded a configuration file from the current working directory!"
+            "Manim Sideview: Loaded a configuration file from the current working directory!"
           )
         );
       }
