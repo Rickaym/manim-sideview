@@ -74,7 +74,7 @@ You can place the cursor at the desired location and click the image of the mani
 ## Frequently Asked Questions
 1. [How do I render on save?](#1-how-do-i-render-on-save)
 2. [How do I change the default manim executable path?](#2-how-do-i-change-the-default-manim-executable-path)
-
+3. [How do I execute a command after the rendering is done?](#3-how-do-i-execute-a-command-after-the-rendering-is-done)
 
 ### 1. How do I render on save?
 
@@ -88,6 +88,17 @@ You can set the default manim executable path by changing the `manim-sideview.de
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_defaultmanimpath.png"></image>
 
+### 3. How do I execute a command after the rendering is done?
+
+We can use the extension preference `manim-sideview.terminalCommand` which accepts a text field to provide a command to execute after the rendering is finished.
+
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/settings_terminalcommand.png"></image>
+
+You can use the following variables in your terminal command:
+1. `{outputPath}` - the path to the rendered media output (video/image)
+2. `{sourcePath}` - the path to the source file
+3. `{sceneName}` - the name of the scene rendered
+
 ## Credits
 
 Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, [mobject gallery](https://github.com/kolibril13/mobject-gallery/) by [kolibril13](https://github.com/kolibril13) and ofcourse the logo by the [manim](https://raw.githubusercontent.com/3b1b/manim)/[community](https://raw.githubusercontent.com/ManimCommunity/manim/) project!
@@ -98,6 +109,11 @@ Consider supporting this project through starring the repository or buying me a 
 <a href="https://www.buymeacoffee.com/rickaym" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## Changelog
+
+#### 0.1.5
+
++ Added `manim-sideview.autoPreview`
++ Added `manim-sideview.terminalCommand`
 
 #### 0.1.4
 
