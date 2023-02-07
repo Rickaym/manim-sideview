@@ -1,4 +1,5 @@
 const vscode = acquireVsCodeApi();
+var videomask = document.querySelector(".video-mask");
 var timestatus = document.querySelector(".color-fill");
 var demostatus = document.querySelector(".demo-fill");
 var controls = document.querySelector(".progress-bar");
@@ -29,6 +30,15 @@ function togglePlayPause(toggle = true) {
     playVideo(toggle);
   } else {
     pauseVideo(toggle);
+  }
+}
+
+function setVideoProgress(value) {
+  if (video.paused || video.ended) {
+    video.play();
+    video.currentTime = value * video.duration;
+  } else {
+    video.currentTime = value * video.duration;
   }
 }
 
@@ -92,7 +102,10 @@ controls.addEventListener("mousemove", function (e) {
 controls.addEventListener("click", function (e) {
   const brc = this.getBoundingClientRect();
   const seek = (e.clientX - brc.left) / brc.width;
+  setVideoProgress(seek);
 });
+
+
 
 window.addEventListener("message", function (e) {
   const message = e.data;
