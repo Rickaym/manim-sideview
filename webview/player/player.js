@@ -1,5 +1,4 @@
 const vscode = acquireVsCodeApi();
-var videomask = document.querySelector(".video-mask");
 var timestatus = document.querySelector(".color-fill");
 var demostatus = document.querySelector(".demo-fill");
 var controls = document.querySelector(".progress-bar");
