@@ -34,11 +34,9 @@ function togglePlayPause(toggle = true) {
 }
 
 function setVideoProgress(value) {
+  video.currentTime = value * video.duration;
   if (video.paused || video.ended) {
     video.play();
-    video.currentTime = value * video.duration;
-  } else {
-    video.currentTime = value * video.duration;
   }
 }
 
