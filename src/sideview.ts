@@ -437,6 +437,16 @@ export class ManimSideview {
     cli.sendText(commandInput);
   }
 
+  /**
+   * Formats a message from a process and makes it printable
+   * @param message The message received from stdout/stderr
+   * @returns The result
+   */
+  formatOutput(message: string): string {
+    return message.replace(/\r\n/g, "\\n")
+    .replace(/    /g, "\\t");
+  }
+
   async render(args: string[], config: RunningConfig, outputChannel: vscode.OutputChannel) {
     const cwd = config.srcRootFolder;
 
@@ -485,15 +495,20 @@ export class ManimSideview {
       }
     });
 
+    process.stderr.on("data", (data: { toString: () => string }) => {
+      const dataStr = data.toString();
+      Log.warn(
+        `[${process.pid}] Captured stderr output "${this.formatOutput(dataStr)}"`
+      );
+    })
+
     // we'll keep a closure because this.process is capable of going undefined
     // at any given time, but we still want valid references
     let stdoutLogbook = "";
-    process.stdout.on("data", (data: string) => {
+    process.stdout.on("data", (data: { toString: () => string }) => {
       const dataStr = data.toString();
       Log.info(
-        `[${process.pid}] Captured stdout output "${dataStr
-          .replace(/\r\n/g, "\\n")
-          .replace(/    /g, "\\t")}"`
+        `[${process.pid}] Captured stdout output "${this.formatOutput(dataStr)}"`
       );
       if (!process.killed) {
         stdoutLogbook += dataStr;
