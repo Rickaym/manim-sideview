@@ -130,7 +130,6 @@ export class ManimSideview {
   }
 
   private manimCfgPath: string = "";
-  private autoPlayCommand = "vscePlay {sourcePath}";
   private activeJobs: { [fsPath: string]: Job } = {};
   private mediaPlayer = new MediaPlayer(this.ctx.extensionUri, this.ctx.subscriptions);
   private gallery = new Gallery(this.ctx.extensionUri, this.ctx.subscriptions);
