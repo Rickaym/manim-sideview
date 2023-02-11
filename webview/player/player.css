@@ -59,7 +59,7 @@ video {
   align-items: center;
   background-color: transparent;
   position: absolute;
-  bottom: 0;
+  bottom: -2px;
   width: 100%;
   height: 10px;
   flex-wrap: wrap;
