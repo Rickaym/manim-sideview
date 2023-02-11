@@ -62,6 +62,7 @@ export class MediaPlayer {
         this.recentMediaPanel.webview,
         mediaUri
       );
+      Log.info(`Reloading media to URI "${mediaUri.fsPath}"`);
       return this.recentMediaPanel.webview.postMessage({
         command: "reload",
         mediaType: mediaType,
@@ -125,6 +126,7 @@ export class MediaPlayer {
       loop: getUserConfiguration("previewLooping") ? "loop" : "",
       autoplay: getUserConfiguration("previewAutoPlay") ? "autoplay" : "",
     });
+    Log.info(`Playing media URI "${mediaUri.fsPath}"`);
 
     panel.webview.onDidReceiveMessage(
       (message) => {
@@ -132,7 +134,7 @@ export class MediaPlayer {
           // Executes a manim-sideview command and then executes run command
           case "executeSelfCommand":
             Log.info(
-              `Executing command "manim-sideview.${message.name}" as requested by webview.`
+              `Executing command "manim-sideview.${message.name}" for webview.`
             );
             vscode.commands.executeCommand(
               `manim-sideview.${message.name}`,
