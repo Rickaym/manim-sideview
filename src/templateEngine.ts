@@ -23,6 +23,7 @@ export class TemplateEngine {
     [this.resMap.js]: this.webview.asWebviewUri(this.resource.js).toString(),
     [this.resMap.css]: this.webview.asWebviewUri(this.resource.css).toString(),
     nonce: getNonce(),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     "codicon.css": this.webview.asWebviewUri(
       vscode.Uri.joinPath(
         this.extensionUri,
