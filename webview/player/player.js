@@ -32,6 +32,13 @@ function togglePlayPause(toggle = true) {
   }
 }
 
+function setVideoProgress(value) {
+  video.currentTime = value * video.duration;
+  if (video.paused || video.ended) {
+    video.play();
+  }
+}
+
 async function enterPictureInPicture() {
   // If there is no element in Picture-in-Picture yet, let’s request
   // Picture-in-Picture for the video, otherwise leave it.
@@ -92,7 +99,10 @@ controls.addEventListener("mousemove", function (e) {
 controls.addEventListener("click", function (e) {
   const brc = this.getBoundingClientRect();
   const seek = (e.clientX - brc.left) / brc.width;
+  setVideoProgress(seek);
 });
+
+
 
 window.addEventListener("message", function (e) {
   const message = e.data;

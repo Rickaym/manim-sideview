@@ -56,10 +56,12 @@ video {
 
 .progress-bar {
   display: flex;
+  align-items: center;
   background-color: transparent;
   position: absolute;
-  bottom: 3.24px;
+  bottom: -2px;
   width: 100%;
+  height: 10px;
   flex-wrap: wrap;
 }
 
