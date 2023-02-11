@@ -205,7 +205,7 @@ export var EXTENSION_VERSION: string | undefined;
 export var PACKAGE_JSON: { [key: string]: any } = {};
 
 export async function loadGlobals(ctx: vscode.ExtensionContext) {
-  Log.info("Loading globals.");
+  Log.info("Loading globals and resource paths.");
 
   const pathsToLoad: { [tp: string]: string } = {
     cfgMap: "assets/local/manim.cfg.json",
@@ -217,7 +217,6 @@ export async function loadGlobals(ctx: vscode.ExtensionContext) {
   Object.keys(pathsToLoad).forEach((tp) => {
     PATHS[tp] = vscode.Uri.joinPath(ctx.extensionUri, pathsToLoad[tp]);
   });
-  Log.info("Loaded all resource paths.");
 
   const cfg = JSON.parse(
     (await vscode.workspace.fs.readFile(PATHS.cfgMap!)).toString()
