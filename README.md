@@ -112,6 +112,10 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.1
+
++ Uses Return code 15 for last-process killing `SIGTERM` signals
+
 #### 0.2.0
 
 + Added video preview seeking ✨

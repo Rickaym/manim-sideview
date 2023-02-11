@@ -216,11 +216,11 @@ export class ManimSideview {
       activeJob.config.isUsingCfgFile = isUsingCfgFile;
       runningCfg = activeJob.config;
     } else {
-      Log.info("Asking user for the new scene name.");
       const newSceneName = await this.getRenderingSceneName(doc.uri);
       if (!newSceneName) {
         return;
       }
+      Log.info(`Asked user for a new scene name and recieved "${newSceneName}".`);
 
       runningCfg = this.getNewRunningConfig(
         doc,
@@ -499,8 +499,8 @@ export class ManimSideview {
     const command = path.normalize(getUserConfiguration("defaultManimPath"));
     const autoPreview = getUserConfiguration("autoPreview");
 
-    // log a fake command execution line
-    outputChannel.append(`${command} ${args.join(" ")}\n`);
+    const executedCommandStr = `${command} ${args.join(" ")}\n`;
+    outputChannel.append(executedCommandStr);
 
     if (getUserConfiguration("focusOutputOnRun")) {
       outputChannel.show(true);
@@ -513,7 +513,7 @@ export class ManimSideview {
 
     const startTime = new Date();
     const process = spawn(command, args, { cwd: cwd, shell: false });
-    Log.info(`[${process.pid}] Spawned a new process for command execution.`);
+    Log.info(`[${process.pid}] Spawned a new process for executing "${executedCommandStr}".`);
     this.process = process;
     this.jobStatusItem.setRunning(this.getActiveJob(config.srcPath));
 
@@ -545,15 +545,16 @@ export class ManimSideview {
     // at any given time, but we still want valid references
     let stdoutLogbook = "";
     process.stdout.on("data", (data: string) => {
+      const dataStr = data.toString();
+      Log.info(
+        `[${process.pid}] Captured stdout output "${dataStr
+          .replace(/\r\n/g, "\\n")
+          .replace(/    /g, "\\t")}"`
+      );
       if (!process.killed) {
-        const dataStr = data.toString();
         stdoutLogbook += dataStr;
 
-        Log.info(
-          `[${process.pid}] Relaying stdout output "${dataStr
-            .replace(/\r\n/g, "\\n")
-            .replace(/    /g, "\\t")}"`
-        );
+        Log.info(`[${process.pid}] Relaying captured stdout output.`);
         outputChannel.append(dataStr);
 
         if (stdoutLogbook.includes(KILL_MSG)) {
@@ -578,7 +579,7 @@ export class ManimSideview {
       const elapsedTime = (new Date().getTime() - startTime.getTime()) / 1000;
 
       if (signal === "SIGTERM") {
-        code = 1;
+        code = 15;
       }
 
       outputChannel.appendLine(
@@ -634,9 +635,9 @@ export class ManimSideview {
           outputFileType = PlayableMediaType.Video;
         }
         Log.info(
-          `[${process.pid}] ${
+          `[${process.pid}] Render output is predicted as "${
             outputFileType === PlayableMediaType.Image ? "Image" : "Video"
-          } output detected.`
+          }".`
         );
       }
 
@@ -672,7 +673,7 @@ export class ManimSideview {
         vscode.window
           .showErrorMessage(
             Log.error(
-              `Manim Sideview: Estimated output file does not exist at "${fullMediaPath.fsPath}"` +
+              `Manim Sideview: Predicted output file does not exist at "${fullMediaPath.fsPath}"` +
                 " Make sure that the designated video directories are reflected" +
                 " in the extension log."
             ),
