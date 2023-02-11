@@ -23,12 +23,8 @@ jobs:
       - name: Install JS dependencies
         run: npm ci
 
-      - name: Copy default configuration file
-        run: cp src/lib/config.template.ts src/lib/config.ts
-
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
           eslint: true
           prettier: true
-
