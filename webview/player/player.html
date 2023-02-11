@@ -1,49 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<title>Player</title>
-<meta charset="UTF-8">
-<meta
-  http-equiv="Content-Security-Policy"
-  content="default-src 'none'; media-src {{ cspSource }} https:; img-src {{ cspSource }} https:; script-src 'nonce-{{ nonce }}'; style-src {{ cspSource }} 'unsafe-inline'; font-src  {{ cspSource }} ;"
-/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="player.css" rel="stylesheet">
-<link href="{{ codicon.css }}" rel="stylesheet">
-</head>
-<body>
-  <div class="media-container">
-    <div {{ videoHideState }} id="video-media-player" class="media-player">
-      <video {{ autoplay }} {{ loop }} id="video-preview" src="{{ videoDir }}"></video>
-      <div class="progress-bar{{ previewShowProgressOnIdle }}">
-        <div class="color-fill" {{ previewProgressStyle }}></div>
-        <div class="demo-fill"></div>
+  <head>
+    <title>Player</title>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; media-src {{ cspSource }} https:; img-src {{ cspSource }} https:; script-src 'nonce-{{ nonce }}'; style-src {{ cspSource }} 'unsafe-inline'; font-src  {{ cspSource }} ;"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="player.css" rel="stylesheet" />
+    <link href="{{ codicon.css }}" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="media-container">
+      <div {{ videoHideState }} id="video-media-player" class="media-player">
+        <video {{ autoplay }} {{ loop }} id="video-preview" src="{{ videoDir }}"></video>
+        <div class="progress-bar{{ previewShowProgressOnIdle }}">
+          <div class="color-fill" {{ previewProgressStyle }}></div>
+          <div class="demo-fill"></div>
+        </div>
+      </div>
+      <div {{ imageHideState }} id="image-media-player" class="media-player">
+        <img src="{{ imageDir }}" id="image-preview" />
       </div>
     </div>
-    <div {{ imageHideState }} id="image-media-player" class="media-player">
-      <img src="{{ imageDir }}" id="image-preview" >
-    </div>
-  </div>
-  <section>
-    <div class="space-between-flex-box">
-      <div id="module-name" class="module-name">{{ moduleName }}</div>
+    <section>
       <div class="space-between-flex-box">
-        <div class="control-button" title="Render a New Scene"><i class="codicon codicon-device-camera-video"></i></div>
-        <div class="control-button" title="Picture In Picture"><i class="codicon codicon-link-external"></i></div>
+        <div id="module-name" class="module-name">{{ moduleName }}</div>
+        <div class="space-between-flex-box">
+          <div class="control-button" title="Render a New Scene">
+            <i class="codicon codicon-device-camera-video"></i>
+          </div>
+          <div class="control-button" title="Picture In Picture">
+            <i class="codicon codicon-link-external"></i>
+          </div>
+        </div>
       </div>
-    </div>
-    <details>
-      <summary>Details</summary>
-      <div class="description-container">
-        <span class="description-header">Output File:  </span>
-        <span id="output-file" class="description-value">{{ outputFile }}</span><br>
-      </div>
-      <div class="description-container">
-        <span class="description-header">Source File:  </span>
-        <span id="source-file" class="description-value">{{ sourceFile }}</span><br>
-      </div>
-    </details>
-  </section>
-  <script nonce="{{ nonce }}" src="player.js"></script>
-</body>
+      <details>
+        <summary>Details</summary>
+        <div class="description-container">
+          <span class="description-header">Output File: </span>
+          <span id="output-file" class="description-value">{{ outputFile }}</span><br />
+        </div>
+        <div class="description-container">
+          <span class="description-header">Source File: </span>
+          <span id="source-file" class="description-value">{{ sourceFile }}</span><br />
+        </div>
+      </details>
+    </section>
+    <script nonce="{{ nonce }}" src="player.js"></script>
+  </body>
 </html>

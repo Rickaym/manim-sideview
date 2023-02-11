@@ -14,11 +14,7 @@ export class Log {
     return `[${date.toLocaleDateString()} ${date.getHours()}:${date.getMinutes()}] ${level.toUpperCase()}: ${msg}`;
   }
 
-  static logs(
-    level: string,
-    msg: string,
-    formatter: FormatHandlerFn = Log.format
-  ) {
+  static logs(level: string, msg: string, formatter: FormatHandlerFn = Log.format) {
     LOGGER.appendLine(formatter(level, msg));
     return msg;
   }
@@ -58,7 +54,7 @@ export var FALLBACK_CONFIG: ManimConfig & FallbackConfig = {
   images_dir: "",
   quality: "",
   image_name: "",
-  quality_map: {},
+  quality_map: {}
 };
 
 export function getDefaultMainConfig() {
@@ -86,15 +82,8 @@ export type RunningConfig = {
   manimConfig: ManimConfig;
 };
 
-export function getVideoOutputPath(
-  config: RunningConfig,
-  extension: string = ".mp4"
-) {
-  if (
-    !Object.keys(FALLBACK_CONFIG.quality_map).includes(
-      config.manimConfig.quality
-    )
-  ) {
+export function getVideoOutputPath(config: RunningConfig, extension: string = ".mp4") {
+  if (!Object.keys(FALLBACK_CONFIG.quality_map).includes(config.manimConfig.quality)) {
     vscode.window.showErrorMessage(
       Log.error(
         `Manim Sideview: The quality "${config.manimConfig.quality}" provided in the configuration is invalid.`
@@ -109,7 +98,7 @@ export function getVideoOutputPath(
     {
       "{quality}": quality,
       "{media_dir}": config.manimConfig.media_dir,
-      "{module_name}": config.moduleName,
+      "{module_name}": config.moduleName
     },
     path.join(config.manimConfig.video_dir, `${config.sceneName}${extension}`)
   );
@@ -133,12 +122,9 @@ export function getImageOutputPath(
       // fallback inference variables
       "{version}": `ManimCE_${getUserConfiguration("manimExecutableVersion")}`,
       "{scene_name}": config.sceneName,
-      "{extension}": extension,
+      "{extension}": extension
     },
-    path.join(
-      config.manimConfig.images_dir,
-      loggedImageName || FALLBACK_CONFIG.image_name
-    )
+    path.join(config.manimConfig.images_dir, loggedImageName || FALLBACK_CONFIG.image_name)
   );
 }
 
@@ -150,19 +136,13 @@ export function getImageOutputPath(
  * @returns
  */
 export function getUserConfiguration<T>(property: string): T {
-  let value: T | undefined = vscode.workspace
-    .getConfiguration("manim-sideview")
-    .get(property);
+  let value: T | undefined = vscode.workspace.getConfiguration("manim-sideview").get(property);
 
   if (value === undefined) {
     const propertyDict =
-      PACKAGE_JSON["contributes"]["configuration"]["properties"][
-        `manim-sideview.${property}`
-      ];
+      PACKAGE_JSON["contributes"]["configuration"]["properties"][`manim-sideview.${property}`];
     if (propertyDict["type"] === "boolean") {
-      return (propertyDict["default"] === "true"
-        ? true
-        : false) as unknown as T;
+      return (propertyDict["default"] === "true" ? true : false) as unknown as T;
     }
   }
   return value!;
@@ -192,11 +172,7 @@ export function updateFallbackManimCfg(
   });
 
   if (saveUpdated) {
-    fs.writeFile(
-      PATHS.cfgMap!.fsPath,
-      JSON.stringify(FALLBACK_CONFIG),
-      () => {}
-    );
+    fs.writeFile(PATHS.cfgMap!.fsPath, JSON.stringify(FALLBACK_CONFIG), () => {});
   }
 }
 
@@ -211,23 +187,17 @@ export async function loadGlobals(ctx: vscode.ExtensionContext) {
     cfgMap: "assets/local/manim.cfg.json",
     mobjVersion: "assets/mobjects/mobject_version.txt",
     mobjGalleryParameters: "assets/mobjects/gallery_parameters.json",
-    mobjImgs: "assets/mobjects/",
+    mobjImgs: "assets/mobjects/"
   };
 
   Object.keys(pathsToLoad).forEach((tp) => {
     PATHS[tp] = vscode.Uri.joinPath(ctx.extensionUri, pathsToLoad[tp]);
   });
 
-  const cfg = JSON.parse(
-    (await vscode.workspace.fs.readFile(PATHS.cfgMap!)).toString()
-  );
+  const cfg = JSON.parse((await vscode.workspace.fs.readFile(PATHS.cfgMap!)).toString());
   updateFallbackManimCfg(cfg, false);
   PACKAGE_JSON = JSON.parse(
-    fs
-      .readFileSync(
-        vscode.Uri.joinPath(ctx.extensionUri, "package.json").fsPath
-      )
-      .toString()
+    fs.readFileSync(vscode.Uri.joinPath(ctx.extensionUri, "package.json").fsPath).toString()
   );
   EXTENSION_VERSION = PACKAGE_JSON["version"];
   Log.info("Successfully loaded all globals.");
@@ -243,8 +213,7 @@ export const BASE_PROGRESS_BAR_COLOR = "var(--vscode-textLink-foreground)";
  */
 export function getNonce(): string {
   let text = "";
-  const possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < 32; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
@@ -276,19 +245,10 @@ export function insertContext(context: ContextVars, payload: string): string {
  * @param viewName
  * @returns WebviewResources
  */
-export function getWebviewResource(
-  extensionUri: vscode.Uri,
-  viewName: string
-): WebviewResources {
+export function getWebviewResource(extensionUri: vscode.Uri, viewName: string): WebviewResources {
   return {
-    css: vscode.Uri.joinPath(
-      extensionUri,
-      `webview/${viewName}/${viewName}.css`
-    ),
+    css: vscode.Uri.joinPath(extensionUri, `webview/${viewName}/${viewName}.css`),
     js: vscode.Uri.joinPath(extensionUri, `webview/${viewName}/${viewName}.js`),
-    html: vscode.Uri.joinPath(
-      extensionUri,
-      `webview/${viewName}/${viewName}.html`
-    ),
+    html: vscode.Uri.joinPath(extensionUri, `webview/${viewName}/${viewName}.html`)
   };
 }

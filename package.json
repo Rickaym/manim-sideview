@@ -184,7 +184,8 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
+    "lint": "prettier --check . && eslint src --ext ts",
+    "format": "prettier --write .",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
@@ -204,8 +205,9 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "axios": "^0.27.2",
     "@vscode/codicons": "0.0.32",
+    "axios": "^0.27.2",
+    "prettier": "^2.8.4",
     "yaml": "^2.1.2"
   }
 }

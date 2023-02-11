@@ -14,13 +14,13 @@ const exec = promisify(cpExec);
 
 const keys = {
   enter: "\r",
-  backspace: "\x7f",
+  backspace: "\x7f"
 };
 const actions = {
   cursorBack: "\x1b[D",
   deleteChar: "\x1b[P",
   columnZero: "^M",
-  clear: "\x1b[2J\x1b[3J\x1b[;H",
+  clear: "\x1b[2J\x1b[3J\x1b[;H"
 };
 
 const defPrompt = "MS";
@@ -36,9 +36,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
     this.name = name;
   }
 
-  public cwd = path.dirname(
-    vscode.workspace.textDocuments[0]?.fileName || process.cwd()
-  );
+  public cwd = path.dirname(vscode.workspace.textDocuments[0]?.fileName || process.cwd());
   public isRunning = false;
 
   public writeEmitter = new vscode.EventEmitter<string>();
@@ -67,7 +65,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
               // run the command
               const { stdout, stderr } = await exec(this.content, {
                 encoding: "utf8",
-                cwd: this.cwd,
+                cwd: this.cwd
               });
 
               if (stdout) {
@@ -98,11 +96,11 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
           this.content += char;
           this.writeEmitter.fire(char);
       }
-    },
+    }
   };
   private terminal: vscode.Terminal = vscode.window.createTerminal({
     name: this.name,
-    pty: this.pty,
+    pty: this.pty
   });
 
   /**
@@ -119,9 +117,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
       return;
     }
 
-    this.writeEmitter.fire(
-      `${this.stickyNotes}${value}`.replace(/\n/g, "\n\r")
-    );
+    this.writeEmitter.fire(`${this.stickyNotes}${value}`.replace(/\n/g, "\n\r"));
     this.stickyNotes = "";
   }
 
@@ -140,9 +136,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
       return;
     }
 
-    this.writeEmitter.fire(
-      `${this.stickyNotes}${value}`.replace(/\n/g, "\n\r")
-    );
+    this.writeEmitter.fire(`${this.stickyNotes}${value}`.replace(/\n/g, "\n\r"));
     this.newPrompt();
     this.stickyNotes = "";
   }

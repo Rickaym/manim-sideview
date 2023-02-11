@@ -1,27 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta
-  http-equiv="Content-Security-Policy"
-  content="default-src 'none'; img-src {{ cspSource }} https:; script-src 'nonce-{{ nonce }}'; style-src {{ cspSource }};"
-/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="gallery.css" rel="stylesheet">
-<source id="version-src" src="{{ version-src }}">
-</head>
-<body>
-  <div>
-    <h1>Mobject Gallery</h1>
-</div>
-  <p>Press the image objects to paste the code.
-    <br>Report issues and suggestions
-    <a href="https://github.com/kolibril13/mobject-gallery/issues">here</a>.<br><br><i>{{ version }}</i></p>
-  <button id="updates" class="button-primary">Check For Updates</button>
-  <!--button id="download-again" class="button-secondary">Force Redownload</button-->
-  <div id="Mobjects">
-    {{ mobjects }}
-  </div>
-  <script nonce="{{ nonce }}" src="gallery.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; img-src {{ cspSource }} https:; script-src 'nonce-{{ nonce }}'; style-src {{ cspSource }};"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="gallery.css" rel="stylesheet" />
+    <source id="version-src" src="{{ version-src }}" />
+  </head>
+  <body>
+    <div>
+      <h1>Mobject Gallery</h1>
+    </div>
+    <p>
+      Press the image objects to paste the code. <br />Report issues and suggestions
+      <a href="https://github.com/kolibril13/mobject-gallery/issues">here</a>.<br /><br /><i
+        >{{ version }}</i
+      >
+    </p>
+    <button id="updates" class="button-primary">Check For Updates</button>
+    <!--button id="download-again" class="button-secondary">Force Redownload</button-->
+    <div id="Mobjects">{{ mobjects }}</div>
+    <script nonce="{{ nonce }}" src="gallery.js"></script>
+  </body>
 </html>
