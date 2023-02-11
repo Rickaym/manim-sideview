@@ -132,7 +132,6 @@ export class ManimSideview {
   private manimCfgPath: string = "";
   private activeJobs: { [fsPath: string]: Job } = {};
   private mediaPlayer = new MediaPlayer(this.ctx.extensionUri, this.ctx.subscriptions);
-  private gallery = new Gallery(this.ctx.extensionUri, this.ctx.subscriptions);
   private process: ChildProcess | undefined;
   private jobStatusItem: JobStatusItemWrapper;
   private lastChosenSceneNames: { [fsPath: string]: string } = {};
@@ -140,6 +139,8 @@ export class ManimSideview {
   // the following channels are only created when necessary
   private outputChannel?: vscode.OutputChannel;
   private outputPseudoTerm?: ManimPseudoTerm;
+
+  gallery = new Gallery(this.ctx.extensionUri, this.ctx.subscriptions);
 
   /**
    * @param srcPath optional path to the source file for directed rendering,
@@ -329,14 +330,6 @@ export class ManimSideview {
       Log.error("Try Again! You provided an invalid scene name.");
       return;
     }
-  }
-
-  showMobjectGallery() {
-    this.gallery.show();
-  }
-
-  syncMobjectGallery() {
-    this.gallery.synchronize(true);
   }
 
   auditTextEditorChange(editor: vscode.TextEditor | undefined) {

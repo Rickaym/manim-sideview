@@ -18,10 +18,10 @@ export async function activate(context: vscode.ExtensionContext) {
     ),
     vscode.commands.registerCommand("manim-sideview.removeCurrentJob", () => sideview.removeJob()),
     vscode.commands.registerCommand("manim-sideview.showMobjectGallery", () =>
-      sideview.showMobjectGallery()
+      sideview.gallery.show()
     ),
     vscode.commands.registerCommand("manim-sideview.syncMobjectGallery", () =>
-      sideview.syncMobjectGallery()
+      sideview.gallery.synchronize(true)
     ),
     vscode.commands.registerCommand("manim-sideview.syncManimConfig", () =>
       sideview.syncFallbackManimConfig()
