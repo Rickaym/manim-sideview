@@ -112,6 +112,10 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.0
+
++ Added video preview seeking ✨
+
 #### 0.1.5
 
 + Added `manim-sideview.autoPreview` command
