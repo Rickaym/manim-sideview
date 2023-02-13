@@ -500,7 +500,8 @@ export class ManimSideview {
       Log.warn(
         `[${process.pid}] Captured stderr output "${this.formatOutput(dataStr)}"`
       );
-    })
+      outputChannel.append(dataStr);
+    });
 
     // we'll keep a closure because this.process is capable of going undefined
     // at any given time, but we still want valid references
