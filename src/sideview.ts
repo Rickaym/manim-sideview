@@ -482,7 +482,7 @@ export class ManimSideview {
           "Manim Sideview: Fatal error, please look at the output channel.",
           "Show Log"
         )
-        .then((value) =>
+        .then((value?: String) =>
           value === "Show Log"
             ? vscode.commands.executeCommand("manim-sideview.showOutputChannel")
             : null
@@ -630,7 +630,7 @@ export class ManimSideview {
             ),
             "Show Log"
           )
-          .then((value) =>
+          .then((value?: String) =>
             value === "Show Log"
               ? vscode.commands.executeCommand("manim-sideview.showOutputChannel")
               : null
