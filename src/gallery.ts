@@ -1,9 +1,5 @@
 import * as vscode from "vscode";
-import {
-  getWebviewResource,
-  PATHS,
-  WebviewResources,
-} from "./globals";
+import { getWebviewResource, PATHS, WebviewResources } from "./globals";
 import * as fs from "fs";
 import { promises as pfs } from "fs";
 import * as path from "path";
@@ -11,8 +7,7 @@ import * as yaml from "yaml";
 import axios from "axios";
 import { TemplateEngine } from "./templateEngine";
 
-const GITHUB_ROOT_DIR =
-  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
+const GITHUB_ROOT_DIR = "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
 // gallery synchronization files
 const GITHUB_ENTRY_FILE =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/html_configuration.yaml";
@@ -26,27 +21,15 @@ interface ImageMap {
 }
 
 export class Gallery {
-  constructor(
-    public readonly extensionUri: vscode.Uri,
-    public readonly disposables: any[]
-  ) {}
+  constructor(public readonly extensionUri: vscode.Uri, public readonly disposables: any[]) {}
 
   private panel: vscode.WebviewPanel | undefined;
-  private mobjectsPath: vscode.Uri = vscode.Uri.joinPath(
-    this.extensionUri,
-    "assets/mobjects"
-  );
+  private mobjectsPath: vscode.Uri = vscode.Uri.joinPath(this.extensionUri, "assets/mobjects");
 
-  private loads: WebviewResources = getWebviewResource(
-    this.extensionUri,
-    "gallery"
-  );
+  private loads: WebviewResources = getWebviewResource(this.extensionUri, "gallery");
   private manimIconsPath = {
     dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
-    light: vscode.Uri.joinPath(
-      this.extensionUri,
-      "assets/images/light_logo.png"
-    ),
+    light: vscode.Uri.joinPath(this.extensionUri, "assets/images/light_logo.png")
   };
   private lastActiveEditor: vscode.TextEditor | undefined;
 
@@ -60,11 +43,11 @@ export class Gallery {
       "Mobject Gallery",
       {
         viewColumn: vscode.ViewColumn.Beside,
-        preserveFocus: true,
+        preserveFocus: true
       },
       {
         enableScripts: true,
-        enableForms: false,
+        enableForms: false
       }
     );
 
@@ -85,19 +68,12 @@ export class Gallery {
       });
     });
 
-    const engine = new TemplateEngine(
-      this.panel.webview,
-      this.loads,
-      "gallery",
-      this.extensionUri
-    );
+    const engine = new TemplateEngine(this.panel.webview, this.loads, "gallery", this.extensionUri);
 
     this.panel.iconPath = this.manimIconsPath;
     this.panel.webview.html = await engine.render({
       mobjects: images,
-      version: (
-        await vscode.workspace.fs.readFile(PATHS.mobjVersion)
-      ).toString(),
+      version: (await vscode.workspace.fs.readFile(PATHS.mobjVersion)).toString()
     });
 
     this.panel.onDidDispose(
@@ -109,10 +85,7 @@ export class Gallery {
     );
     this.panel.webview.onDidReceiveMessage(
       (message) => {
-        if (
-          message.command === "update" ||
-          message.command === "download-again"
-        ) {
+        if (message.command === "update" || message.command === "download-again") {
           return this.synchronize(message.command === "download-again");
         } else {
           this.insertCode(message.code);
@@ -172,9 +145,7 @@ export class Gallery {
   }
 
   async insertCode(code: string) {
-    const lastEditor = this.lastActiveEditor
-      ? this.lastActiveEditor
-      : Gallery.getPreviousEditor();
+    const lastEditor = this.lastActiveEditor ? this.lastActiveEditor : Gallery.getPreviousEditor();
     if (!lastEditor) {
       return vscode.window.showErrorMessage(
         "Manim Sideview: You need to place a cursor somewhere to insert the code."
@@ -192,22 +163,17 @@ export class Gallery {
           .executeCommand("workbench.action.focusPreviousGroup")
           .then(() =>
             lastEditor.revealRange(
-              new vscode.Range(
-                lastEditor.selection.active,
-                lastEditor.selection.active
-              )
+              new vscode.Range(lastEditor.selection.active, lastEditor.selection.active)
             )
           );
       });
   }
 
   async synchronize(forceDownload: boolean) {
-    const localVersion = (
-      await vscode.workspace.fs.readFile(PATHS.mobjVersion)
-    ).toString();
+    const localVersion = (await vscode.workspace.fs.readFile(PATHS.mobjVersion)).toString();
 
     const root = PATHS.mobjImgs.fsPath;
-    var {data} = await axios.get(GITHUB_ENTRY_FILE);
+    var { data } = await axios.get(GITHUB_ENTRY_FILE);
     data = yaml.parse(data) as any; // Parse yaml
 
     let newVersion = data["user_content_version"];
@@ -227,7 +193,7 @@ export class Gallery {
         vscode.window.showInformationMessage("Manim Sideview: You're already up to date!");
         return;
       }
-    } else if(!newVersion) {
+    } else if (!newVersion) {
       newVersion = localVersion;
     }
 
@@ -235,20 +201,20 @@ export class Gallery {
       "Manim Sideview: Please wait a moment while we pull remote assets..."
     );
 
-    var {data} = await axios.get(GITHUB_ROOT_DIR + galleryParameters);
+    var { data } = await axios.get(GITHUB_ROOT_DIR + galleryParameters);
 
     await pfs.writeFile(PATHS.mobjGalleryParameters.fsPath, JSON.stringify(data));
 
     const objectLists = Object.values(data);
-    for(const [index, entry] of objectLists.entries()) {
+    for (const [index, entry] of objectLists.entries()) {
       const allObjects: any[] = entry as any[];
 
-      for(const mObj of allObjects) {
+      for (const mObj of allObjects) {
         let imagePath = mObj.image_path;
         var { data } = await axios({
           method: "get",
           url: GITHUB_ROOT_DIR + imagePath,
-          responseType: "stream",
+          responseType: "stream"
         });
 
         data.pipe(fs.createWriteStream(path.join(root, imagePath)));

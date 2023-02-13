@@ -1,5 +1,5 @@
 :root {
-  --controls-background: rgba(0, 0, 0, 0.3)
+  --controls-background: rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -89,7 +89,7 @@ section {
 
 .description-container {
   width: 100%;
-  border-radius: 0 0 .4rem .4rem;
+  border-radius: 0 0 0.4rem 0.4rem;
   margin-bottom: 5px;
   max-height: 20rem;
   display: block;

@@ -23,9 +23,7 @@ export class ConfigParser {
   static async parse(uri: string): Promise<Config> {
     const result: Config = {};
 
-    const contents = (
-      await vscode.workspace.fs.readFile(vscode.Uri.file(uri))
-    ).toString();
+    const contents = (await vscode.workspace.fs.readFile(vscode.Uri.file(uri))).toString();
     const sect = "CLI";
     [...contents.matchAll(RE_KEYVALPAIR)].forEach((r) => {
       if (r && r.groups) {

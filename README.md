@@ -7,8 +7,8 @@ A Visual Studio code extension with rich support for working with the **[manim](
 
 The extension assumes an installation of manim on `PATH`. Follow [this guide](https://docs.manim.community/en/stable/installation.html) to install manim (if you haven't) and [this guide](#how-do-i-change-the-default-manim-executable-path) to set a custom path to the executable file.
 
-
 # Index
+
 1. [Quickstart](#quickstart)
 2. [Rendering Scenes](#rendering-scenes)
 3. [Configuring](#configuring)
@@ -18,11 +18,12 @@ The extension assumes an installation of manim on `PATH`. Follow [this guide](ht
 7. [Changelog](#changelog)
 
 ## Quickstart
+
 After the extension is installed, open the source file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar or use `Ctrl+'` `r` to immediately start rendering with a live preview!
 
 <image src="https://raw.githubusercontent.com/Rickaym/manim-sideview/master/images/quickstart.gif">
 
-*That's it, folks!*
+_That's it, folks!_
 
 If you have any questions or find any issues, create a GitHub issue [here](https://github.com/Rickaym/manim-sideview/issues/new), seek support through the extension
 [development discord server](https://discord.gg/UmnzdPgn6g/) or you can ping `@Neo#1844` with a question
@@ -41,12 +42,14 @@ Manim Sideview is made to render a single scene at any given moment recurrently.
 1. Using the `Manim: Set A New SceneName` command through the command palette `Shift + Command + P (Mac)` / `Ctrl + Shift + P`.
 2. Using the following default hotkey `Ctrl + '` `c`.
 3. Using the render-change icon from the sideview
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/render-change.png"></image>
+   <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/render-change.png"></image>
 
 ## Configuring
+
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image>
 There are two main ways to configure your render using
 manim-sideview:
+
 1. `manim-sideview.commandLineArgs`
 
 By setting this configuration through `File -> Preferences -> Settings` you can pass CLI arguments to the `manim.exe` call.
@@ -66,12 +69,14 @@ The Mobject gallery is a web view that allows users to insert code snippets for 
 ![](images/example_of_mobject_gallery.gif)
 
 ### How do I open the gallery?
+
 1. Open the command palette using `Shift + Command + P (Mac)` / `Ctrl + Shift + P`
 2. Use the command `Manim: Open Mobject Gallery`
 
 You can place the cursor at the desired location and click the image of the manim object to insert the code into a Python file or Jupyter Notebook!
 
 ## Frequently Asked Questions
+
 1. [How do I render on save?](#1-how-do-i-render-on-save)
 2. [How do I change the default manim executable path?](#2-how-do-i-change-the-default-manim-executable-path)
 3. [How do I execute a command after the rendering is finished?](#3-how-do-i-execute-a-command-after-the-rendering-is-finished)
@@ -97,6 +102,7 @@ We can achieve this via the extension preference `manim-sideview.terminalCommand
 The command is executed in an external terminal as soon as all the rendering is finished.
 
 You can use the following variables in your terminal command:
+
 1. `{outputPath}` - the path to the rendered media output (video/image)
 2. `{sourcePath}` - the path to the source file
 3. `{sceneName}` - the name of the scene rendered
@@ -114,115 +120,120 @@ Consider supporting this project through starring the repository or buying me a 
 
 #### 0.2.1
 
-+ Uses Return code 15 for last-process killing `SIGTERM` signals
+- Uses Return code 15 for last-process killing `SIGTERM` signals
 
 #### 0.2.0
 
-+ Added video preview seeking ✨
+- Added video preview seeking ✨
 
 #### 0.1.5
 
-+ Added `manim-sideview.autoPreview` command
-+ Added `manim-sideview.terminalCommand` command
-+ Added `manim-sideview.showManimExecTerminal` option
-+ Users are able to execute a terminal command at the end of a render
+- Added `manim-sideview.autoPreview` command
+- Added `manim-sideview.terminalCommand` command
+- Added `manim-sideview.showManimExecTerminal` option
+- Users are able to execute a terminal command at the end of a render
 
 #### 0.1.4
 
-+ Source JS files repackaged
+- Source JS files repackaged
 
 #### 0.1.3
 
-+ Targeted vscode engine downgraded to `1.62.3`
+- Targeted vscode engine downgraded to `1.62.3`
 
 #### 0.1.2
 
-+ (Bugfix) `frame_rate` assumed as 60 on every quality
-- Temporarily dropped `frame_rate` key in `manim.cfg` for output directory name
+- (Bugfix) `frame_rate` assumed as 60 on every quality
+
+* Temporarily dropped `frame_rate` key in `manim.cfg` for output directory name
 
 #### 0.1.1 [Latest]
 
-+ `@vscode/codicons` dependency changed from devDependency to general dependency
+- `@vscode/codicons` dependency changed from devDependency to general dependency
 
 #### 0.1.0
 
-+ Extension terminal output format changed & added message persistence<br>
-+ Video Player renamed to "Media Player" and now handles both image and video media<br>
-+ Added image support for rendering previews and its corresponding config flags<br>
-+ New GUI User Interface for the Media Player<br>
-+ Uses the `plywood-gallery-for-vsce` template engine for Mobject Gallery<br>
-+ Uses the `plywood-gallery-for-vsce` template engine for Media Player<br>
-+ Added a new output channel called `Manim Sideview` for the extension to log all window and debug information<br>
-+ README write simplification and rewrite<br>
-+ Added support to rendering scenes without loading the source file workspace<br>
-- Fontawesome CSS and JS files removed<br>
-- Extension excess terminal output removed<br>
-- Just in-time configuration
-+ Changed command `manim-sideview.setRenderingSceneName` name to `manim-sideview.renderNewScene`<br>
-+ Added command `manim-sideview.showOutputChannel` command for opening the log output channel<br>
-+ `manim.cfg` files are reloaded every run
+- Extension terminal output format changed & added message persistence<br>
+- Video Player renamed to "Media Player" and now handles both image and video media<br>
+- Added image support for rendering previews and its corresponding config flags<br>
+- New GUI User Interface for the Media Player<br>
+- Uses the `plywood-gallery-for-vsce` template engine for Mobject Gallery<br>
+- Uses the `plywood-gallery-for-vsce` template engine for Media Player<br>
+- Added a new output channel called `Manim Sideview` for the extension to log all window and debug information<br>
+- README write simplification and rewrite<br>
+- Added support to rendering scenes without loading the source file workspace<br>
+
+* Fontawesome CSS and JS files removed<br>
+* Extension excess terminal output removed<br>
+* Just in-time configuration
+
+- Changed command `manim-sideview.setRenderingSceneName` name to `manim-sideview.renderNewScene`<br>
+- Added command `manim-sideview.showOutputChannel` command for opening the log output channel<br>
+- `manim.cfg` files are reloaded every run
 
 #### 0.0.13
 
-+ Optional Terminal Output<br>
-+ Jupyter Notebook Fix<br>
-+ Webview URI error fix<br>
+- Optional Terminal Output<br>
+- Jupyter Notebook Fix<br>
+- Webview URI error fix<br>
 
 #### 0.0.12
 
-+ Added configurations to disable or enable auto-play
-+ Added configurations to disable or enable looping
+- Added configurations to disable or enable auto-play
+- Added configurations to disable or enable looping
 
 #### 0.0.11
 
-+ Patched the local incorrect version file path for mobject gallery
+- Patched the local incorrect version file path for mobject gallery
 
 #### 0.0.10
 
-+ Run-time configuration settings can be set for jobless scenes where it'll create a new job for the user
-+ Changed default quality mappings with responsiveness to Manim 0.13.1
-+ Smarter manim.cfg file analysis and in determining context
+- Run-time configuration settings can be set for jobless scenes where it'll create a new job for the user
+- Changed default quality mappings with responsiveness to Manim 0.13.1
+- Smarter manim.cfg file analysis and in determining context
+
 * It should be noted that default rendering will still use `-ql` for backward compatibility
-+ Added manim version re-synchronization command for developer independent compatibility
-+ Added version signifier to the mobject gallery
+
+- Added manim version re-synchronization command for developer independent compatibility
+- Added version signifier to the mobject gallery
 
 #### 0.0.9
 
-+ Scene scanner now looks for all class definitions with subclasses with name Scene in them
-+ Better responsiveness for refocusing selected documents in mobject gallery
+- Scene scanner now looks for all class definitions with subclasses with name Scene in them
+- Better responsiveness for refocusing selected documents in mobject gallery
 
 #### 0.0.8
 
-+ Using axios now to synchronize assets for better performance
+- Using axios now to synchronize assets for better performance
 
 #### 0.0.7
 
-+ Added force re-download when assets are damaged
+- Added force re-download when assets are damaged
 
 #### 0.0.6
 
-+ Added video player configurations `previewProgressColor`, `previewShowProgressOnIdle`
-+ Added `Check For Updates` button in mobject gallery and a sync lock with the repo
+- Added video player configurations `previewProgressColor`, `previewShowProgressOnIdle`
+- Added `Check For Updates` button in mobject gallery and a sync lock with the repo
 
 #### 0.0.5
 
-+ Fixed server links
-+ Added `manim-sideview.showMobjectGallery`
-+ Added hide progress button
-+ Added debrief for the video
+- Fixed server links
+- Added `manim-sideview.showMobjectGallery`
+- Added hide progress button
+- Added debrief for the video
 
 #### 0.0.4
 
-+ Minor bug fix for Unix machines with trimmed leading slashes
+- Minor bug fix for Unix machines with trimmed leading slashes
 
 #### 0.0.3
 
-+ Added `manim-sideview.stop` for stopping any running processes
-+ Paths are now normalized to work with both forward and backward slashes
-+ video directories are now static and will not depend on the verdict of manim
-+ Setting a valid path no longer replies with "Success" because this can be confusing when there is an exception thrown later down the line that has nothing to do with the scene name
-+ `manim.cfg` files are now derived from the working path - which is the correct case
-+ Added support server link
+- Added `manim-sideview.stop` for stopping any running processes
+- Paths are now normalized to work with both forward and backward slashes
+- video directories are now static and will not depend on the verdict of manim
+- Setting a valid path no longer replies with "Success" because this can be confusing when there is an exception thrown later down the line that has nothing to do with the scene name
+- `manim.cfg` files are now derived from the working path - which is the correct case
+- Added support server link
 
 #### 0.0.1 - 0.0.2
 

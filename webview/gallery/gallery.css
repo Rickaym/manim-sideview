@@ -17,7 +17,7 @@
 }
 
 button.button-primary {
-  background-color: #2A5DB0;
+  background-color: #2a5db0;
   color: var(--vscode-button-foreground);
   border-radius: 5px;
   border: transparent;

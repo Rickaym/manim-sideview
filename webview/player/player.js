@@ -61,14 +61,14 @@ for (const button of controlButtons) {
         vscode.postMessage({
           command: "executeSelfCommand",
           name: "renderNewScene",
-          args: [srcPath],
+          args: [srcPath]
         });
         break;
       case "Picture In Picture":
         if (videoPlayer.hidden) {
           vscode.postMessage({
             command: "errorMessage",
-            text: "Manim Sideview: Picture In Picture is not supported on images.",
+            text: "Manim Sideview: Picture In Picture is not supported on images."
           });
         } else {
           enterPictureInPicture();
@@ -101,8 +101,6 @@ controls.addEventListener("click", function (e) {
   const seek = (e.clientX - brc.left) / brc.width;
   setVideoProgress(seek);
 });
-
-
 
 window.addEventListener("message", function (e) {
   const message = e.data;

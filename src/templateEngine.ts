@@ -11,7 +11,7 @@ export class TemplateEngine {
 
   private resMap = {
     js: ` ${this.name}.js`,
-    css: ` ${this.name}.css`,
+    css: ` ${this.name}.css`
   };
 
   /**
@@ -23,6 +23,7 @@ export class TemplateEngine {
     [this.resMap.js]: this.webview.asWebviewUri(this.resource.js).toString(),
     [this.resMap.css]: this.webview.asWebviewUri(this.resource.css).toString(),
     nonce: getNonce(),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     "codicon.css": this.webview.asWebviewUri(
       vscode.Uri.joinPath(
         this.extensionUri,
@@ -31,14 +32,11 @@ export class TemplateEngine {
         "dist",
         "codicon.css"
       )
-    ),
+    )
   };
 
   static async renderDoc(fp: vscode.Uri, globals: { [varname: string]: any }) {
-    return TemplateEngine.textRender(
-      (await vscode.workspace.fs.readFile(fp)).toString(),
-      globals
-    );
+    return TemplateEngine.textRender((await vscode.workspace.fs.readFile(fp)).toString(), globals);
   }
 
   public static createCSSRegex(property: string, pattern: string) {
@@ -50,10 +48,7 @@ export class TemplateEngine {
       if (varname.startsWith(" ")) {
         text = text.replace(new RegExp(varname.trim(), "gi"), globals[varname]);
       } else {
-        text = text.replace(
-          new RegExp(`{{ ${varname} }}`, "gi"),
-          globals[varname]
-        );
+        text = text.replace(new RegExp(`{{ ${varname} }}`, "gi"), globals[varname]);
       }
     });
     return text;

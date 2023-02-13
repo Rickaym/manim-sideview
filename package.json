@@ -184,28 +184,29 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
+    "lint": "prettier --check . && eslint src --ext ts",
+    "format": "prettier --write .",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/glob": "^8.0.0",
-    "@types/mocha": "^10.0.0",
-    "@types/node": "^18.8.0",
-    "@types/node-fetch": "^3.0.3",
-    "@types/vscode": "^1.62.3",
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
-    "@typescript-eslint/parser": "^5.38.1",
-    "@vscode/test-electron": "^2.1.5",
-    "electron-rebuild": "^3.2.9",
-    "esbuild": "^0.15.10",
-    "eslint": "^8.24.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.0.0",
-    "typescript": "^4.8.4"
+    "@electron/rebuild": "^3.2.9",
+    "@types/glob": "^8.0.1",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.13.0",
+    "@types/vscode": "^1.75.0",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "@vscode/test-electron": "^2.2.3",
+    "esbuild": "^0.15.18",
+    "eslint": "^8.34.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5"
   },
   "dependencies": {
-    "axios": "^0.27.2",
     "@vscode/codicons": "0.0.32",
-    "yaml": "^2.1.2"
+    "axios": "^0.27.2",
+    "yaml": "^2.2.1"
   }
 }
