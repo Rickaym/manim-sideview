@@ -596,7 +596,6 @@ export class ManimSideview {
           }".`
         );
       }
-      outputFileType = undefined;
 
       if (outputFileType === undefined) {
         const job = this.getActiveJob(config.srcPath);
@@ -611,6 +610,7 @@ export class ManimSideview {
             "Image"
           );
           if (!fileType) {
+            this.jobStatusItem.setError(null);
             return;
           }
           outputFileType = fileType === "Video" ? PlayableMediaType.Video : PlayableMediaType.Image;

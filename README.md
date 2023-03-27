@@ -3,7 +3,7 @@
 <a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Homepage" src="https://img.shields.io/badge/vscode-install%20Here-brightgreen?style=for-the-badge&logo=visualstudiocode"></a>
 <a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Version" src="https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview?style=for-the-badge"></a> <a href="https://discord.gg/UmnzdPgn6g/"><img src="https://img.shields.io/discord/793047973751554088.svg?label=Extension Support&color=blue&style=for-the-badge&logo=discord" alt="Discord"></a> <a href="https://www.manim.community/discord/"><img src="https://img.shields.io/discord/581738731934056449.svg?label=Manim Community&style=for-the-badge&color=yellow&logo=discord" alt="Discord"></a> <a href="https://open-vsx.org/extension/Rickaym/manim-sideview"><img alt="Extension Homepage" src="https://img.shields.io/badge/open vsx-extension-782A90?style=for-the-badge&logo=eclipse"></a>
 
-A Visual Studio code extension with rich support for working with the **[manim](https://github.com/ManimCommunity/manim)** framework, providing features such as video and image live previews, gallery-based code snippet catalogs, etc... with completely flexible configurations.
+A Visual Studio code extension with rich support for working with the **[manim](https://github.com/ManimCommunity/manim)** framework, providing features such as gallery-based code snippet catalogs and video and image live preview with flexible configurations.
 
 The extension assumes an installation of manim on `PATH`. Follow [this guide](https://docs.manim.community/en/stable/installation.html) to install manim (if you haven't) and [this guide](#how-do-i-change-the-default-manim-executable-path) to set a custom path to the executable file.
 
@@ -118,7 +118,11 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
-#### 0.2.2
+#### 0.2.4
+
+- Fix outputFileType always being undefined
+
+#### 0.2.3
 
 - Saves user given output file type to job.
 
