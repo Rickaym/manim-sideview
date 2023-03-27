@@ -40,8 +40,13 @@ const enum JobStatus {
   New
 }
 
+type RuntimeOptions = {
+  outputFileType?: number;
+};
+
 type Job = {
   config: RunningConfig;
+  runtimeOptions: RuntimeOptions;
   status: JobStatus;
 };
 
@@ -50,7 +55,7 @@ class JobStatusItemWrapper {
     this.jobStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     this.jobStatusItem.name = "job-indicator";
     this.jobStatusItem.command = "manim-sideview.removeCurrentJob";
-    this.jobStatusItem.tooltip = "Mainm Sideview - Press to stop session.";
+    this.jobStatusItem.tooltip = "Mainm Sideview - Press to discard.";
   }
 
   private jobStatusItem: vscode.StatusBarItem;
@@ -184,7 +189,7 @@ export class ManimSideview {
         // loaded the file config for the first time
         vscode.window.showInformationMessage(
           Log.info(
-            "Manim Sideview: Loaded a configuration file from the current working directory!"
+            "Manim Sideview: Loaded a config file from the working directory!"
           )
         );
       }
@@ -443,8 +448,7 @@ export class ManimSideview {
    * @returns The result
    */
   formatOutput(message: string): string {
-    return message.replace(/\r\n/g, "\\n")
-    .replace(/    /g, "\\t");
+    return message.replace(/\r\n/g, "\\n").replace(/    /g, "\\t");
   }
 
   async render(args: string[], config: RunningConfig, outputChannel: vscode.OutputChannel) {
@@ -497,9 +501,7 @@ export class ManimSideview {
 
     process.stderr.on("data", (data: { toString: () => string }) => {
       const dataStr = data.toString();
-      Log.warn(
-        `[${process.pid}] Captured stderr output "${this.formatOutput(dataStr)}"`
-      );
+      Log.warn(`[${process.pid}] Captured stderr output "${this.formatOutput(dataStr)}"`);
       outputChannel.append(dataStr);
     });
 
@@ -508,9 +510,7 @@ export class ManimSideview {
     let stdoutLogbook = "";
     process.stdout.on("data", (data: { toString: () => string }) => {
       const dataStr = data.toString();
-      Log.info(
-        `[${process.pid}] Captured stdout output "${this.formatOutput(dataStr)}"`
-      );
+      Log.info(`[${process.pid}] Captured stdout output "${this.formatOutput(dataStr)}"`);
       if (!process.killed) {
         stdoutLogbook += dataStr;
 
@@ -596,19 +596,27 @@ export class ManimSideview {
           }".`
         );
       }
+      outputFileType = undefined;
 
       if (outputFileType === undefined) {
-        const fileType = await vscode.window.showWarningMessage(
-          Log.warn(
-            `Manim Sideview: Unable to infer the file-type for "${config.sceneName}". Please select below.`
-          ),
-          "Video",
-          "Image"
-        );
-        if (!fileType) {
-          return;
+        const job = this.getActiveJob(config.srcPath);
+
+        // we don't have a prior user input to infer the output type
+        if (job?.runtimeOptions.outputFileType === undefined) {
+          const fileType = await vscode.window.showWarningMessage(
+            Log.warn(
+              `Manim Sideview: Unable to infer the output filetype for "${config.sceneName}". Please select one below!`
+            ),
+            "Video",
+            "Image"
+          );
+          if (!fileType) {
+            return;
+          }
+          outputFileType = fileType === "Video" ? PlayableMediaType.Video : PlayableMediaType.Image;
+        } else {
+          outputFileType = job.runtimeOptions.outputFileType;
         }
-        outputFileType = fileType === "Video" ? PlayableMediaType.Video : PlayableMediaType.Image;
       }
 
       const mediaPath =
@@ -672,6 +680,7 @@ export class ManimSideview {
       Log.info(`New job added for "${config.srcPath}" as ${JSON.stringify(config, null, 4)}`);
       this.activeJobs[config.srcPath] = {
         config: config,
+        runtimeOptions: {outputFileType: outputFileType},
         status: JobStatus.New
       };
       this.jobStatusItem.setNew();

@@ -118,6 +118,10 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.2
+
+- Saves user input output file type to job.
+
 #### 0.2.1
 
 - Uses Return code 15 for last-process killing `SIGTERM` signals
