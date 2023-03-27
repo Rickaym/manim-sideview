@@ -120,7 +120,7 @@ Consider supporting this project through starring the repository or buying me a 
 
 #### 0.2.2
 
-- Saves user input output file type to job.
+- Saves user given output file type to job.
 
 #### 0.2.1
 
