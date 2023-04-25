@@ -7,7 +7,7 @@ import * as fs from "fs";
 import { ChildProcess, spawn } from "child_process";
 import {
   RunningConfig,
-  getDefaultMainConfig,
+  getDefaultConfig,
   Log,
   ManimConfig,
   getVideoOutputPath,
@@ -24,7 +24,15 @@ import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 
 const CONFIG_SECTION = "CLI";
-const RELEVANT_CONF_FLAGS = ["quality", "media_dir", "video_dir", "images_dir", "frame_rate"];
+const RELEVANT_CONFIG_OPTIONS = [
+  "quality",
+  "frame_rate",
+  "pixel_width",
+  "pixel_height",
+  "media_dir",
+  "video_dir",
+  "images_dir"
+];
 const RE_SCENE_CLASS = /class\s+(?<name>\w+)\(\w*Scene\w*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
 const RE_FILE_READY = /File\s*ready\s*at[^']*'(?<path>[^']*)'/g;
@@ -178,7 +186,7 @@ export class ManimSideview {
       activeJob = this.getActiveJob(doc.fileName);
     }
 
-    // load/reload every time the program is running
+    // reloaded/loaded every run
     let manimConfig = await this.getManimConfigFile(doc.uri.fsPath);
     let isUsingCfgFile = false;
 
@@ -188,14 +196,12 @@ export class ManimSideview {
       if (!activeJob || !activeJob.config.isUsingCfgFile) {
         // loaded the file config for the first time
         vscode.window.showInformationMessage(
-          Log.info(
-            "Manim Sideview: Loaded a config file from the working directory!"
-          )
+          Log.info("Manim Sideview: Loaded a config file from the working directory!")
         );
       }
     } else {
-      // if we fail load it / we're not using a file: we'll use fallback values
-      manimConfig = getDefaultMainConfig();
+      // if loading failed / no config file is used
+      manimConfig = getDefaultConfig();
     }
 
     let runningCfg: RunningConfig;
@@ -680,7 +686,7 @@ export class ManimSideview {
       Log.info(`New job added for "${config.srcPath}" as ${JSON.stringify(config, null, 4)}`);
       this.activeJobs[config.srcPath] = {
         config: config,
-        runtimeOptions: {outputFileType: outputFileType},
+        runtimeOptions: { outputFileType: outputFileType },
         status: JobStatus.New
       };
       this.jobStatusItem.setNew();
@@ -759,9 +765,9 @@ export class ManimSideview {
 
     // we always need a fully configured ManimConfig so this requires us to
     // start from fallback values
-    let manimConfig = getDefaultMainConfig();
+    let manimConfig = getDefaultConfig();
 
-    for (const flag of RELEVANT_CONF_FLAGS) {
+    for (const flag of RELEVANT_CONFIG_OPTIONS) {
       if (Object.keys(cliConfig).includes(flag)) {
         manimConfig[flag as keyof ManimConfig] = cliConfig[flag];
         Log.info(`Set flag "${flag}" to ${cliConfig[flag]}.`);

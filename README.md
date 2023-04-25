@@ -118,6 +118,10 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.5
+
+- Allowed `pixel_width` and `pixel_height` as quality flags
+
 #### 0.2.4
 
 - Fix outputFileType always being undefined

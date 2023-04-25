@@ -32,12 +32,14 @@ export class Log {
   }
 }
 
-// The key and value pairs that directly correlate to the output path
+// the config file type specified by `manim.cfg`
 export type ManimConfig = {
   media_dir: string;
   video_dir: string;
   quality: string;
   images_dir: string;
+  pixel_height?: string;
+  pixel_width?: string;
   frame_rate?: string;
 };
 
@@ -48,7 +50,7 @@ type FallbackConfig = {
 };
 
 // default configurations, these values are set through ./local/manim.cfg.json
-export var FALLBACK_CONFIG: ManimConfig & FallbackConfig = {
+export var DEFAULT_CONFIG: ManimConfig & FallbackConfig = {
   media_dir: "",
   video_dir: "",
   images_dir: "",
@@ -57,8 +59,8 @@ export var FALLBACK_CONFIG: ManimConfig & FallbackConfig = {
   quality_map: {}
 };
 
-export function getDefaultMainConfig() {
-  return { ...FALLBACK_CONFIG };
+export function getDefaultConfig() {
+  return { ...DEFAULT_CONFIG };
 }
 
 /**
@@ -83,17 +85,20 @@ export type RunningConfig = {
 };
 
 export function getVideoOutputPath(config: RunningConfig, extension: string = ".mp4") {
-  if (!Object.keys(FALLBACK_CONFIG.quality_map).includes(config.manimConfig.quality)) {
-    vscode.window.showErrorMessage(
-      Log.error(
-        `Manim Sideview: The quality "${config.manimConfig.quality}" provided in the configuration is invalid.`
-      )
-    );
-    return;
+  if (config.manimConfig.pixel_height && config.manimConfig.pixel_width) {
+    var quality = `${config.manimConfig.pixel_height}p${config.manimConfig.frame_rate}`;
+  } else {
+    if (!Object.keys(DEFAULT_CONFIG.quality_map).includes(config.manimConfig.quality)) {
+      vscode.window.showErrorMessage(
+        Log.error(
+          `Manim Sideview: The quality "${config.manimConfig.quality}" provided in the configuration is invalid.`
+        )
+      );
+      return;
+    }
+
+    var quality = DEFAULT_CONFIG.quality_map[config.manimConfig.quality];
   }
-
-  let quality = FALLBACK_CONFIG.quality_map![config.manimConfig.quality];
-
   return insertContext(
     {
       "{quality}": quality,
@@ -124,7 +129,7 @@ export function getImageOutputPath(
       "{scene_name}": config.sceneName,
       "{extension}": extension
     },
-    path.join(config.manimConfig.images_dir, loggedImageName || FALLBACK_CONFIG.image_name)
+    path.join(config.manimConfig.images_dir, loggedImageName || DEFAULT_CONFIG.image_name)
   );
 }
 
@@ -165,14 +170,14 @@ export function updateFallbackManimCfg(
   },
   saveUpdated: boolean = true
 ) {
-  Object.keys(FALLBACK_CONFIG).forEach((ky) => {
+  Object.keys(DEFAULT_CONFIG).forEach((ky) => {
     if (updated[ky]) {
-      FALLBACK_CONFIG[ky as keyof ManimConfig] = updated[ky];
+      DEFAULT_CONFIG[ky as keyof ManimConfig] = updated[ky];
     }
   });
 
   if (saveUpdated) {
-    fs.writeFile(PATHS.cfgMap!.fsPath, JSON.stringify(FALLBACK_CONFIG), () => {});
+    fs.writeFile(PATHS.cfgMap!.fsPath, JSON.stringify(DEFAULT_CONFIG), () => {});
   }
 }
 
