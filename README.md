@@ -17,7 +17,7 @@ The extension assumes an installation of manim on `PATH`. Follow [this guide](ht
 - [Credits](#credits)
 - [Changelog](#changelog)
 
-## Quickstart
+## Getting Started
 
 After the extension is installed, open the source file with the scene classes and press the <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/rotation.png" height="100%" width= "15px"> icon from the menu bar or use `Ctrl+'` `r` to immediately start rendering with a live preview!
 
