@@ -7,15 +7,15 @@ A Visual Studio code extension with rich support for working with the **[manim](
 
 The extension assumes an installation of manim on `PATH`. Follow [this guide](https://docs.manim.community/en/stable/installation.html) to install manim (if you haven't) and [this guide](#how-do-i-change-the-default-manim-executable-path) to set a custom path to the executable file.
 
-# Index
+# Table Of Contents
 
-1. [Quickstart](#quickstart)
-2. [Rendering Scenes](#rendering-scenes)
-3. [Configuring](#configuring)
-4. [Mobject Gallery](#mobject-gallery)
-5. [FAQs](#frequently-asked-questions)
-6. [Credits](#credits)
-7. [Changelog](#changelog)
+- [Quickstart](#quickstart)
+- [Rendering Scenes](#rendering-scenes)
+- [Configuring](#configuring)
+- [Mobject Gallery](#mobject-gallery)
+- [Frequently Asked Questions](#frequently-asked-questions)
+- [Credits](#credits)
+- [Changelog](#changelog)
 
 ## Quickstart
 
