@@ -23,7 +23,7 @@ const actions = {
   clear: "\x1b[2J\x1b[3J\x1b[;H"
 };
 
-const defPrompt = "MS";
+const defPrompt = "MSV";
 
 // cleanup inconsitent line breaks
 const formatText = (text: string) => `\r${text.split(/(\r?\n)/g).join("\r")}\r`;
@@ -35,22 +35,22 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
   constructor(public readonly name: string) {
     this.name = name;
   }
-
+  public envName = "";
   public cwd = path.dirname(vscode.workspace.textDocuments[0]?.fileName || process.cwd());
   public isRunning = false;
 
   public writeEmitter = new vscode.EventEmitter<string>();
-  private prompt = `${defPrompt} ${this.cwd}>`;
+  private prompt = () => (this.envName ? `(${this.envName})` : defPrompt) + ` ${this.cwd}>`;
   private intro =
     "Manim Extension XTerm\n\rServes as a terminal for logging purpose.\n\r\n\r" +
-    `Extension Version ${EXTENSION_VERSION}\n\r\n\r${this.prompt}`;
+    `Extension Version ${EXTENSION_VERSION}\n\r\n\r${this.prompt()}`;
   private content = "";
   public appendedBefore = false;
   private stickyNotes = "";
   private pty: vscode.Pseudoterminal = {
     onDidWrite: this.writeEmitter.event,
     open: () => this.writeEmitter.fire(this.intro),
-    close: () => {},
+    close: () => { },
     handleInput: async (char: string) => {
       if (this.isRunning) {
         return;
@@ -58,7 +58,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
       switch (char) {
         case keys.enter:
           // preserve the run command line for history
-          this.writeEmitter.fire(`\r\n${this.prompt}`);
+          this.writeEmitter.fire(`\r\n${this.prompt()}`);
           if (this.content) {
             this.isRunning = true;
             try {
@@ -80,7 +80,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
             }
             this.isRunning = false;
             this.content = "";
-            this.writeEmitter.fire(`\r${this.prompt}`);
+            this.writeEmitter.fire(`\r${this.prompt()}`);
           }
         case keys.backspace:
           if (!this.content || !this.content.length) {
