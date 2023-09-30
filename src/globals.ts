@@ -49,13 +49,15 @@ type FallbackConfig = {
   quality_map: { [tp: string]: string };
 };
 
-// default configurations, these values are set through ./local/manim.cfg.json
+// default configurations, these values are set as ./local/manim.cfg.json
+// note only values that are pre-set here are loaded
 export var DEFAULT_CONFIG: ManimConfig & FallbackConfig = {
   media_dir: "",
   video_dir: "",
   images_dir: "",
   quality: "",
   image_name: "",
+  frame_rate: "",
   quality_map: {}
 };
 
@@ -80,7 +82,7 @@ export type RunningConfig = {
   moduleName: string;
   srcRootFolder: string;
   document: vscode.TextDocument;
-  isUsingCfgFile: boolean;
+  isUsingConfFile: boolean;
   manimConfig: ManimConfig;
 };
 
@@ -94,7 +96,7 @@ export function getVideoOutputPath(config: RunningConfig, extension: string = ".
           `Manim Sideview: The quality "${config.manimConfig.quality}" provided in the configuration is invalid.`
         )
       );
-      return;
+      throw new Error("Invalid quality provided.");
     }
 
     var quality = DEFAULT_CONFIG.quality_map[config.manimConfig.quality];
