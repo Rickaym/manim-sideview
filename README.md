@@ -2,17 +2,15 @@
 
 <img src="https://repository-images.githubusercontent.com/429329947/d3f3cf71-a491-47e0-a629-34e0a4b9051f" height="100%" width="300px">
 
-<br>
-<a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Homepage" src="https://img.shields.io/badge/vscode-install%20Here-brightgreen?style=for-the-badge&logo=visualstudiocode"></a>
-<a href="https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview"><img alt="Extension Version" src="https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview?style=for-the-badge"></a> <a href="https://discord.gg/UmnzdPgn6g/"><img src="https://img.shields.io/discord/793047973751554088.svg?label=Extension Support&color=blue&style=for-the-badge&logo=discord" alt="Discord"></a> <a href="https://www.manim.community/discord/"><img src="https://img.shields.io/discord/581738731934056449.svg?label=Manim Community&style=for-the-badge&color=yellow&logo=discord" alt="Discord"></a> <a href="https://open-vsx.org/extension/Rickaym/manim-sideview"><img alt="Extension Homepage" src="https://img.shields.io/badge/open vsx-extension-782A90?style=for-the-badge&logo=eclipse"></a>
+[![Extension Homepage](https://img.shields.io/badge/vscode-install%20Here-brightgreen?style=for-the-badge&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview) [![Extension Version](https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview) [![Discord](https://img.shields.io/discord/793047973751554088.svg?label=Extension%20Support&color=blue&style=for-the-badge&logo=discord)](https://discord.gg/UmnzdPgn6g/) [![Discord](https://img.shields.io/discord/581738731934056449.svg?label=Manim%20Community&style=for-the-badge&color=yellow&logo=discord)](https://www.manim.community/discord/) [![Extension% Homepage](https://img.shields.io/badge/open%20vsx-extension-782A90?style=for-the-badge&logo=eclipse)](https://open-vsx.org/extension/Rickaym/manim-sideview)
 
 A Visual Studio code extension with rich support for working with the **[manim](https://github.com/ManimCommunity/manim)** framework, providing features such as gallery-based code snippet catalogs and video and image live preview with flexible configurations.
 
-The extension assumes an installation of manim on `PATH`. Follow [this guide](https://docs.manim.community/en/stable/installation.html) to install manim (if you haven't) and [this guide](#how-do-i-change-the-default-manim-executable-path) to set a custom path to the executable file.
+Ensure you have manim installed on your `PATH`. Check out [this guide](https://docs.manim.community/en/stable/installation.html) for installing manim. Follow [this guide](#how-do-i-change-the-default-manim-executable-path) to set a custom executable path.
 
 # Table Of Contents
 
-- [Quickstart](#quickstart)
+- [Getting Started](#getting-started)
 - [Rendering Scenes](#rendering-scenes)
 - [Configuring](#configuring)
 - [Mobject Gallery](#mobject-gallery)
@@ -120,6 +118,11 @@ Consider supporting this project through starring the repository or buying me a 
 <a href="https://www.buymeacoffee.com/rickaym" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## Changelog
+
+#### 0.2.6
+
+- Virtual env detection and activation
+- Added portrait mode display
 
 #### 0.2.5
 
