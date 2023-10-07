@@ -26,6 +26,7 @@
     "animations",
     "manim sideview"
   ],
+  "activationEvents": [],
   "extensionDependencies": [
     "ms-python.python"
   ],
