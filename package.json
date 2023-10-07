@@ -36,60 +36,60 @@
         "manim-sideview.defaultManimPath": {
           "type": "string",
           "default": "manim",
-          "description": "The absolute path to the manim executable."
+          "description": "Specify the absolute path to the Manim executable file."
         },
         "manim-sideview.commandLineArgs": {
           "type": "string",
-          "description": "Refer to the manim documentation for existing CLI args."
+          "description": "Input additional command line arguments for Manim. Refer to Manim documentation for options."
         },
         "manim-sideview.runOnSave": {
           "type": "boolean",
           "default": "false",
-          "description": "Whether to run on save for a file that has been run before."
+          "description": "Enable or disable the automatic running of a previously run file upon saving."
         },
         "manim-sideview.focusOutputOnRun": {
           "type": "boolean",
           "default": "true",
-          "description": "Whether to focus on the output when run."
+          "description": "Determine if the output panel should gain focus automatically upon running."
         },
         "manim-sideview.previewShowProgressOnIdle": {
           "type": "boolean",
           "default": "true",
-          "description": "Whether to display the video progress bar in the video player when the job is idle."
+          "description": "Choose whether to show the video progress bar in the player while the job is idle."
         },
         "manim-sideview.previewProgressColor": {
           "type": "string",
           "default": "textLink.foreground",
-          "description": "The color of the progress bar. You can use theme colors here. Either specify hex colors `#F1F1F1` or theme colors `button.border`"
+          "description": "Define the progress bar color, using either hex codes (e.g., `#F1F1F1`) or theme color names (e.g., `button.border`)."
         },
         "manim-sideview.previewAutoPlay": {
           "type": "boolean",
           "default": "true",
-          "description": "Whether to auto-play the preview right after rendering."
+          "description": "Decide whether to automatically play the video preview upon rendering completion."
         },
         "manim-sideview.previewLooping": {
           "type": "boolean",
           "default": "true",
-          "description": "Whether to loop the preview at the end."
+          "description": "Enable or disable continuous looping of the video preview."
         },
         "manim-sideview.outputToTerminal": {
           "type": "boolean",
           "default": "true",
-          "description": "Whether to relay output to a terminal. If False, an output channel rather than a terminal is used to display text."
+          "description": "Toggle between sending output to a terminal (true) or to an output channel (false)."
         },
         "manim-sideview.manimExecutableVersion": {
           "type": "string",
           "default": "v0.16.0.post0",
-          "description": "The manim executable version that runs on the extension."
+          "description": "Specify the version of the Manim executable used by the extension."
         },
         "manim-sideview.terminalCommand": {
           "type": "string",
-          "description": "A terminal command to invoke after a render is called. Available variables are: {outputPath}, {sourcePath} and {sceneName}."
+          "description": "Define a terminal command to run post-render. Use variables: {outputPath}, {sourcePath}, and {sceneName} as needed."
         },
         "manim-sideview.autoPreview": {
           "type": "boolean",
           "default": "true",
-          "description": "Whether to display the preview after being rendered."
+          "description": "Enable or disable automatic display of the preview after rendering."
         }
       }
     },
