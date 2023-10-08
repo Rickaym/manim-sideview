@@ -81,12 +81,21 @@ export class MediaPlayer {
     const srcReplacementKey = mediaType === PlayableMediaType.Video ? "videoDir" : "imageDir";
 
     // the property variable key from the HTML document to hide
-    const hideKey = mediaType === PlayableMediaType.Video ? "imageHideState" : "videoHideState";
-
+    // we hide the video element when playing an image and vice versa
+    let videoHideState;
+    let imageHideState;
+    if (mediaType === PlayableMediaType.Video) {
+      imageHideState = "hidden";
+      videoHideState = "";
+    } else {
+      imageHideState = "";
+      videoHideState = "hidden";
+    }
     panel.iconPath = this.manimIconsPath;
     panel.webview.html = await engine.render({
       [srcReplacementKey]: this.asCacheBreakingWebviewUri(panel.webview, mediaUri),
-      [hideKey]: "hidden",
+      imageHideState,
+      videoHideState,
       outputFile: mediaUri.fsPath,
       sourceFile: config.srcPath,
       moduleName: config.sceneName,
@@ -95,7 +104,7 @@ export class MediaPlayer {
         : " hidden-controls",
       previewProgressStyle: this.parseProgressStyle(getUserConfiguration("previewProgressColor")),
       loop: getUserConfiguration("previewLooping") ? "loop" : "",
-      autoplay: getUserConfiguration("previewAutoPlay") ? "autoplay" : ""
+      autoplay: getUserConfiguration("previewAutoPlay") ? "autoplay muted" : ""
     });
     Log.info(`Playing media URI "${mediaUri.fsPath}"`);
 
