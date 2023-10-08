@@ -26,7 +26,19 @@
     "animations",
     "manim sideview"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:manim-sideview.run",
+    "onCommand:manim-sideview.stop",
+    "onCommand:manim-sideview.removeAllJobs",
+    "onCommand:manim-sideview.removeCurrentJob",
+    "onCommand:manim-sideview.renderNewScene",
+    "onCommand:manim-sideview.showMobjectGallery",
+    "onCommand:manim-sideview.syncMobjectGallery",
+    "onCommand:manim-sideview.updateDefaultManimConfig",
+    "onCommand:manim-sideview.showOutputChannel",
+    "onCommand:manim-sideview.showExtensionManimConfig",
+    "onCommand:manim-sideview.showManimExecTerminal"
+  ],
   "extensionDependencies": [
     "ms-python.python"
   ],
