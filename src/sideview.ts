@@ -419,7 +419,7 @@ export class ManimSideview {
         throw new Error("Manim Sideview: Predicted output file does not exist.");
       }
 
-      if (getUserConfiguration("autoPreview")) {
+      if (getUserConfiguration("preview")) {
         // we'll open a side view
         this.mediaPlayer.playMedia(
           filePath,

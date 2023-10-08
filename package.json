@@ -78,7 +78,7 @@
         "manim-sideview.previewAutoPlay": {
           "type": "boolean",
           "default": "true",
-          "description": "Decide whether to automatically play the video preview upon rendering completion."
+          "description": "Decide whether to automatically play the video or not when it is ready."
         },
         "manim-sideview.previewLooping": {
           "type": "boolean",
@@ -99,10 +99,10 @@
           "type": "string",
           "description": "Define a terminal command to run post-render. Use variables: {outputPath}, {sourcePath}, and {sceneName} as needed."
         },
-        "manim-sideview.autoPreview": {
+        "manim-sideview.preview": {
           "type": "boolean",
           "default": "true",
-          "description": "Enable or disable automatic display of the preview after rendering."
+          "description": "Enable or disable the display of the preview after rendering. This should be enabled at all times except for when you're using the extension solely to render."
         }
       }
     },
