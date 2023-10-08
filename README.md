@@ -119,6 +119,10 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.7
+
+- Fix commands not found error for VSCode engines under 1.75
+
 #### 0.2.6
 
 - Virtual env detection and activation
