@@ -495,11 +495,10 @@ export class ManimSideview {
     let stdoutLogbook = "";
     process.stdout.on("data", (data: { toString: () => string }) => {
       const dataStr = data.toString();
-      Log.info(`[${process.pid}] Captured stdout output "${formatOutput(dataStr)}"`);
+      Log.info(`[${process.pid}] RE: "${formatOutput(dataStr)}"`);
       if (!process.killed) {
         stdoutLogbook += dataStr;
 
-        Log.info(`[${process.pid}] Relaying captured stdout output.`);
         this.outputChannel!.append(dataStr);
 
         if (stdoutLogbook.includes(KILL_MSG)) {
