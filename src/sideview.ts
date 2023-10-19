@@ -24,6 +24,7 @@ import { MediaPlayer, PlayableMediaType } from "./player";
 import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 import { PythonExtension } from "@vscode/python-extension";
+import { platform } from "os";
 
 const CONFIG_SECTION = "CLI";
 const RELEVANT_CONFIG_OPTIONS = [
@@ -39,6 +40,11 @@ const RE_SCENE_CLASS = /class\s+(?<name>\w+)\(\w*Scene\w*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
 const RE_FILE_READY = /File\s*ready\s*at[^']*'(?<path>[^']*)'/g;
 
+const PYTHON_ENV_SCRIPTS_FOLDER = {
+  'win32': 'Scripts',
+  'darwin': 'bin',
+  'linux': 'bin'
+}
 
 type MediaInfo = {
   fileType: number;
@@ -81,7 +87,7 @@ export class ManimSideview {
   private manimPseudoTerm?: ManimPseudoTerm;
 
   gallery = new Gallery(this.ctx.extensionUri, this.ctx.subscriptions);
-  
+
   /**
    * The main entry point for executing a render.
    * 
@@ -260,16 +266,22 @@ export class ManimSideview {
   }
 
   private async getManimPath() {
-    let manim = path.normalize(getUserConfiguration("defaultManimPath"));
-    
+    let manimPath = path.normalize(getUserConfiguration("defaultManimPath"));
     const env = await this.getPythonEnvironment();
     let envName = "";
     if (env) {
-      Log.info(`Using python environment "${env.name}" for manim.`);
       envName = env.name || "base";
-      manim = path.join(env.folderUri.fsPath, "Scripts", manim); 
+      Log.info(`Using python environment "${envName}" for manim.`);
+
+      let bin = PYTHON_ENV_SCRIPTS_FOLDER[process.platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER];
+      if (!bin) {
+        Log.error("Manim Sideview: Unsupported platform for python environment. Assuming linux directory.");
+        bin = PYTHON_ENV_SCRIPTS_FOLDER['linux'];
+      }
+
+      manimPath = path.join(env.folderUri.fsPath, bin, manimPath);
     }
-    return {manim, envName};
+    return { manim: manimPath, envName };
   }
 
   async cmdUpdateDefaultManimConfig() {
@@ -315,7 +327,7 @@ export class ManimSideview {
     const environmentPath = this.pythonApi.environments.getActiveEnvironmentPath();
     const environment = await this.pythonApi.environments.resolveEnvironment(environmentPath);
     if (environment) {
-        return environment.environment;
+      return environment.environment;
     }
   }
 
@@ -390,7 +402,7 @@ export class ManimSideview {
     if (getUserConfiguration("focusOutputOnRun")) {
       this.outputChannel!.show(true);
     }
-    
+
     const args: string[] = [config.srcPath, ...(config.isUsingConfFile ? [] : this.getPreferenceArgs()), config.sceneName.trim()];
 
     this.spawnManimProcess(manim.manim, args, cwd, config.srcPath, config.sceneName, (mediaInfo) => {
