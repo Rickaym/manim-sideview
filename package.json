@@ -12,7 +12,7 @@
     "name": "Ricky",
     "url": "https://github.com/Rickaym"
   },
-  "version": "0.2.8",
+  "version": "0.2.9",
   "publisher": "Rickaym",
   "engines": {
     "vscode": "^1.62.3"
