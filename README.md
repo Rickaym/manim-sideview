@@ -119,6 +119,11 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.9
+
+- Fix virtual env detection and activation
+- Added settings to enable/disable the checkered background
+
 #### 0.2.8
 
 - Fix video autoplay not working 
