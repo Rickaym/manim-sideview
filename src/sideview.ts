@@ -100,10 +100,10 @@ export class ManimSideview {
       ? this.jobManager.getActiveJob(typeof srcPath === "string" ? srcPath : srcPath.fsPath)!
       : null;
 
-    let runningDoc: vscode.TextDocument;
+    let document: vscode.TextDocument;
 
     if (activeJob) {
-      runningDoc = activeJob.config.document;
+      document = activeJob.config.document;
     } else {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
@@ -115,21 +115,21 @@ export class ManimSideview {
         }
         return;
       }
-      runningDoc = editor.document;
-      activeJob = this.jobManager.getActiveJob(runningDoc.fileName);
+      document = editor.document;
+      activeJob = this.jobManager.getActiveJob(document.fileName);
     }
 
-    // reloaded/loaded every run
-    let manimConfig = await this.getManimConfigFile(runningDoc.uri.fsPath);
+    // configuration is reloaded every run
+    let manimConfig = await this.getManimConfigFile(document.uri.fsPath);
     let isConfFile: boolean;
 
     if (manimConfig) {
       isConfFile = true;
 
       if (!activeJob || !activeJob.config.isUsingConfFile) {
-        // loaded the file config for the first time
+        // notify config file loading for the first time
         vscode.window.showInformationMessage(
-          Log.info("Manim Sideview: Loaded a config file from the working directory!")
+          Log.info("Manim Sideview: Loaded a configuration file from the working directory.")
         );
       }
     } else {
@@ -139,16 +139,16 @@ export class ManimSideview {
 
     let currentRunningConfig: RunningConfig;
     if (activeJob) {
-      // update active job
+      // if there is an active job simply resume
       activeJob.config.manimConfig = manimConfig;
       activeJob.config.isUsingConfFile = isConfFile;
       currentRunningConfig = activeJob.config;
     } else {
-      const newSceneName = await this.getRenderSceneName(runningDoc.uri);
+      const newSceneName = await this.getRenderSceneName(document.uri);
       if (!newSceneName) return;
 
       Log.info(`Asked user for a new scene name and recieved "${newSceneName}".`);
-      currentRunningConfig = this.createRunningConfig(runningDoc, newSceneName, isConfFile, manimConfig);
+      currentRunningConfig = this.createRunningConfig(document, newSceneName, isConfFile, manimConfig);
     }
 
     this.render(currentRunningConfig);
