@@ -102,7 +102,12 @@
         "manim-sideview.preview": {
           "type": "boolean",
           "default": "true",
-          "description": "Enable or disable the display of the preview after rendering. This should be enabled at all times except for when you're using the extension solely to render."
+          "description": "Display the preview after rendering. This should be enabled at all times except for when you're using the extension solely to render."
+        },
+        "manim-sideview.checkeredBackground": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Show a checkered background behind the video preview."
         }
       }
     },

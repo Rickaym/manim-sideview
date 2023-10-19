@@ -63,9 +63,8 @@ export class TemplateEngine {
    *  OR
    * ' varname' : varname
    *
-   * The latter replaces any first occurence of the varname with unbound
-   * squiggly braces. It must be fed into the globals object with a leading
-   * space.
+   * The latter replaces the first occurence of the varname without squiggly braces. 
+   * The value for it must be fed into the globals object with a leading space.
    */
   async render(globals: { [varname: string]: any }) {
     return TemplateEngine.textRender(

@@ -12,10 +12,10 @@
     <link href="{{ codicon.css }}" rel="stylesheet" />
   </head>
   <body>
-    <div class="media-container">
+    <div class="media-container {{ background }}">
       <div {{ videoHideState }} id="video-media-player" class="media-player">
         <video {{ autoplay }} {{ loop }} id="video-preview" src="{{ videoDir }}"></video>
-        <div class="progress-bar{{ previewShowProgressOnIdle }}">
+        <div class="progress-bar {{ previewShowProgressOnIdle }}">
           <div class="color-fill" {{ previewProgressStyle }}></div>
           <div class="demo-fill"></div>
         </div>
