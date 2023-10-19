@@ -93,7 +93,7 @@ export function getVideoOutputPath(config: RunningConfig, extension: string = ".
     if (!Object.keys(DEFAULT_CONFIG.quality_map).includes(config.manimConfig.quality)) {
       vscode.window.showErrorMessage(
         Log.error(
-          `Manim Sideview: The quality "${config.manimConfig.quality}" provided in the configuration is invalid.`
+          `Manim Sideview: "${config.manimConfig.quality}" is an invalid quality value provided in the configuration.`
         )
       );
       throw new Error("Invalid quality provided.");
