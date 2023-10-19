@@ -48,7 +48,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidSaveTextDocument(
     (e) => {
-      if (getUserConfiguration<boolean>("runOnSave")) {
+      if (getUserConfiguration<boolean>("runOnSave") && e.fileName.endsWith(".py")) {
         vscode.commands.executeCommand("manim-sideview.run", e.fileName, true);
       }
     },
