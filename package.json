@@ -216,6 +216,7 @@
     "@vscode/codicons": "0.0.32",
     "@vscode/python-extension": "^1.0.5",
     "axios": "^1.3.2",
+    "toml": "^3.0.0",
     "yaml": "^2.2.1"
   }
 }

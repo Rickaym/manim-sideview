@@ -3,6 +3,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+import * as toml from "toml";
 
 import { ChildProcess, spawn } from "child_process";
 import {
@@ -18,7 +19,6 @@ import {
   DefaultTerminalName
 } from "./globals";
 
-import { ConfigParser } from "./configParser";
 import { JobStatusManager } from "./job";
 import { MediaPlayer, PlayableMediaType } from "./player";
 import { Gallery } from "./gallery";
@@ -653,7 +653,7 @@ export class ManimSideview {
 
     Log.info(`Parsing configuration file "${filePath}".`);
     try {
-      var parsedConfig = await ConfigParser.parse(filePath);
+      var parsedConfig = toml.parse(filePath);
     } catch (e) {
       vscode.window.showErrorMessage(
         Log.error("Manim Sideview: Failed parsing the manim.cfg file, ignoring it.")
