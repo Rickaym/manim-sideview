@@ -7,10 +7,10 @@ import {
 
 
 const enum JobStatus {
-    Error,
-    Active,
-    Running,
-    New
+    error,
+    active,
+    running,
+    new
 }
 
 type RuntimeOptions = {
@@ -46,7 +46,7 @@ export class JobStatusManager {
         this.activeJobs[config.srcPath] = {
             config: config,
             runtimeOptions: { outputFileType: fileType },
-            status: JobStatus.New
+            status: JobStatus.new
         };
         this.setNew();
     }
@@ -91,16 +91,16 @@ export class JobStatusManager {
 
     restoreStatus(job: Job) {
         switch (job.status) {
-            case JobStatus.New:
+            case JobStatus.new:
                 this.setNew();
                 break;
-            case JobStatus.Active:
+            case JobStatus.active:
                 this.setActive(job);
                 break;
-            case JobStatus.Error:
+            case JobStatus.error:
                 this.setError(job);
                 break;
-            case JobStatus.Running:
+            case JobStatus.running:
                 this.setRunning(job);
                 break;
         }
@@ -108,7 +108,7 @@ export class JobStatusManager {
 
     setRunning(activeJob: Job | null) {
         if (activeJob) {
-            activeJob.status = JobStatus.Running;
+            activeJob.status = JobStatus.running;
         }
         this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
         this.setIcon("$(sync~spin)");
@@ -117,7 +117,7 @@ export class JobStatusManager {
 
     setActive(activeJob: Job | null) {
         if (activeJob) {
-            activeJob.status = JobStatus.Active;
+            activeJob.status = JobStatus.active;
         }
         this.jobStatusItem.color = new vscode.ThemeColor("textLink.foreground");
         this.setIcon("$(vm-running)");
@@ -126,7 +126,7 @@ export class JobStatusManager {
 
     setError(activeJob: Job | null) {
         if (activeJob) {
-            activeJob.status = JobStatus.Error;
+            activeJob.status = JobStatus.error;
         }
         this.jobStatusItem.color = new vscode.ThemeColor("minimap.errorHighlight");
         this.setIcon("$(vm-outline)");
