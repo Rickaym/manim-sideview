@@ -55,9 +55,13 @@ manim-sideview:
 
 By setting this configuration through `File -> Preferences -> Settings` you can pass CLI arguments to the `manim.exe` call.
 
+> [!WARN]
+>
+> Do not use args that change the path of the output file, i.e., quality args like 'ql'. Use the config file instead.
+
 2. `manim.cfg` file
 
-If you're using a configuration file for your renders, worry not! the extension recognizes any manim configuration under the guideline [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) that exists
+Use a configuration file for your renders! The extension recognizes the manim configuration under the guideline [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) that exists
 in the current working directory.
 
 If a `manim.cfg` file is found, all command line arguments given through
