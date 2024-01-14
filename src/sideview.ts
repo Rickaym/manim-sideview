@@ -24,7 +24,6 @@ import { MediaPlayer, PlayableMediaType } from "./player";
 import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 import { PythonExtension } from "@vscode/python-extension";
-import { platform } from "os";
 
 const CONFIG_SECTION = "CLI";
 const RELEVANT_CONFIG_OPTIONS = [
