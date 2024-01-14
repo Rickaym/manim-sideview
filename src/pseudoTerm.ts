@@ -1,7 +1,4 @@
-/**
- * The pseudoterminal used by manim-sideview to output stdout.
- * The container implements the OutputChannel interface.
- */
+// A pseudoterminal implemented as an OutputChannel.
 
 import * as vscode from "vscode";
 import * as path from "path";
