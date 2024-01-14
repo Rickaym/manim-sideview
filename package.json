@@ -159,15 +159,15 @@
       },
       {
         "command": "manim-sideview.showOutputChannel",
-        "title": "Manim: Reveal Output Channel"
+        "title": "Manim: Show Output Channel"
       },
       {
         "command": "manim-sideview.showExtensionManimConfig",
-        "title": "Manim: Reveal Extension’s Manim Config"
+        "title": "Manim: Show Internal Manim Config"
       },
       {
         "command": "manim-sideview.showManimExecTerminal",
-        "title": "Manim: Reveal Extension’s Execution Terminal"
+        "title": "Manim: Show Internal Execution Terminal"
       }
     ],
     "keybindings": [
