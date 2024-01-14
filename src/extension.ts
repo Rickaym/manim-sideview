@@ -1,4 +1,4 @@
-import path = require("path");
+import * as path from "path";
 import * as vscode from "vscode";
 import { getUserConfiguration, DefaultTerminalName, loadGlobals, Log, LOGGER } from "./globals";
 import { ManimSideview } from "./sideview";
