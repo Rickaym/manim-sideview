@@ -63,6 +63,15 @@ function formatOutput(message: string): string {
   return message.replace(/\r\n/g, "\\n").replace(/    /g, "\\t");
 }
 
+function quoteSpecialChars(text: string): string {
+  // special characters
+  const specialCharsRegex = /[^\w\s,.]/;
+  if (specialCharsRegex.test(text)) {
+    return `"${text}"`;
+  }
+  return text;
+}
+
 export class ManimSideview {
   constructor(
     public readonly ctx: vscode.ExtensionContext,
@@ -493,8 +502,9 @@ export class ManimSideview {
     const startTime = new Date();
     const process = spawn(command, args, { cwd: cwd, shell: false });
     const job = this.jobManager.getActiveJob(srcPath);
-    const commandString = `${command} ${args.join(" ")}\n`;
-
+    
+    // String representation of the command process 
+    const commandString = `"${command}" ${args.map((a) => quoteSpecialChars(a)).join(" ")}\n`;
     this.outputChannel!.append(commandString);
 
     // kill any existing old processes if they exist
