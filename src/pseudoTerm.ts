@@ -47,7 +47,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
   private pty: vscode.Pseudoterminal = {
     onDidWrite: this.writeEmitter.event,
     open: () => this.writeEmitter.fire(this.intro),
-    close: () => { },
+    close: () => {},
     handleInput: async (char: string) => {
       if (this.isRunning) {
         return;

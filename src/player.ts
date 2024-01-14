@@ -96,7 +96,7 @@ export class MediaPlayer {
       [srcReplacementKey]: this.asCacheBreakingWebviewUri(panel.webview, mediaUri),
       imageHideState,
       videoHideState,
-      background: getUserConfiguration("checkeredBackground") ? "checkered-bg" : "", 
+      background: getUserConfiguration("checkeredBackground") ? "checkered-bg" : "",
       outputFile: mediaUri.fsPath,
       sourceFile: config.srcPath,
       moduleName: config.sceneName,

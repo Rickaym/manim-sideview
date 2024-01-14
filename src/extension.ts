@@ -2,23 +2,27 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { getUserConfiguration, DefaultTerminalName, loadGlobals, Log, LOGGER } from "./globals";
 import { ManimSideview } from "./sideview";
-import { PythonExtension } from '@vscode/python-extension';
+import { PythonExtension } from "@vscode/python-extension";
 
 export async function activate(context: vscode.ExtensionContext) {
   Log.info("Activating extension.");
   await loadGlobals(context);
-  
+
   const pythonApi: PythonExtension = await PythonExtension.api();
   const sideview = new ManimSideview(context, pythonApi);
 
   context.subscriptions.push(
     vscode.commands.registerCommand("manim-sideview.run", (...args) => sideview.cmdRun(...args)),
-    vscode.commands.registerCommand("manim-sideview.removeAllJobs", () => sideview.cmdRemoveAllJobs()),
+    vscode.commands.registerCommand("manim-sideview.removeAllJobs", () =>
+      sideview.cmdRemoveAllJobs()
+    ),
     vscode.commands.registerCommand("manim-sideview.stop", () => sideview.cmdStop()),
     vscode.commands.registerCommand("manim-sideview.renderNewScene", (...args) =>
       sideview.cmdRenderNewScene(...args)
     ),
-    vscode.commands.registerCommand("manim-sideview.removeCurrentJob", () => sideview.cmdRemoveJob()),
+    vscode.commands.registerCommand("manim-sideview.removeCurrentJob", () =>
+      sideview.cmdRemoveJob()
+    ),
     vscode.commands.registerCommand("manim-sideview.showMobjectGallery", () =>
       sideview.gallery.show()
     ),
