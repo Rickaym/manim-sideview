@@ -123,7 +123,7 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
-#### 0.2.10
+#### 0.2.11
 
 - Manim command args with special characters are quoted
 - Manim config parsing is more reliable
