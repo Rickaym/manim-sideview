@@ -55,7 +55,7 @@ manim-sideview:
 
 By setting this configuration through `File -> Preferences -> Settings` you can pass CLI arguments to the `manim.exe` call.
 
-> [!WARN]
+> [!WARNING]
 >
 > Do not use args that change the path of the output file, i.e., quality args like 'ql'. Use the config file instead.
 
