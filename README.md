@@ -123,6 +123,11 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.10
+
+- Manim command args with special characters are quoted
+- Manim config parsing is more reliable
+
 #### 0.2.9
 
 - Fix virtual env detection and activation
@@ -130,7 +135,7 @@ Consider supporting this project through starring the repository or buying me a 
 
 #### 0.2.8
 
-- Fix video autoplay not working 
+- Fix video autoplay not working
 - Renamed `autoPreview` preference option to `preview`
 
 #### 0.2.7
