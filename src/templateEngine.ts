@@ -7,33 +7,35 @@ export class TemplateEngine {
     public readonly resource: WebviewResources,
     public readonly name: String,
     public readonly extensionUri: vscode.Uri
-  ) {}
+  ) {
+    this.resMap = {
+      js: ` ${this.name}.js`,
+      css: ` ${this.name}.css`
+    };
+    this.preamble = {
+      cspSource: this.webview.cspSource,
+      [this.resMap.js]: this.webview.asWebviewUri(this.resource.js).toString(),
+      [this.resMap.css]: this.webview.asWebviewUri(this.resource.css).toString(),
+      nonce: getNonce(),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      "codicon.css": this.webview.asWebviewUri(
+        vscode.Uri.joinPath(
+          this.extensionUri,
+          "node_modules",
+          "@vscode/codicons",
+          "dist",
+          "codicon.css"
+        )
+      )
+    };
+  }
 
-  private resMap = {
-    js: ` ${this.name}.js`,
-    css: ` ${this.name}.css`
-  };
-
+  private resMap;
   /**
    * A list of preamble context variables that will be rendered without
    * explicit instructions.
    */
-  private preamble = {
-    cspSource: this.webview.cspSource,
-    [this.resMap.js]: this.webview.asWebviewUri(this.resource.js).toString(),
-    [this.resMap.css]: this.webview.asWebviewUri(this.resource.css).toString(),
-    nonce: getNonce(),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    "codicon.css": this.webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this.extensionUri,
-        "node_modules",
-        "@vscode/codicons",
-        "dist",
-        "codicon.css"
-      )
-    )
-  };
+  private preamble;
 
   static async renderDoc(fp: vscode.Uri, globals: { [varname: string]: any }) {
     return TemplateEngine.textRender((await vscode.workspace.fs.readFile(fp)).toString(), globals);
