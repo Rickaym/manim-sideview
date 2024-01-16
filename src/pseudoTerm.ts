@@ -31,6 +31,10 @@ to how either form of output is used in the sideview */
 export class ManimPseudoTerm implements vscode.OutputChannel {
   constructor(public readonly name: string) {
     this.name = name;
+    this.terminal = vscode.window.createTerminal({
+      name: this.name,
+      pty: this.pty
+    });
   }
   public envName = "";
   public cwd = path.dirname(vscode.workspace.textDocuments[0]?.fileName || process.cwd());
@@ -95,10 +99,7 @@ export class ManimPseudoTerm implements vscode.OutputChannel {
       }
     }
   };
-  private terminal: vscode.Terminal = vscode.window.createTerminal({
-    name: this.name,
-    pty: this.pty
-  });
+  private terminal: vscode.Terminal;
 
   /**
    * Appends the string directly if the terminal has been appended to before.
