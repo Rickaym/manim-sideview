@@ -123,6 +123,11 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.12
+
+- Fix manim config parsing
+- Bumped vscode engine to v1.68.0
+
 #### 0.2.11
 
 - Manim command args with special characters are quoted
