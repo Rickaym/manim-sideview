@@ -21,20 +21,26 @@ interface ImageMap {
 }
 
 export class Gallery {
-  constructor(public readonly extensionUri: vscode.Uri, public readonly disposables: any[]) {}
-
-  private panel: vscode.WebviewPanel | undefined;
-  private mobjectsPath: vscode.Uri = vscode.Uri.joinPath(this.extensionUri, "assets/mobjects");
-
-  private loads: WebviewResources = getWebviewResource(this.extensionUri, "gallery");
-  private manimIconsPath = {
+  constructor(public readonly extensionUri: vscode.Uri, public readonly disposables: any[]) {
+    
+  this.mobjectsPath = vscode.Uri.joinPath(this.extensionUri, "assets/mobjects");
+  this.loads = getWebviewResource(this.extensionUri, "gallery");
+  this.manimIconsPath = {
     dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
     light: vscode.Uri.joinPath(this.extensionUri, "assets/images/light_logo.png")
   };
-  private lastActiveEditor: vscode.TextEditor | undefined;
+  }
 
-  setLastActiveEditor(editor: vscode.TextEditor) {
-    this.lastActiveEditor = editor;
+  private panel: vscode.WebviewPanel | undefined;
+  private mobjectsPath: vscode.Uri;
+  private loads: WebviewResources;
+  private manimIconsPath;
+  private lastActiveEditor: vscode.TextEditor | vscode.NotebookEditor | undefined;
+
+  setLastActiveEditor(editor: vscode.TextEditor | vscode.NotebookEditor) {
+    if (this.lastActiveEditor !== editor) {
+      this.lastActiveEditor = editor;
+    }
   }
 
   async show() {
@@ -145,28 +151,48 @@ export class Gallery {
   }
 
   async insertCode(code: string) {
-    const lastEditor = this.lastActiveEditor ? this.lastActiveEditor : Gallery.getPreviousEditor();
+    const lastEditor = this.lastActiveEditor || Gallery.getPreviousEditor();
     if (!lastEditor) {
       return vscode.window.showErrorMessage(
         "Manim Sideview: You need to place a cursor somewhere to insert the code."
       );
     }
 
-    code = Gallery.adaptiveIndent(code, lastEditor);
+    if (lastEditor.document !== undefined) {
+      const editor = lastEditor as vscode.TextEditor;
+      code = Gallery.adaptiveIndent(code, editor);
 
-    lastEditor
-      .edit((e) => {
-        e.insert(lastEditor.selection.active, code);
-      })
-      .then(() => {
-        vscode.commands
-          .executeCommand("workbench.action.focusPreviousGroup")
-          .then(() =>
-            lastEditor.revealRange(
-              new vscode.Range(lastEditor.selection.active, lastEditor.selection.active)
-            )
-          );
-      });
+      editor
+        .edit((e) => {
+          e.insert(editor.selection.active, code);
+        })
+        .then(() => {
+          vscode.commands
+            .executeCommand("workbench.action.focusPreviousGroup")
+            .then(() =>
+              editor.revealRange(new vscode.Range(editor.selection.active, editor.selection.active))
+            );
+        });
+    } else {
+      const document = (lastEditor as vscode.NotebookEditor).notebook;
+      const selection = (lastEditor as vscode.NotebookEditor).selection;
+      if (selection) {
+        const cellData = new vscode.NotebookCellData(
+          vscode.NotebookCellKind.Code,
+          code,
+          document.metadata.language_info.name
+        );
+
+        const edit = new vscode.WorkspaceEdit();
+        edit.set(document.uri, [
+          vscode.NotebookEdit.replaceCells(
+            new vscode.NotebookRange(selection.start, selection.end),
+            [cellData]
+          )
+        ]);
+        await vscode.workspace.applyEdit(edit);
+      }
+    }
   }
 
   async synchronize(forceDownload: boolean) {
