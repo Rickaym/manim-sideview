@@ -35,9 +35,9 @@ export class Gallery {
   private mobjectsPath: vscode.Uri;
   private loads: WebviewResources;
   private manimIconsPath;
-  private lastActiveEditor: vscode.TextEditor | vscode.NotebookEditor | undefined;
+  private lastActiveEditor: vscode.TextEditor | undefined;
 
-  setLastActiveEditor(editor: vscode.TextEditor | vscode.NotebookEditor) {
+  setLastActiveEditor(editor: vscode.TextEditor) {
     if (this.lastActiveEditor !== editor) {
       this.lastActiveEditor = editor;
     }
@@ -157,42 +157,19 @@ export class Gallery {
         "Manim Sideview: You need to place a cursor somewhere to insert the code."
       );
     }
+    code = Gallery.adaptiveIndent(code, lastEditor);
 
-    if (lastEditor.document !== undefined) {
-      const editor = lastEditor as vscode.TextEditor;
-      code = Gallery.adaptiveIndent(code, editor);
-
-      editor
-        .edit((e) => {
-          e.insert(editor.selection.active, code);
-        })
-        .then(() => {
-          vscode.commands
-            .executeCommand("workbench.action.focusPreviousGroup")
-            .then(() =>
-              editor.revealRange(new vscode.Range(editor.selection.active, editor.selection.active))
-            );
-        });
-    } else {
-      const document = (lastEditor as vscode.NotebookEditor).notebook;
-      const selection = (lastEditor as vscode.NotebookEditor).selection;
-      if (selection) {
-        const cellData = new vscode.NotebookCellData(
-          vscode.NotebookCellKind.Code,
-          code,
-          document.metadata.language_info.name
-        );
-
-        const edit = new vscode.WorkspaceEdit();
-        edit.set(document.uri, [
-          vscode.NotebookEdit.replaceCells(
-            new vscode.NotebookRange(selection.start, selection.end),
-            [cellData]
-          )
-        ]);
-        await vscode.workspace.applyEdit(edit);
-      }
-    }
+    lastEditor
+      .edit((e) => {
+        e.insert(lastEditor.selection.active, code);
+      })
+      .then(() => {
+        vscode.commands
+          .executeCommand("workbench.action.focusPreviousGroup")
+          .then(() =>
+            lastEditor.revealRange(new vscode.Range(lastEditor.selection.active, lastEditor.selection.active))
+          );
+    });
   }
 
   async synchronize(forceDownload: boolean) {
