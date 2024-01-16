@@ -3,7 +3,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import * as toml from "toml";
+import ConfigParser from "configparser";
 
 import { ChildProcess, spawn } from "child_process";
 import {
@@ -81,22 +81,23 @@ export class ManimSideview {
     this.pythonApi = pythonApi;
     this.jobManager = new JobStatusManager();
     this.ctx.subscriptions.push(this.jobManager.getItem());
+    this.mediaPlayer = new MediaPlayer(this.ctx.extensionUri, this.ctx.subscriptions);
+    this.gallery = new Gallery(this.ctx.extensionUri, this.ctx.subscriptions);
   }
 
   private manimConfPath: string = "";
   // private activeJobs: { [fsPath: string]: Job } = {};
-  private mediaPlayer = new MediaPlayer(this.ctx.extensionUri, this.ctx.subscriptions);
   private process: ChildProcess | undefined;
   private jobManager: JobStatusManager;
   private previousSceneNames: { [fsPath: string]: string } = {};
+  private mediaPlayer: MediaPlayer;
+  public gallery: Gallery;
 
   // the pointer to the current output channel
   private outputChannel?: vscode.OutputChannel;
   // the following channels are only created when needed
   private manimOutputChannel?: vscode.OutputChannel;
   private manimPseudoTerm?: ManimPseudoTerm;
-
-  gallery = new Gallery(this.ctx.extensionUri, this.ctx.subscriptions);
 
   /**
    * The main entry point for executing a render.
@@ -155,7 +156,9 @@ export class ManimSideview {
       currentRunningConfig = activeJob.config;
     } else {
       const newSceneName = await this.getRenderSceneName(document.uri);
-      if (!newSceneName) return;
+      if (!newSceneName) {
+        return;
+      };
 
       Log.info(`Asked user for a new scene name and recieved "${newSceneName}".`);
       currentRunningConfig = this.createRunningConfig(
@@ -693,31 +696,30 @@ export class ManimSideview {
 
     Log.info(`Parsing configuration file "${filePath}".`);
     try {
-      var parsedConfig = toml.parse(filePath);
+      var parsedConfig = new ConfigParser();
+      await parsedConfig.readAsync(filePath);
     } catch (e) {
       vscode.window.showErrorMessage(
-        Log.error("Manim Sideview: Failed parsing the manim.cfg file, ignoring it.")
+        Log.error(`Manim Sideview: Error whilst parsing manim.cfg file, ignoring it. ${e}`)
       );
       return;
     }
 
-    if (!Object.keys(parsedConfig).includes(CONFIG_SECTION)) {
+    if (!parsedConfig.sections().includes(CONFIG_SECTION)) {
       vscode.window.showErrorMessage(
         Log.error(`Manim Sideview: Config file is missing the [${CONFIG_SECTION}] section.`)
       );
       return;
     }
-
-    const cliConfig = parsedConfig[CONFIG_SECTION];
-
+    
     // since not all configuration options are necessary for rendering but we still
     // need them, we'll use the default config as a base
     let manimConfig = getDefaultConfig();
 
     for (const flag of RELEVANT_CONFIG_OPTIONS) {
-      if (Object.keys(cliConfig).includes(flag)) {
-        manimConfig[flag as keyof ManimConfig] = cliConfig[flag];
-        Log.info(`Set flag "${flag}" to ${cliConfig[flag]}.`);
+      if (parsedConfig.hasKey(CONFIG_SECTION, flag)) {
+        manimConfig[flag as keyof ManimConfig] = parsedConfig.get(CONFIG_SECTION, flag)!;
+        Log.info(`Set flag "${flag}" to ${parsedConfig.get(CONFIG_SECTION, flag)}.`);
       }
     }
 
