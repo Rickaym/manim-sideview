@@ -59,13 +59,12 @@ export async function activate(context: vscode.ExtensionContext) {
     null,
     context.subscriptions
   );
-  vscode.window.onDidChangeActiveTextEditor(
-    (e) => {
-      sideview.cmdRefreshJobStatus();
-      sideview.cmdAuditTextEditorChange(e);
-    },
+
+  vscode.window.onDidChangeTextEditorSelection(
+    (e) => sideview.auditTextEditorChange(e.textEditor),
     null,
     context.subscriptions
   );
+  
   Log.info("Activated extension.");
 }
