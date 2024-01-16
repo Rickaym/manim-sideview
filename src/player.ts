@@ -17,14 +17,15 @@ export const PlayableMediaType = {
 };
 
 export class MediaPlayer {
-  constructor(public readonly extensionUri: vscode.Uri, public readonly disposables: any[]) {}
+  constructor(public readonly extensionUri: vscode.Uri, public readonly disposables: any[]) {
+    this.manimIconsPath = {
+      dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
+      light: vscode.Uri.joinPath(this.extensionUri, "assets/images/light_logo.png")
+    };
+  }
 
   private recentMediaPanel: vscode.WebviewPanel | undefined;
-
-  private manimIconsPath = {
-    dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
-    light: vscode.Uri.joinPath(this.extensionUri, "assets/images/light_logo.png")
-  };
+  private manimIconsPath;
 
   parseProgressStyle(colorStr?: string): string {
     if (!colorStr) {
