@@ -217,10 +217,8 @@ export class ManimSideview {
     this.cmdRun(runningCfgSrcPath);
   }
 
-  cmdAuditTextEditorChange(editor: vscode.TextEditor | undefined) {
-    if (editor && editor.document.languageId === "python") {
-      this.gallery.setLastActiveEditor(editor);
-    }
+  auditTextEditorChange(editor: vscode.TextEditor) {
+    this.gallery.setLastActiveEditor(editor);
   }
 
   private async getRenderSceneName(srcFileUri: vscode.Uri): Promise<string | undefined> {
