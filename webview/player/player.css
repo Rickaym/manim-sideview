@@ -50,15 +50,19 @@ video {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
+  margin-bottom: 8px;
 }
 
 .control-button {
   cursor: pointer;
   background-color: var(--vscode-button-background);
   color: var(--vscode-button-foreground);
-  margin-top: 4px;
-  margin-right: 4px;
   padding: 2px 6px 2px 6px;
+  margin-right: 4px;
+  margin-top: 5px;
+  display: flex; 
+  align-items: center; 
+  border-radius: 5px;
 }
 
 .control-button:hover {
@@ -113,7 +117,7 @@ section {
 }
 
 .module-name {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
   margin-top: 5px;
   overflow-wrap: break-word;
