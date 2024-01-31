@@ -123,6 +123,10 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.13
+
+- Fix missing icons in sideview
+
 #### 0.2.12
 
 - Fix manim config parsing
