@@ -340,6 +340,9 @@ export class ManimSideview {
   }
 
   private async getPythonEnvironment() {
+    if (!this.pythonApi.environments) {
+      return;
+    }
     const environmentPath = this.pythonApi.environments.getActiveEnvironmentPath();
     const environment = await this.pythonApi.environments.resolveEnvironment(environmentPath);
     if (environment) {
