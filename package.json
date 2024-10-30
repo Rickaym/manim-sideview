@@ -53,7 +53,7 @@
         },
         "manim-sideview.commandLineArgs": {
           "type": "string",
-          "description": "Input additional command line arguments for Manim. Refer to Manim documentation for options."
+          "description": "Input additional command line arguments for Manim. Refer to Manim documentation for options. Use the config file for quality args like 'ql'."
         },
         "manim-sideview.runOnSave": {
           "type": "boolean",
