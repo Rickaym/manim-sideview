@@ -3,10 +3,10 @@
   <head>
     <title>Player</title>
     <meta charset="UTF-8" />
-    <meta
+    <!-- <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; media-src {{ cspSource }} https:; img-src {{ cspSource }} https:; script-src 'nonce-{{ nonce }}'; style-src {{ cspSource }} 'unsafe-inline'; font-src  {{ cspSource }} ;"
-    />
+    /> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="player.css" rel="stylesheet" />
   </head>
@@ -14,10 +14,10 @@
     <div class="media-container {{ background }}">
       <div {{ videoHideState }} id="video-media-player" class="media-player">
         <video {{ autoplay }} {{ loop }} id="video-preview" src="{{ videoDir }}"></video>
-        <div class="progress-bar {{ previewShowProgressOnIdle }}">
-          <div class="color-fill" {{ previewProgressStyle }}></div>
-          <div class="demo-fill"></div>
-        </div>
+      </div>
+      <div class="progress-bar {{ previewShowProgressOnIdle }}">
+        <div class="color-fill" {{ previewProgressStyle }}></div>
+        <div class="demo-fill"></div>
       </div>
       <div {{ imageHideState }} id="image-media-player" class="media-player">
         <img src="{{ imageDir }}" id="image-preview" />
