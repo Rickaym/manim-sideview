@@ -283,23 +283,28 @@ export class ManimSideview {
 
   private async getManimPath() {
     let manimPath = path.normalize(getUserConfiguration("defaultManimPath"));
-    const env = await this.getPythonEnvironment();
     let envName = "";
-    if (env) {
-      envName = env.name || "base";
-      Log.info(`Using python environment "${envName}" for manim.`);
 
-      let bin =
-        PYTHON_ENV_SCRIPTS_FOLDER[process.platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER];
-      if (!bin) {
-        Log.error(
-          "Manim Sideview: Unsupported platform for python environment. Assuming linux directory."
-        );
-        bin = PYTHON_ENV_SCRIPTS_FOLDER["linux"];
+    if (!path.isAbsolute(manimPath)) {
+      const env = await this.getPythonEnvironment();
+      if (env) {
+        envName = env.name || "base";
+        Log.info(`Using python environment "${envName}" for manim.`);
+
+        let bin =
+          PYTHON_ENV_SCRIPTS_FOLDER[process.platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER];
+        if (!bin) {
+          Log.error(
+            "Manim Sideview: Unsupported platform for python environment. Assuming linux directory."
+          );
+          bin = PYTHON_ENV_SCRIPTS_FOLDER["linux"];
+        }
+
+        manimPath = path.join(env.folderUri.fsPath, bin, manimPath);
+        Log.info(`Resolved manim path inside the venv ${env.folderUri.fsPath} + ${bin} + ${manimPath}`);
       }
-
-      manimPath = path.join(env.folderUri.fsPath, bin, manimPath);
     }
+  
     return { manim: manimPath, envName };
   }
 
