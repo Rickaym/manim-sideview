@@ -123,6 +123,13 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.15
+
+- Fix proper handling of absolute defaultManimPath
+- Better error message for bad quality values
+- Better preference description
+- Slight style improvements for the player
+
 #### 0.2.14
 
 - Ignore undefined environments
