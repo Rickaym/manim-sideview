@@ -12,18 +12,18 @@ video {
 }
 
 .checkered-bg {
-  background-image:
-      linear-gradient(45deg, #ccc 25%, transparent 25%), 
-      linear-gradient(135deg, #ccc 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, #ccc 75%),
-      linear-gradient(135deg, transparent 75%, #ccc 75%);
-  background-size:25px 25px; /* Must be a square */
-  background-position:0 0, 12.5px 0, 12.5px -12.5px, 0px 12.5px; /* Must be half of one side of the square */
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(135deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(135deg, transparent 75%, #ccc 75%);
+  background-size: 25px 25px; /* Must be a square */
+  background-position: 0 0, 12.5px 0, 12.5px -12.5px, 0px 12.5px; /* Must be half of one side of the square */
 }
 
 .media-container {
   background-color: black;
   border: 1px solid transparent;
+  border-bottom: none;
   border-radius: 1.9% 1.9% 0 0;
   justify-content: center;
   align-items: center;
@@ -41,6 +41,7 @@ video {
   overflow: hidden;
   position: relative;
   cursor: pointer;
+  border-bottom: 1px solid transparent;
 }
 
 .space-between-flex-box {
@@ -58,8 +59,8 @@ video {
   padding: 2px 6px 2px 6px;
   margin-right: 4px;
   margin-top: 5px;
-  display: flex; 
-  align-items: center; 
+  display: flex;
+  align-items: center;
   border-radius: 5px;
 }
 
@@ -70,6 +71,7 @@ video {
 .progress-bar {
   display: flex;
   align-items: center;
+  position: relative;
   background-color: var(--vscode-editorGutter-background);
   width: 100%;
   height: 5px;
@@ -82,6 +84,10 @@ video {
 
 .progress-bar:hover .demo-fill {
   background-color: rgba(255, 255, 255, 0.342);
+}
+
+.demo-fill {
+  position: absolute;
 }
 
 .color-fill,
