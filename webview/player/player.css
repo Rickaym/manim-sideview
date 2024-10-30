@@ -39,7 +39,6 @@ video {
 .media-player {
   width: 100%;
   height: 100%;
-  max-width: 800px;
   overflow: hidden;
   position: relative;
   cursor: pointer;
