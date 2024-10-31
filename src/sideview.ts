@@ -108,8 +108,17 @@ export class ManimSideview {
    */
   async cmdRun(srcPath?: vscode.Uri | string, autoRun?: boolean) {
     let activeJob = srcPath
-      ? this.jobManager.getActiveJob(typeof srcPath === "string" ? srcPath : srcPath.fsPath)!
+      ? this.jobManager.getActiveJob(
+          typeof srcPath === "string" ? srcPath : srcPath.fsPath
+        )!
       : null;
+
+    if (autoRun === true && !activeJob) {
+      Log.info(
+        `Ignoring auto-run of ${srcPath} for lack of a first time manual run`
+      );
+      return;
+    }
 
     let document: vscode.TextDocument;
 
