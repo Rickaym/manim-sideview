@@ -5,7 +5,7 @@ const enum JobStatus {
   error,
   active,
   running,
-  new
+  new,
 }
 
 type RuntimeOptions = {
@@ -23,7 +23,9 @@ type Job = {
  */
 export class JobStatusManager {
   constructor() {
-    this.jobStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+    this.jobStatusItem = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left
+    );
     this.jobStatusItem.name = "job-indicator";
     this.jobStatusItem.command = "manim-sideview.removeCurrentJob";
     this.jobStatusItem.tooltip = "Mainm Sideview - Press to discard.";
@@ -40,7 +42,7 @@ export class JobStatusManager {
     this.activeJobs[config.srcPath] = {
       config: config,
       runtimeOptions: { outputFileType: fileType },
-      status: JobStatus.new
+      status: JobStatus.new,
     };
     this.setNew();
   }
@@ -78,7 +80,9 @@ export class JobStatusManager {
   }
 
   setNew() {
-    this.jobStatusItem.backgroundColor = new vscode.ThemeColor("button.hoverBackground");
+    this.jobStatusItem.backgroundColor = new vscode.ThemeColor(
+      "button.hoverBackground"
+    );
     this.setIcon("$(vm-active)");
     this.setVisibility(true);
   }

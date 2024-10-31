@@ -7,7 +7,8 @@ import * as yaml from "yaml";
 import axios from "axios";
 import { TemplateEngine } from "./templateEngine";
 
-const GITHUB_ROOT_DIR = "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
+const GITHUB_ROOT_DIR =
+  "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/";
 // gallery synchronization files
 const GITHUB_ENTRY_FILE =
   "https://raw.githubusercontent.com/kolibril13/mobject-gallery/main/html_configuration.yaml";
@@ -21,14 +22,25 @@ interface ImageMap {
 }
 
 export class Gallery {
-  constructor(public readonly extensionUri: vscode.Uri, public readonly disposables: any[]) {
-    
-  this.mobjectsPath = vscode.Uri.joinPath(this.extensionUri, "assets/mobjects");
-  this.loads = getWebviewResource(this.extensionUri, "gallery");
-  this.manimIconsPath = {
-    dark: vscode.Uri.joinPath(this.extensionUri, "assets/images/dark_logo.png"),
-    light: vscode.Uri.joinPath(this.extensionUri, "assets/images/light_logo.png")
-  };
+  constructor(
+    public readonly extensionUri: vscode.Uri,
+    public readonly disposables: any[]
+  ) {
+    this.mobjectsPath = vscode.Uri.joinPath(
+      this.extensionUri,
+      "assets/mobjects"
+    );
+    this.loads = getWebviewResource(this.extensionUri, "gallery");
+    this.manimIconsPath = {
+      dark: vscode.Uri.joinPath(
+        this.extensionUri,
+        "assets/images/dark_logo.png"
+      ),
+      light: vscode.Uri.joinPath(
+        this.extensionUri,
+        "assets/images/light_logo.png"
+      ),
+    };
   }
 
   private panel: vscode.WebviewPanel | undefined;
@@ -49,11 +61,11 @@ export class Gallery {
       "Mobject Gallery",
       {
         viewColumn: vscode.ViewColumn.Beside,
-        preserveFocus: true
+        preserveFocus: true,
       },
       {
         enableScripts: true,
-        enableForms: false
+        enableForms: false,
       }
     );
 
@@ -74,12 +86,19 @@ export class Gallery {
       });
     });
 
-    const engine = new TemplateEngine(this.panel.webview, this.loads, "gallery", this.extensionUri);
+    const engine = new TemplateEngine(
+      this.panel.webview,
+      this.loads,
+      "gallery",
+      this.extensionUri
+    );
 
     this.panel.iconPath = this.manimIconsPath;
     this.panel.webview.html = await engine.render({
       mobjects: images,
-      version: (await vscode.workspace.fs.readFile(PATHS.mobjVersion)).toString()
+      version: (
+        await vscode.workspace.fs.readFile(PATHS.mobjVersion)
+      ).toString(),
     });
 
     this.panel.onDidDispose(
@@ -91,7 +110,10 @@ export class Gallery {
     );
     this.panel.webview.onDidReceiveMessage(
       (message) => {
-        if (message.command === "update" || message.command === "download-again") {
+        if (
+          message.command === "update" ||
+          message.command === "download-again"
+        ) {
           return this.synchronize(message.command === "download-again");
         } else {
           this.insertCode(message.code);
@@ -167,13 +189,20 @@ export class Gallery {
         vscode.commands
           .executeCommand("workbench.action.focusPreviousGroup")
           .then(() =>
-            lastEditor.revealRange(new vscode.Range(lastEditor.selection.active, lastEditor.selection.active))
+            lastEditor.revealRange(
+              new vscode.Range(
+                lastEditor.selection.active,
+                lastEditor.selection.active
+              )
+            )
           );
-    });
+      });
   }
 
   async synchronize(forceDownload: boolean) {
-    const localVersion = (await vscode.workspace.fs.readFile(PATHS.mobjVersion)).toString();
+    const localVersion = (
+      await vscode.workspace.fs.readFile(PATHS.mobjVersion)
+    ).toString();
 
     const root = PATHS.mobjImgs.fsPath;
     var { data } = await axios.get(GITHUB_ENTRY_FILE);
@@ -193,7 +222,9 @@ export class Gallery {
       }
 
       if (newVersion === localVersion) {
-        vscode.window.showInformationMessage("Manim Sideview: You're already up to date!");
+        vscode.window.showInformationMessage(
+          "Manim Sideview: You're already up to date!"
+        );
         return;
       }
     } else if (!newVersion) {
@@ -206,7 +237,10 @@ export class Gallery {
 
     var { data } = await axios.get(GITHUB_ROOT_DIR + galleryParameters);
 
-    await pfs.writeFile(PATHS.mobjGalleryParameters.fsPath, JSON.stringify(data));
+    await pfs.writeFile(
+      PATHS.mobjGalleryParameters.fsPath,
+      JSON.stringify(data)
+    );
 
     const objectLists = Object.values(data);
     for (const [index, entry] of objectLists.entries()) {
@@ -217,7 +251,7 @@ export class Gallery {
         var { data } = await axios({
           method: "get",
           url: GITHUB_ROOT_DIR + imagePath,
-          responseType: "stream"
+          responseType: "stream",
         });
 
         data.pipe(fs.createWriteStream(path.join(root, imagePath)));
