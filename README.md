@@ -123,6 +123,11 @@ Consider supporting this project through starring the repository or buying me a 
 
 ## Changelog
 
+#### 0.2.16
+
+- Fix auto save run; user must manually first run a file to be put into watch for run on save
+- Feat allow the player to go into portrait mode
+
 #### 0.2.15
 
 - Fix proper handling of absolute defaultManimPath
