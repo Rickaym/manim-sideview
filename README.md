@@ -6,7 +6,7 @@
 
 A Visual Studio code extension with rich support for working with the **[manim](https://github.com/ManimCommunity/manim)** framework, providing features such as gallery-based code snippet catalogs and video and image live preview with flexible configurations.
 
-Ensure you have manim installed on your `PATH`. Check out [this guide](https://docs.manim.community/en/stable/installation.html) for installing manim. Follow [this guide](#[how-do-i-change-the-default-manim-executable-path](https://github.com/Rickaym/manim-sideview?tab=readme-ov-file#2-how-do-i-change-the-default-manim-executable-path) to set a custom executable path.
+Ensure you have manim installed on your `PATH`. Check out [this guide](https://docs.manim.community/en/stable/installation.html) for installing manim. Follow [this guide](https://github.com/Rickaym/manim-sideview?tab=readme-ov-file#2-how-do-i-change-the-default-manim-executable-path) to set a custom executable path.
 
 # Table Of Contents
 
@@ -26,9 +26,7 @@ After the extension is installed, open the source file with the scene classes an
 
 _That's it, folks!_
 
-If you have any questions or find any issues, create a GitHub issue [here](https://github.com/Rickaym/manim-sideview/issues/new), seek support through the extension
-[development discord server](https://discord.gg/UmnzdPgn6g/) or you can ping `@Neo#1844` with a question
-on the official manim community discord server.
+If you have any questions or find any issues, create a GitHub issue [here](https://github.com/Rickaym/manim-sideview/issues/new), seek support through the extension [development discord server](https://discord.gg/UmnzdPgn6g) or you can ping `@rick.aym` with a question on the official manim community discord server.
 
 ## Rendering Scenes
 
