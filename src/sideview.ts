@@ -458,11 +458,12 @@ export class ManimSideview {
     Log.info(
       "Attempting to render via the running configuration " +
         JSON.stringify(config, null, 4) +
-        ',\n{\n\t"predictedVideoOutputPath": ' +
-        getVideoOutputPath(config) +
-        ',\n\t"predictedImageOutputPath": ' +
-        getImageOutputPath(config, "{version}") +
-        "\n"
+        ",\n" +
+        JSON.stringify({
+          cliArguments: this.getPreferenceArgs(),
+          predictedVideoOutputPath: getVideoOutputPath(config),
+          predictedImageOutputPath: getImageOutputPath(config, "{version}"),
+        }, null, 4)
     );
 
     const cwd = config.srcRootFolder;
