@@ -330,13 +330,49 @@ export class ManimSideview {
           bin = PYTHON_ENV_SCRIPTS_FOLDER["linux"];
         }
 
-        if (env.folderUri.fsPath.endsWith("/bin/python")) {
-          manimPath = path.join(path.dirname(env.folderUri.fsPath), manimPath);
+        // Check if the environment path is a direct path to the Python executable
+        const pythonExecutablePaths = [
+          "\\bin\\python",
+          "\\Scripts\\python.exe",
+        ];
+        const normalizedPath = path.normalize(env.folderUri.fsPath);
+        if (
+          pythonExecutablePaths.some((execPath) =>
+            normalizedPath.endsWith(execPath)
+          )
+        ) {
+          const pythonDir = path.dirname(env.folderUri.fsPath);
+          manimPath = path.join(pythonDir, manimPath);
+          Log.info(`Using Python executable directory: ${pythonDir}`);
         } else {
           manimPath = path.join(env.folderUri.fsPath, bin, manimPath);
         }
+
+        if (!fs.existsSync(manimPath) && !fs.existsSync(manimPath + ".exe")) {
+          window.showWarningMessage(
+            Log.warn(
+              `Manim Sideview: Executable not found at ${manimPath}, trying to access the executable on PATH...`
+            )
+          );
+          try {
+            // Use 'where' on Windows, 'which' on Unix-like systems
+            const checkCommand =
+              process.platform === "win32" ? "where" : "which";
+            execSync(`${checkCommand} manim`);
+            manimPath = "manim";
+            Log.info(`Manim found in PATH, using direct command: ${manimPath}`);
+          } catch (error) {
+            window.showErrorMessage(
+              Log.error(
+                `Manim Sideview: Manim is not found in PATH or at the specified location. Please ensure manim is installed correctly or specify a valid path in settings.`
+              )
+            );
+            throw error;
+          }
+        }
+
         Log.info(
-          `Resolved manim path inside the venv ${env.folderUri.fsPath} + ${bin} = ${manimPath}`
+          `Resolved manim path: ${manimPath} (from environment: ${env.folderUri.fsPath})`
         );
       }
     }
