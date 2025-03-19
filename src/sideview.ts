@@ -5,7 +5,7 @@ import * as path from "path";
 import * as fs from "fs";
 import ConfigParser from "configparser";
 
-import { ChildProcess, spawn } from "child_process";
+import { ChildProcess, spawn, execSync } from "child_process";
 import {
   RunningConfig,
   getDefaultConfig,
@@ -24,6 +24,7 @@ import { MediaPlayer, PlayableMediaType } from "./player";
 import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 import { PythonExtension } from "@vscode/python-extension";
+import { window } from "vscode";
 
 const CONFIG_SECTION = "CLI";
 const RELEVANT_CONFIG_OPTIONS = [
@@ -499,11 +500,15 @@ export class ManimSideview {
       "Attempting to render via the running configuration " +
         JSON.stringify(config, null, 4) +
         ",\n" +
-        JSON.stringify({
-          cliArguments: this.getPreferenceArgs(),
-          predictedVideoOutputPath: getVideoOutputPath(config),
-          predictedImageOutputPath: getImageOutputPath(config, "{version}"),
-        }, null, 4)
+        JSON.stringify(
+          {
+            cliArguments: this.getPreferenceArgs(),
+            predictedVideoOutputPath: getVideoOutputPath(config),
+            predictedImageOutputPath: getImageOutputPath(config, "{version}"),
+          },
+          null,
+          4
+        )
     );
 
     const cwd = config.srcRootFolder;
@@ -673,7 +678,19 @@ export class ManimSideview {
       if (signal === "SIGTERM") {
         code = 15;
       }
-
+      if (code !== 0) {
+        if (code === -4058) {
+          vscode.window.showErrorMessage(
+            Log.error(
+              `Manim Sideview: Unable to find the source file. Try opening the folder containing this file instead of a single file, or check file permissions.`
+            )
+          );
+        } else {
+          vscode.window.showErrorMessage(
+            Log.error(`Manim Sideview: Error rendering file (exit code ${code}). Check the output for more details.`)
+          );
+        }
+      }
       this.outputChannel!.appendLine(
         Log.info(
           `[${
