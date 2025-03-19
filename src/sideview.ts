@@ -896,7 +896,7 @@ export class ManimSideview {
     Log.info(`Creating a new running configuration for file "${srcPath}"`);
 
     const moduleName = path.basename(srcPath).slice(0, -3);
-    const root = path.join(document.uri.fsPath, "../");
+    const root = path.dirname(document.uri.fsPath);
 
     return {
       srcRootFolder: root,
