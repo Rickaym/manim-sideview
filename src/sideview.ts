@@ -330,9 +330,13 @@ export class ManimSideview {
           bin = PYTHON_ENV_SCRIPTS_FOLDER["linux"];
         }
 
-        manimPath = path.join(env.folderUri.fsPath, bin, manimPath);
+        if (env.folderUri.fsPath.endsWith("/bin/python")) {
+          manimPath = path.join(path.dirname(env.folderUri.fsPath), manimPath);
+        } else {
+          manimPath = path.join(env.folderUri.fsPath, bin, manimPath);
+        }
         Log.info(
-          `Resolved manim path inside the venv ${env.folderUri.fsPath} + ${bin} + ${manimPath}`
+          `Resolved manim path inside the venv ${env.folderUri.fsPath} + ${bin} = ${manimPath}`
         );
       }
     }
