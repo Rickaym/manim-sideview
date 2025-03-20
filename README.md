@@ -4,9 +4,13 @@
 
 [![Extension Homepage](https://img.shields.io/badge/vscode-install%20Here-brightgreen?style=for-the-badge&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview) [![Extension Version](https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview) [![Discord](https://img.shields.io/discord/793047973751554088.svg?label=Join%20Extension%20Support&color=blue&style=for-the-badge&logo=discord)](https://discord.gg/UmnzdPgn6g) [![Extension% Homepage](https://img.shields.io/badge/open%20vsx-extension-782A90?style=for-the-badge&logo=eclipse)](https://open-vsx.org/extension/Rickaym/manim-sideview)
 
-A Visual Studio code extension with rich support for working with the **[manim](https://github.com/ManimCommunity/manim)** framework, providing features such as gallery-based code snippet catalogs and video and image live preview with flexible configurations.
+A Visual Studio Code extension that enhances your experience with **[manim](https://github.com/ManimCommunity/manim)**, providing powerful features including gallery-based code snippet catalogs and live preview of videos and images with flexible configuration options.
 
-Ensure you have manim installed on your `PATH`. Check out [this guide](https://docs.manim.community/en/stable/installation.html) for installing manim. Follow [this guide](https://github.com/Rickaym/manim-sideview?tab=readme-ov-file#2-how-do-i-change-the-default-manim-executable-path) to set a custom executable path.
+## Prerequisites
+
+- **Manim Installation**: Ensure you have manim installed on your `PATH`. Check out the [official installation guide](https://docs.manim.community/en/stable/installation.html).
+- **Python Environment**: The extension works with your active Python environment.
+- **Custom Executable Path**: If manim isn't on your PATH, you can [set a custom executable path](#2-how-do-i-change-the-default-manim-executable-path).
 
 # Table Of Contents
 
@@ -15,6 +19,7 @@ Ensure you have manim installed on your `PATH`. Check out [this guide](https://d
 - [Configuring](#configuring)
 - [Mobject Gallery](#mobject-gallery)
 - [Frequently Asked Questions](#frequently-asked-questions)
+- [Keyboard Shortcuts](#keyboard-shortcuts)
 - [Credits](#credits)
 - [Changelog](#changelog)
 
@@ -30,40 +35,40 @@ If you have any questions or find any issues, create a GitHub issue [here](https
 
 ## Rendering Scenes
 
-<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> **We've looked at how to render a scene in quickstart, now how do work with multiple scenes?**
+<image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image> **Working with multiple scenes**
 
-In any event, the extension creates a job tied to the source file to ensure persistence in scene names, and configurations right after it is rendered for the first time.
+After rendering a scene for the first time, the extension creates a persistent job tied to the source file to maintain your scene names and configurations.
 
-**Changing the scene name!**
+### Changing the Scene Name
 
-Manim Sideview is made to render a single scene at any given moment recurrently. To hop from scene to scene, you'll have to explicitly change the scene name through:
+Manim Sideview renders one scene at a time. To switch between scenes, you can:
 
-1. Using the `Manim: Set A New SceneName` command through the command palette `Shift + Command + P (Mac)` / `Ctrl + Shift + P`.
-2. Using the following default hotkey `Ctrl + '` `c`.
-3. Using the render-change icon from the sideview
+1. Use the `Manim: Set A New SceneName` command through the command palette (`Shift + Command + P` on Mac / `Ctrl + Shift + P` on Windows/Linux)
+2. Use the default hotkey `Ctrl + '` followed by `c`
+3. Click the render-change icon in the sideview:<br>
    <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/images/render-change.png"></image>
+
+### Scene Auto-Detection
+
+When you first render a file, the extension will scan for any class that inherits from a `Scene` class and present them as options for easy selection.
 
 ## Configuring
 
 <image src="https://raw.githubusercontent.com/Rickaym/Manim-Sideview/master/assets/images/dark_logo.png" height="100%" width= "20px"></image>
-There are two main ways to configure your render using
-manim-sideview:
+You can configure your renders in two primary ways:
 
-1. `manim-sideview.commandLineArgs`
+### 1. VS Code Settings
 
-By setting this configuration through `File -> Preferences -> Settings` you can pass CLI arguments to the `manim.exe` call.
+Set `manim-sideview.commandLineArgs` in your VS Code settings (`File -> Preferences -> Settings`) to pass CLI arguments to manim.
 
 > [!WARNING]
->
-> Do not use args that change the path of the output file, i.e., quality args like 'ql'. Use the config file instead.
+> Avoid using quality args like 'ql' that change the output file path. For output path configuration, use the manim.cfg file instead.
 
-2. `manim.cfg` file
+### 2. Configuration File
 
-Use a configuration file for your renders! The extension recognizes the manim configuration under the guideline [manim.cfg](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files) that exists
-in the current working directory.
+Create a `manim.cfg` file in your working directory following the [Manim configuration guidelines](https://docs.manim.community/en/stable/guides/configuration.html#the-config-files).
 
-If a `manim.cfg` file is found, all command line arguments given through
-`manim-sideview.commandLineArgs` is ignored.
+**Note:** When a `manim.cfg` file is detected, all command line arguments from `manim-sideview.commandLineArgs` are ignored.
 
 ## Mobject Gallery
 
@@ -83,6 +88,8 @@ You can place the cursor at the desired location and click the image of the mani
 1. [How do I render on save?](#1-how-do-i-render-on-save)
 2. [How do I change the default manim executable path?](#2-how-do-i-change-the-default-manim-executable-path)
 3. [How do I execute a command after the rendering is finished?](#3-how-do-i-execute-a-command-after-the-rendering-is-finished)
+4. [Why isn't my Python environment being detected?](#4-why-isnt-my-python-environment-being-detected)
+5. [How do I fix rendering errors?](#5-how-do-i-fix-rendering-errors)
 
 ### 1. How do I render on save?
 
@@ -110,16 +117,53 @@ You can use the following variables in your terminal command:
 2. `{sourcePath}` - the path to the source file
 3. `{sceneName}` - the name of the scene rendered
 
+### 4. Why isn't my Python environment being detected?
+
+The extension uses the VS Code Python extension to detect your active Python environment. Make sure:
+
+- You have the [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python) installed
+- You've selected a Python interpreter in VS Code
+- Your environment has manim installed
+
+You can verify your active environment by checking the Python interpreter indicator in the VS Code status bar.
+
+### 5. How do I fix rendering errors?
+
+If you encounter errors during rendering:
+
+1. Check the output terminal for specific error messages
+2. Verify that your scene name exists in the file
+3. Ensure manim is correctly installed in your Python environment
+4. Try running the same command manually in a terminal to see detailed errors
+
+For persistent issues, open the Manim Sideview output channel by running the `Manim: Show Output Channel` command.
+
+## Keyboard Shortcuts
+
+| Action | Windows/Linux | Mac |
+|--------|--------------|-----|
+| Render current scene | `Ctrl+'` `r` | `Ctrl+'` `r` |
+| Change scene name | `Ctrl+'` `c` | `Ctrl+'` `c` |
+| Stop rendering | `Ctrl+'` `s` | `Ctrl+'` `s` |
+| Open mobject gallery | Via command palette | Via command palette |
+
+You can customize these shortcuts in VS Code's keyboard shortcuts editor.
+
 ## Credits
 
 Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> and <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, [mobject gallery](https://github.com/kolibril13/mobject-gallery/) by [kolibril13](https://github.com/kolibril13) and ofcourse the logo by the [manim](https://raw.githubusercontent.com/3b1b/manim)/[community](https://raw.githubusercontent.com/ManimCommunity/manim/) project!
 
 **Made and Maintained with <3 by Ricky**
-Consider supporting this project through starring the repository or buying me a coffee!!
-
-<a href="https://www.buymeacoffee.com/rickaym" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+Consider supporting this project through starring the repository!!
 
 ## Changelog
+
+#### 0.2.17
+
+- Better error messages
+- Fix manim path detection
+- Update discord link
+- More verbose output
 
 #### 0.2.16
 
