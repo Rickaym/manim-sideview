@@ -346,39 +346,38 @@ export class ManimSideview {
         } else {
           pythonDir = path.join(env.folderUri.fsPath, bin);
         }
-        
+
         manimPath = path.join(pythonDir, manimPath);
         Log.info(
           `Resolved manim path: ${manimPath} (from environment: ${env.folderUri.fsPath})`
         );
       }
-
-      // Check if manim path exists
-      if (!(await this.checkManimExists(manimPath))) {
-        if (await this.checkManimExists("manim")) {
-          window.showWarningMessage(
-            Log.warn(
-              `Manim Sideview: Executable not found at ${manimPath}, but found executable on PATH...`
-            )
-          );
-          manimPath = "manim";
-        } else {
-          const msg = Log.error(
-            `Manim Sideview: Manim is not found in PATH or at the specified location "${manimPath}". Please ensure manim is installed correctly or specify a valid path in settings.`
-          );
-          window.showErrorMessage(msg, "Go to Settings").then((selection) => {
-            if (selection === "Go to Settings") {
-              vscode.commands.executeCommand(
-                "workbench.action.openSettings",
-                "manim-sideview.defaultManimPath"
-              );
-            }
-          });
-          throw Error(msg);
-        }
-      }
     }
 
+    // Check if manim path exists
+    if (!(await this.checkManimExists(manimPath))) {
+      if (await this.checkManimExists("manim")) {
+        window.showWarningMessage(
+          Log.warn(
+            `Manim Sideview: Executable not found at ${manimPath}, but found executable on PATH...`
+          )
+        );
+        manimPath = "manim";
+      } else {
+        const msg = Log.error(
+          `Manim Sideview: Manim is not found in PATH or at the specified location "${manimPath}". Please ensure manim is installed correctly or specify a valid path in settings.`
+        );
+        window.showErrorMessage(msg, "Go to Settings").then((selection) => {
+          if (selection === "Go to Settings") {
+            vscode.commands.executeCommand(
+              "workbench.action.openSettings",
+              "manim-sideview.defaultManimPath"
+            );
+          }
+        });
+        throw Error(msg);
+      }
+    }
     return { manim: manimPath, envName };
   }
 
