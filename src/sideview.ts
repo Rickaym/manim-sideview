@@ -312,8 +312,9 @@ export class ManimSideview {
 
   private async getManimPath() {
     let manimPath = path.normalize(getUserConfiguration("defaultManimPath"));
-    let envName = "";
+    let envName = null;
 
+    Log.info(`Default manim path is found as "${manimPath}"`);
     if (!path.isAbsolute(manimPath)) {
       const env = await this.getPythonEnvironment();
       if (env) {
@@ -324,6 +325,7 @@ export class ManimSideview {
           PYTHON_ENV_SCRIPTS_FOLDER[
             process.platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER
           ];
+
         if (!bin) {
           Log.error(
             "Manim Sideview: Unsupported platform for python environment. Assuming linux directory."
@@ -332,49 +334,48 @@ export class ManimSideview {
         }
 
         // Check if the environment path is a direct path to the Python executable
-        const pythonExecutablePaths = [
-          "\\bin\\python",
-          "\\Scripts\\python.exe",
-        ];
         const normalizedPath = path.normalize(env.folderUri.fsPath);
-        if (
-          pythonExecutablePaths.some((execPath) =>
-            normalizedPath.endsWith(execPath)
-          )
-        ) {
-          const pythonDir = path.dirname(env.folderUri.fsPath);
-          manimPath = path.join(pythonDir, manimPath);
+        const isPythonPath = ["\\bin\\python", "\\Scripts\\python.exe"].some(
+          (execPath) => normalizedPath.endsWith(execPath)
+        );
+
+        let pythonDir: string;
+        if (isPythonPath) {
+          pythonDir = path.dirname(env.folderUri.fsPath);
           Log.info(`Using Python executable directory: ${pythonDir}`);
         } else {
-          manimPath = path.join(env.folderUri.fsPath, bin, manimPath);
+          pythonDir = path.join(env.folderUri.fsPath, bin);
         }
-
-        if (!fs.existsSync(manimPath) && !fs.existsSync(manimPath + ".exe")) {
-          window.showWarningMessage(
-            Log.warn(
-              `Manim Sideview: Executable not found at ${manimPath}, trying to access the executable on PATH...`
-            )
-          );
-          try {
-            // Use 'where' on Windows, 'which' on Unix-like systems
-            const checkCommand =
-              process.platform === "win32" ? "where" : "which";
-            execSync(`${checkCommand} manim`);
-            manimPath = "manim";
-            Log.info(`Manim found in PATH, using direct command: ${manimPath}`);
-          } catch (error) {
-            window.showErrorMessage(
-              Log.error(
-                `Manim Sideview: Manim is not found in PATH or at the specified location. Please ensure manim is installed correctly or specify a valid path in settings.`
-              )
-            );
-            throw error;
-          }
-        }
-
+        
+        manimPath = path.join(pythonDir, manimPath);
         Log.info(
           `Resolved manim path: ${manimPath} (from environment: ${env.folderUri.fsPath})`
         );
+      }
+
+      // Check if manim path exists
+      if (!(await this.checkManimExists(manimPath))) {
+        if (await this.checkManimExists("manim")) {
+          window.showWarningMessage(
+            Log.warn(
+              `Manim Sideview: Executable not found at ${manimPath}, but found executable on PATH...`
+            )
+          );
+          manimPath = "manim";
+        } else {
+          const msg = Log.error(
+            `Manim Sideview: Manim is not found in PATH or at the specified location "${manimPath}". Please ensure manim is installed correctly or specify a valid path in settings.`
+          );
+          window.showErrorMessage(msg, "Go to Settings").then((selection) => {
+            if (selection === "Go to Settings") {
+              vscode.commands.executeCommand(
+                "workbench.action.openSettings",
+                "manim-sideview.defaultManimPath"
+              );
+            }
+          });
+          throw Error(msg);
+        }
       }
     }
 
@@ -514,7 +515,7 @@ export class ManimSideview {
     const cwd = config.srcRootFolder;
     const manim = await this.getManimPath();
 
-    this.getOutputChannel(cwd, manim.envName);
+    this.getOutputChannel(cwd, manim.envName || "");
     if (getUserConfiguration("focusOutputOnRun")) {
       this.outputChannel!.show(true);
     }
@@ -678,18 +679,28 @@ export class ManimSideview {
       if (signal === "SIGTERM") {
         code = 15;
       }
-      if (code !== 0) {
-        if (code === -4058) {
-          vscode.window.showErrorMessage(
+
+      if (code === -4058) {
+        vscode.window.showErrorMessage(
+          Log.error(
+            `Manim Sideview: Unable to find the source file. Try opening the folder containing this file instead of a single file, or check file permissions.`
+          )
+        );
+      } else if (code !== 0) {
+        vscode.window
+          .showErrorMessage(
             Log.error(
-              `Manim Sideview: Unable to find the source file. Try opening the folder containing this file instead of a single file, or check file permissions.`
-            )
-          );
-        } else {
-          vscode.window.showErrorMessage(
-            Log.error(`Manim Sideview: Error rendering file (exit code ${code}). Check the output for more details.`)
-          );
-        }
+              `Manim Sideview: Error rendering file (exit code ${code}). Check the output for more details.`
+            ),
+            "Show Logs"
+          )
+          .then((selection) => {
+            if (selection === "Show Logs") {
+              vscode.commands.executeCommand(
+                "manim-sideview.showOutputChannel"
+              );
+            }
+          });
       }
       this.outputChannel!.appendLine(
         Log.info(
@@ -907,5 +918,21 @@ export class ManimSideview {
       document: document,
       sceneName: sceneName,
     };
+  }
+
+  private async checkManimExists(manimPath: string): Promise<boolean> {
+    try {
+      // Check if the provided path exists
+      if (fs.existsSync(manimPath) || fs.existsSync(manimPath + ".exe")) {
+        return true;
+      }
+
+      // Check if manim is on the PATH
+      const checkCommand = process.platform === "win32" ? "where" : "which";
+      execSync(`${checkCommand} ${manimPath}`);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
