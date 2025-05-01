@@ -158,6 +158,22 @@ Consider supporting this project through starring the repository!!
 
 ## Changelog
 
+#### 0.3.0
+
+- Fix infer type as video by default
+
+#### 0.2.19
+
+- Fresh upgrade to the player U.I.
+- Added support for early process killing
+- Fix unending process
+- More eloquent logging
+
+#### 0.2.18
+
+- More eloquent error messages
+- Added double checking & verification for the manim executable path
+
 #### 0.2.17
 
 - Better error messages
