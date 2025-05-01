@@ -113,8 +113,8 @@ export class ManimSideview {
   async cmdRun(srcPath?: vscode.Uri | string, autoRun?: boolean) {
     let activeJob = srcPath
       ? this.jobManager.getActiveJob(
-          typeof srcPath === "string" ? srcPath : srcPath.fsPath
-        )!
+        typeof srcPath === "string" ? srcPath : srcPath.fsPath
+      )!
       : null;
 
     if (autoRun === true && !activeJob) {
@@ -200,19 +200,28 @@ export class ManimSideview {
   async cmdRemoveAllJobs() {
     this.jobManager.removeAllActiveJobs();
     this.manimConfPath = "";
-    this.cmdRefreshJobStatus();
+    this.refreshJobStatus();
   }
 
   async cmdRemoveJob(srcPath?: string | undefined) {
+    Log.info(`Removing job for file ${srcPath}.`);
     const job = this.jobManager.getActiveJob(srcPath);
     if (job) {
+      this.refreshJobStatus();
+      if (this.process) {
+        this.process.kill();
+        this.process = undefined;
+      }
+      this.jobManager.setError(job);
       this.jobManager.removeJob(job.config.srcPath);
-      this.cmdRefreshJobStatus();
+    } else {
+      Log.info(`No job found for file ${srcPath}.`);
     }
   }
 
-  cmdRefreshJobStatus() {
-    const activeJob = this.jobManager.getActiveJob();
+  refreshJobStatus(srcPath?: string | undefined) {
+    Log.info(`Refreshing job status.`);
+    const activeJob = this.jobManager.getActiveJob(srcPath);
     if (activeJob !== null) {
       this.jobManager.restoreStatus(activeJob);
     } else {
@@ -221,6 +230,7 @@ export class ManimSideview {
   }
 
   async cmdRenderNewScene(runningCfgSrcPath?: string) {
+    console.log("cmdRenderNewScene", runningCfgSrcPath);
     const job = this.jobManager.getActiveJob(runningCfgSrcPath);
     if (!job) {
       vscode.window.showErrorMessage(
@@ -245,6 +255,8 @@ export class ManimSideview {
   private async getRenderSceneName(
     srcFileUri: vscode.Uri
   ): Promise<string | undefined> {
+    Log.info(`Fetching the scene name for probably render file ${srcFileUri}.`);
+
     const contents = (await vscode.workspace.fs.readFile(srcFileUri))
       .toString()
       .replace(/\r|\n/g, "");
@@ -323,7 +335,7 @@ export class ManimSideview {
 
         let bin =
           PYTHON_ENV_SCRIPTS_FOLDER[
-            process.platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER
+          process.platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER
           ];
 
         if (!bin) {
@@ -470,6 +482,7 @@ export class ManimSideview {
     } else {
       cli.sendText(`cd "${cwd}"`);
     }
+    Log.info(`Executing post-render command "${commandInput}" in terminal "${cli.name}".`);
     cli.sendText(commandInput);
   }
 
@@ -498,17 +511,17 @@ export class ManimSideview {
   private async render(config: RunningConfig) {
     Log.info(
       "Attempting to render via the running configuration " +
-        JSON.stringify(config, null, 4) +
-        ",\n" +
-        JSON.stringify(
-          {
-            cliArguments: this.getPreferenceArgs(),
-            predictedVideoOutputPath: getVideoOutputPath(config),
-            predictedImageOutputPath: getImageOutputPath(config, "{version}"),
-          },
-          null,
-          4
-        )
+      JSON.stringify(config, null, 4) +
+      ",\n" +
+      JSON.stringify(
+        {
+          cliArguments: this.getPreferenceArgs(),
+          predictedVideoOutputPath: getVideoOutputPath(config),
+          predictedImageOutputPath: getImageOutputPath(config, "{version}"),
+        },
+        null,
+        4
+      )
     );
 
     const cwd = config.srcRootFolder;
@@ -518,6 +531,8 @@ export class ManimSideview {
     if (getUserConfiguration("focusOutputOnRun")) {
       this.outputChannel!.show(true);
     }
+
+    this.jobManager.addJob(config);
 
     const args: string[] = [
       config.srcPath,
@@ -532,6 +547,7 @@ export class ManimSideview {
       config.srcPath,
       config.sceneName,
       (mediaInfo) => {
+        Log.info(`Running process for "${config.sceneName}" has finished.`);
         const mediaPath =
           mediaInfo.fileType === PlayableMediaType.Video
             ? getVideoOutputPath(config)
@@ -540,22 +556,25 @@ export class ManimSideview {
         const filePath = vscode.Uri.file(
           path.join(config.srcRootFolder, mediaPath)
         );
+        Log.info(
+          `Predicted output file path is "${filePath.fsPath}" for "${config.sceneName}".`
+        );
 
         if (!fs.existsSync(filePath.fsPath)) {
           vscode.window
             .showErrorMessage(
               Log.error(
                 `Manim Sideview: Predicted output file does not exist at "${filePath.fsPath}"` +
-                  " Make sure that the designated video directories are reflected" +
-                  " in the extension log."
+                " Make sure that the designated video directories are reflected" +
+                " in the extension log."
               ),
               "Show Log"
             )
             .then((value?: String) =>
               value === "Show Log"
                 ? vscode.commands.executeCommand(
-                    "manim-sideview.showOutputChannel"
-                  )
+                  "manim-sideview.showOutputChannel"
+                )
                 : null
             );
           throw new Error(
@@ -659,14 +678,13 @@ export class ManimSideview {
           );
           this.outputChannel!.append(
             "\r\n" +
-              Log.error(
-                `[${process.pid}] Your selected scene name does not exist in the source file.`
-              ) +
-              "\r\n"
+            Log.error(
+              `[${process.pid}] Your selected scene name does not exist in the source file.`
+            ) +
+            "\r\n"
           );
 
           this.cmdRemoveJob(srcPath);
-          process.kill();
           return;
         }
       }
@@ -679,38 +697,39 @@ export class ManimSideview {
         code = 15;
       }
 
-      if (code === -4058) {
-        vscode.window.showErrorMessage(
-          Log.error(
-            `Manim Sideview: Unable to find the source file. Try opening the folder containing this file instead of a single file, or check file permissions.`
-          )
-        );
-      } else if (code !== 0) {
-        vscode.window
-          .showErrorMessage(
+      if (code !== 0) {
+        if (code === -4058) {
+          vscode.window.showErrorMessage(
             Log.error(
-              `Manim Sideview: Error rendering file (exit code ${code}). Check the output for more details.`
-            ),
-            "Show Logs"
-          )
-          .then((selection) => {
-            if (selection === "Show Logs") {
-              vscode.commands.executeCommand(
-                "manim-sideview.showOutputChannel"
-              );
-            }
-          });
+              `Manim Sideview: Unable to find the source file. Try opening the folder containing this file instead of a single file, or check file permissions.`
+            )
+          );
+        } else if (code != 15) {
+          // only show the error message if the process was not killed by us
+          vscode.window
+            .showErrorMessage(
+              Log.error(
+                `Manim Sideview: Error rendering file (exit code ${code}). Check the output for more details.`
+              ),
+              "Show Logs"
+            )
+            .then((selection) => {
+              if (selection === "Show Logs") {
+                vscode.commands.executeCommand(
+                  "manim-sideview.showOutputChannel"
+                );
+              }
+            });
+        }
       }
+
       this.outputChannel!.appendLine(
         Log.info(
-          `[${
-            process.pid
-          }] Execution returned code=${code} in ${timeElapsed} seconds ${
-            code === 1 ? "returned signal " + signal : ""
-          } ${
-            signal === "SIGTERM"
-              ? "Cause: An old process has been terminated due to a termination signal."
-              : ""
+          `[${process.pid
+          }] Execution returned code=${code} in ${timeElapsed} seconds ${code === 1 ? "returned signal " + signal : ""
+          } ${signal === "SIGTERM"
+            ? "Cause: An old process has been terminated due to a termination signal."
+            : ""
           }`
         ) + "\n"
       );
@@ -736,6 +755,7 @@ export class ManimSideview {
 
       onProcessClose(mediaInfo);
     });
+
     Log.info(
       `[${process.pid}] Spawned a new process for executing "${commandString}".`
     );
@@ -756,6 +776,7 @@ export class ManimSideview {
     let fileType: number | undefined;
     let imageName: string | undefined;
     const job = this.jobManager.getActiveJob(srcPath)!;
+    Log.info(`Attempting to determine the output file type for "${sceneName}".`);
 
     // the file output signifier
     const fileReSignifier = [...stdoutLogbook.matchAll(RE_FILE_READY)];
@@ -773,8 +794,7 @@ export class ManimSideview {
         fileType = PlayableMediaType.Video;
       }
       Log.info(
-        `[${process.pid}] Render output is predicted as "${
-          fileType === PlayableMediaType.Image ? "Image" : "Video"
+        `[${process.pid}] Render output is predicted as "${fileType === PlayableMediaType.Image ? "Image" : "Video"
         }".`
       );
     }
@@ -804,6 +824,7 @@ export class ManimSideview {
       }
     }
 
+    Log.info(`File type is set to "${fileType}".`);
     return { fileType: fileType || PlayableMediaType.Video, imageName };
   }
 
