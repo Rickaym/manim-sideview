@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { RunningConfig } from "./globals";
+import { Log, RunningConfig } from "./globals";
 
 const enum JobStatus {
   error,
@@ -38,7 +38,7 @@ export class JobStatusManager {
     return this.jobStatusItem;
   }
 
-  addJob(config: RunningConfig, fileType: number) {
+  addJob(config: RunningConfig, fileType?: number) {
     this.activeJobs[config.srcPath] = {
       config: config,
       runtimeOptions: { outputFileType: fileType },
@@ -69,8 +69,10 @@ export class JobStatusManager {
     } else {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "python") {
+        Log.info(`No active editor or language is not python.`);
         return null;
       }
+      Log.info(`Getting active job for file ${editor.document.fileName}. Active Jobs: ${Object.keys(this.activeJobs)}`);
       return this.activeJobs[editor.document.fileName];
     }
   }
