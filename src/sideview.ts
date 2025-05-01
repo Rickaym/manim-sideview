@@ -532,7 +532,7 @@ export class ManimSideview {
       this.outputChannel!.show(true);
     }
 
-    this.jobManager.addJob(config);
+    this.jobManager.addJob(config, PlayableMediaType.Video);
 
     const args: string[] = [
       config.srcPath,
