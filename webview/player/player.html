@@ -12,41 +12,267 @@
   </head>
   <body>
     <div class="media-container {{ background }}">
+      <!-- Video Player -->
       <div {{ videoHideState }} id="video-media-player" class="media-player">
-        <video {{ autoplay }} {{ loop }} id="video-preview" src="{{ videoDir }}"></video>
+        <video
+          {{ autoplay }}
+          {{ loop }}
+          id="video-preview"
+          src="{{ videoDir }}"
+          tabindex="0"
+        ></video>
       </div>
-      <div class="progress-bar {{ previewShowProgressOnIdle }}">
-        <div class="color-fill" {{ previewProgressStyle }}></div>
-        <div class="demo-fill"></div>
-      </div>
+      <!-- Image Player -->
       <div {{ imageHideState }} id="image-media-player" class="media-player">
         <img src="{{ imageDir }}" id="image-preview" />
       </div>
-    </div>
-    <section>
-      <div class="space-between-flex-box">
-        <div id="module-name" class="module-name">{{ moduleName }}</div>
-        <div class="space-between-flex-box">
-          <div class="control-button" title="Render a New Scene">
-            <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 32 32"><path stroke="currentColor" fill="currentColor" d="M8.707 3.293a1 1 0 0 1 0 1.414L5.414 8H17.5C23.299 8 28 12.701 28 18.5S23.299 29 17.5 29S7 24.299 7 18.5a1 1 0 1 1 2 0a8.5 8.5 0 1 0 8.5-8.5H5.414l3.293 3.293a1 1 0 1 1-1.414 1.414l-5-5a1 1 0 0 1 0-1.414l5-5a1 1 0 0 1 1.414 0"/></svg>
+
+      <!-- ==== NEW CONTROL BAR ==== -->
+      <div class="controls-container">
+        <!-- Progress Bar -->
+        <div class="progress-bar {{ previewShowProgressOnIdle }}">
+          <div class="progress-bar-background"></div>
+          <div class="demo-fill"></div>
+          <div class="color-fill" {{ previewProgressStyle }}></div>
+        </div>
+
+        <!-- Bottom Controls Row -->
+        <div class="controls">
+          <div class="controls-left">
+            <button
+              class="control-button"
+              id="play-pause-button"
+              title="Play/Pause (Space)"
+            >
+              <svg
+                id="play-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.2em"
+                height="1.2em"
+                viewBox="0 0 32 32"
+              >
+                <path
+                  fill="currentColor"
+                  d="M7 28a1 1 0 0 1-1-1V5a1 1 0 0 1 1.482-.876l20 11a1 1 0 0 1 0 1.752l-20 11A1 1 0 0 1 7 28"
+                />
+              </svg>
+              <svg
+                id="pause-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.2em"
+                height="1.2em"
+                viewBox="0 0 32 32"
+                style="display: none"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 28a1 1 0 0 1-1-1V5a1 1 0 0 1 2 0v22a1 1 0 0 1-1 1m8 0a1 1 0 0 1-1-1V5a1 1 0 0 1 2 0v22a1 1 0 0 1-1 1"
+                />
+              </svg>
+            </button>
+            <div class="volume-container" style="display: none">
+              <button
+                class="control-button"
+                id="volume-button"
+                title="Mute (M)"
+              >
+                <svg
+                  id="volume-high-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="1.2em"
+                  height="1.2em"
+                  viewBox="0 0 32 32"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M19.733 4.067a1.44 1.44 0 0 0-2.033.016L10.3 11.44H4.8a1.44 1.44 0 0 0-1.44 1.44v6.24a1.44 1.44 0 0 0 1.44 1.44H10.3l7.4 7.357a1.44 1.44 0 0 0 2.033.017a1.42 1.42 0 0 0 .575-1.2V5.267a1.42 1.42 0 0 0-.575-1.2m7.01 6.716a1.44 1.44 0 0 1 2.038 2.036c-1.08 1.082-1.62 2.378-1.62 3.881s.54 2.8 1.62 3.88a1.44 1.44 0 1 1-2.037 2.037c-1.667-1.667-2.5-3.914-2.5-6.317s.833-4.65 2.5-6.317m3.537-3.536a1.44 1.44 0 0 1 2.036 2.036C31.3 10.3 32 13.022 32 16s-.7 5.7-2.683 7.717a1.44 1.44 0 0 1-2.036-2.036C28.6 20.315 29.12 18.25 29.12 16s-.52-4.315-1.833-5.684"
+                  />
+                </svg>
+                <svg
+                  id="volume-muted-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="1.2em"
+                  height="1.2em"
+                  viewBox="0 0 32 32"
+                  style="display: none"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M19.733 4.067a1.44 1.44 0 0 0-2.033.016L10.3 11.44H4.8a1.44 1.44 0 0 0-1.44 1.44v6.24a1.44 1.44 0 0 0 1.44 1.44H10.3l7.4 7.357a1.44 1.44 0 0 0 2.033.017a1.42 1.42 0 0 0 .575-1.2V5.267a1.42 1.42 0 0 0-.575-1.2m8.823 6.11l-2.036 2.037l2.037 2.036a1.44 1.44 0 1 1-2.037 2.037l-2.036-2.037l-2.037 2.037a1.44 1.44 0 0 1-2.037-2.037l2.037-2.036l-2.037-2.036a1.44 1.44 0 0 1 2.037-2.037l2.037 2.037l2.036-2.037a1.44 1.44 0 1 1 2.037 2.037"
+                  />
+                </svg>
+              </button>
+              <input
+                type="range"
+                id="volume-slider"
+                min="0"
+                max="1"
+                step="0.01"
+                value="1"
+                title="Volume"
+              />
+            </div>
+            <span id="time-display">0:00 / 0:00</span>
           </div>
-          <div class="control-button" title="Picture In Picture">
-            <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 16 16"><path stroke="currentColor" fill="currentColor" d="M1 4.5A2.5 2.5 0 0 1 3.5 2h8A2.5 2.5 0 0 1 14 4.5V8h-1V4.5A1.5 1.5 0 0 0 11.5 3h-8A1.5 1.5 0 0 0 2 4.5v5A1.5 1.5 0 0 0 3.5 11H7v1H3.5A2.5 2.5 0 0 1 1 9.5zM9 9a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z"/></svg>
+          <div class="controls-right">
+            <button
+              class="control-button"
+              id="render-button"
+              title="Render a New Scene"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.2em"
+                height="1.2em"
+                viewBox="0 0 32 32"
+              >
+                <path
+                  stroke="currentColor"
+                  fill="currentColor"
+                  d="M8.707 3.293a1 1 0 0 1 0 1.414L5.414 8H17.5C23.299 8 28 12.701 28 18.5S23.299 29 17.5 29S7 24.299 7 18.5a1 1 0 1 1 2 0a8.5 8.5 0 1 0 8.5-8.5H5.414l3.293 3.293a1 1 0 1 1-1.414 1.414l-5-5a1 1 0 0 1 0-1.414l5-5a1 1 0 0 1 1.414 0"
+                />
+              </svg>
+            </button>
+            <button
+              class="control-button"
+              id="pip-button"
+              title="Picture In Picture"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.2em"
+                height="1.2em"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  stroke="currentColor"
+                  fill="currentColor"
+                  d="M1 4.5A2.5 2.5 0 0 1 3.5 2h8A2.5 2.5 0 0 1 14 4.5V8h-1V4.5A1.5 1.5 0 0 0 11.5 3h-8A1.5 1.5 0 0 0 2 4.5v5A1.5 1.5 0 0 0 3.5 11H7v1H3.5A2.5 2.5 0 0 1 1 9.5zM9 9a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z"
+                />
+              </svg>
+            </button>
+            <button class="control-button" id="loop-button" title="Loop (L)">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.2em"
+                height="1.2em"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 5V1L7 6l5 5V7c3.3 0 6 2.7 6 6s-2.7 6-6 6s-6-2.7-6-6H4c0 4.4 3.6 8 8 8s8-3.6 8-8s-3.6-8-8-8"
+                />
+              </svg>
+            </button>
+            <div class="playback-speed-container" style="display: none">
+              <button
+                class="control-button"
+                id="speed-button"
+                title="Playback Speed"
+              >
+                1x
+              </button>
+              <ul class="speed-options" id="speed-options-list">
+                <li data-value="0.5">0.5x</li>
+                <li data-value="0.75">0.75x</li>
+                <li data-value="1" class="active">1x</li>
+                <li data-value="1.5">1.5x</li>
+                <li data-value="2">2x</li>
+              </ul>
+            </div>
+            <button
+              class="control-button"
+              style="display: none"
+              id="fullscreen-button"
+              title="Fullscreen (F)"
+            >
+              <svg
+                id="fullscreen-enter-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.2em"
+                height="1.2em"
+                viewBox="0 0 32 32"
+              >
+                <path
+                  fill="currentColor"
+                  d="M4 7a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H6v5a1 1 0 1 1-2 0zm1-1h5a1 1 0 1 1 0 2H6v5a1 1 0 1 1-2 0zm1 1V5a1 1 0 1 1 2 0v1zM27 6h-6a1 1 0 1 1 0-2h6a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0zm1-1a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0V6h-5a1 1 0 1 1 0-2zm-1 1h-5a1 1 0 1 1 0-2h5zm1 20v-6a1 1 0 1 1 2 0v6a1 1 0 0 1-1 1h-6a1 1 0 1 1 0-2zm-1 1v-5a1 1 0 1 1 2 0v5h-1zm-1-1h6a1 1 0 1 1 0 2h-6a1 1 0 0 1-1-1v-6a1 1 0 1 1 2 0zM5 28a1 1 0 0 1-1-1v-6a1 1 0 1 1 2 0v5h5a1 1 0 1 1 0 2zm-1-1a1 1 0 0 1-1-1v-5a1 1 0 1 1 2 0v5zM6 26v-5a1 1 0 1 1 2 0v5z"
+                />
+              </svg>
+              <svg
+                id="fullscreen-exit-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.2em"
+                height="1.2em"
+                viewBox="0 0 32 32"
+                style="display: none"
+              >
+                <path
+                  fill="currentColor"
+                  d="M10 7a1 1 0 0 0-1 1v5a1 1 0 1 0 2 0V8h5a1 1 0 1 0 0-2zm1-1h5a1 1 0 1 0 0-2H9a1 1 0 0 0-1 1v6a1 1 0 1 0 2 0zm10 1h-5a1 1 0 1 0 0 2h5v5a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1zm1-1v6a1 1 0 1 0 2 0V7a1 1 0 0 0-1-1h-6a1 1 0 1 0 0 2zm-1 1V8a1 1 0 1 0-2 0v1zM11 21H6v-5a1 1 0 1 0-2 0v6a1 1 0 0 0 1 1h6a1 1 0 1 0 0-2zm-1-1H6v-5a1 1 0 1 0-2 0v6a1 1 0 0 0 1 1h5zm11 1h-6a1 1 0 1 0 0 2h6a1 1 0 0 0 1-1v-6a1 1 0 1 0-2 0zm1-1a1 1 0 0 0 1-1v-5a1 1 0 1 0-2 0v5h-5a1 1 0 1 0 0 2zm-1 1h-5a1 1 0 1 0 0 2h5v-1z"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
-      <details>
-        <summary>Details</summary>
-        <div class="description-container">
-          <span class="description-header">Output File: </span>
-          <span id="output-file" class="description-value">{{ outputFile }}</span><br />
-        </div>
-        <div class="description-container">
-          <span class="description-header">Source File: </span>
-          <span id="source-file" class="description-value">{{ sourceFile }}</span><br />
+      <!-- ==== END CONTROL BAR ==== -->
+    </div>
+
+    <section class="info-section" style="margin-bottom: 20px">
+      <div class="module-header">
+        <span id="module-name" class="module-name">{{ moduleName }}</span>
+      </div>
+      <details class="file-details">
+        <summary class="details-summary">File Information</summary>
+        <div class="details-content">
+          <div class="info-line">
+            <span class="info-icon">📄</span>
+            <!-- Example icon -->
+            <span class="info-label">Output:</span>
+            <span
+              id="output-file"
+              class="info-value file-path"
+              title="Click to reveal in Explorer"
+              >{{ outputFile }}</span
+            >
+          </div>
+          <div class="info-line">
+            <span class="info-icon">💻</span>
+            <!-- Example icon -->
+            <span class="info-label">Source:</span>
+            <span
+              id="source-file"
+              class="info-value file-path"
+              title="Click to open file"
+              >{{ sourceFile }}</span
+            >
+          </div>
         </div>
       </details>
     </section>
+
+    <!-- ==== NEW SUPPORT LINKS ==== -->
+    <div class="support-links-container" style="margin-top: 20px">
+      <a class="support-link-button" href="https://docs.manim.community/"
+        >Docs
+      </a>
+      ·
+      <a
+        class="support-link-button"
+        href="https://github.com/Rickaym/manim-sideview"
+      >
+        Support
+      </a>
+      ·
+      <a
+        class="support-link-button"
+        href="https://github.com/Rickaym/manim-sideview/issues/new/choose"
+      >
+        Issue
+      </a>
+    </div>
+    <!-- ==== END SUPPORT LINKS ==== -->
+
     <script nonce="{{ nonce }}" src="player.js"></script>
   </body>
 </html>
