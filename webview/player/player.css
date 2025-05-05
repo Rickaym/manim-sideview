@@ -24,8 +24,8 @@ body:fullscreen .media-container {
 
 body:-webkit-full-screen video,
 body:-webkit-full-screen .media-container {
-    width: 100vw;
-    height: 100vh;
+  width: 100vw;
+  height: 100vh;
 }
 
 .checkered-bg {
@@ -110,7 +110,10 @@ body:-webkit-full-screen .media-container {
 }
 
 .color-fill {
-  background-color: var(--vscode-progressBar-background, var(--vscode-accent-foreground, dodgerblue));
+  background-color: var(
+    --vscode-progressBar-background,
+    var(--vscode-accent-foreground, dodgerblue)
+  );
   width: 0;
 }
 
@@ -126,7 +129,7 @@ body:-webkit-full-screen .media-container {
   opacity: 1;
 }
 
-input[type=range] {
+input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 70px;
@@ -140,23 +143,23 @@ input[type=range] {
   visibility: hidden;
 }
 
-.volume-container:hover input[type=range] {
+.volume-container:hover input[type="range"] {
   opacity: 1;
   visibility: visible;
 }
 
-input[type=range]::-webkit-slider-runnable-track {
+input[type="range"]::-webkit-slider-runnable-track {
   height: 100%;
   background: rgba(128, 128, 128, 0.5);
   border-radius: calc(var(--progress-bar-height) / 2);
 }
-input[type=range]::-moz-range-track {
+input[type="range"]::-moz-range-track {
   height: 100%;
   background: rgba(128, 128, 128, 0.5);
   border-radius: calc(var(--progress-bar-height) / 2);
 }
 
-input[type=range]::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   margin-top: -2px;
@@ -165,7 +168,7 @@ input[type=range]::-webkit-slider-thumb {
   height: calc(var(--progress-bar-height) + 4px);
   width: calc(var(--progress-bar-height) + 4px);
 }
-input[type=range]::-moz-range-thumb {
+input[type="range"]::-moz-range-thumb {
   background-color: #fff;
   border: none;
   border-radius: 50%;
@@ -202,7 +205,7 @@ input[type=range]::-moz-range-thumb {
 }
 
 .control-button svg {
-    display: block;
+  display: block;
 }
 
 .control-button:hover {
@@ -242,7 +245,7 @@ input[type=range]::-moz-range-thumb {
 }
 
 .playback-speed-container:hover .speed-options {
-   display: block;
+  display: block;
 }
 
 .speed-options li {
@@ -304,16 +307,16 @@ section {
 }
 
 summary {
-    cursor: pointer;
-    font-weight: bold;
-    margin-bottom: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 summary:hover {
-    color: var(--vscode-textLink-foreground);
+  color: var(--vscode-textLink-foreground);
 }
 
 details[open] > summary {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .info-section {
@@ -321,7 +324,11 @@ details[open] > summary {
   padding: 12px 20px;
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--vscode-sideBar-border, var(--vscode-editorGroupHeader-tabsBorder, transparent));
+  border-top: 1px solid
+    var(
+      --vscode-sideBar-border,
+      var(--vscode-editorGroupHeader-tabsBorder, transparent)
+    );
   margin-top: 0;
 }
 
@@ -359,11 +366,11 @@ details[open] > summary {
 }
 
 .details-summary:hover {
-    color: var(--vscode-textLink-activeForeground);
+  color: var(--vscode-textLink-activeForeground);
 }
 
 .details-summary::before {
-  content: '▶';
+  content: "▶";
   position: absolute;
   left: 0;
   top: 1px;
@@ -382,7 +389,8 @@ details[open] > summary {
 
 .details-content {
   padding-left: 18px;
-  border-left: 1px solid var(--vscode-tree-indentGuidesStroke, rgba(128,128,128,0.3));
+  border-left: 1px solid
+    var(--vscode-tree-indentGuidesStroke, rgba(128, 128, 128, 0.3));
 }
 
 .info-line {
@@ -433,7 +441,8 @@ details[open] > summary {
   align-items: center;
   flex-wrap: wrap;
   padding: 10px 20px;
-  border-top: 1px solid var(--vscode-divider-background, rgba(128,128,128,0.15));
+  border-top: 1px solid
+    var(--vscode-divider-background, rgba(128, 128, 128, 0.15));
   gap: 8px;
   background-color: var(--vscode-editor-background);
 }
