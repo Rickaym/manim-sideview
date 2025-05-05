@@ -158,6 +158,10 @@ Consider supporting this project through starring the repository!!
 
 ## Changelog
 
+#### 0.3.1
+
+- Fix video player in portrait mode
+
 #### 0.3.0
 
 - Fix infer type as video by default
