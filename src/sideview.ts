@@ -347,7 +347,7 @@ export class ManimSideview {
 
         // Check if the environment path is a direct path to the Python executable
         const normalizedPath = path.normalize(env.folderUri.fsPath);
-        const isPythonPath = ["\\bin\\python", "\\Scripts\\python.exe"].some(
+        const isPythonPath = ["/bin/python", "\\bin\\python", "\\Scripts\\python.exe"].some(
           (execPath) => normalizedPath.endsWith(execPath)
         );
 
