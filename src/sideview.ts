@@ -257,6 +257,13 @@ export class ManimSideview {
   ): Promise<string | undefined> {
     Log.info(`Fetching the scene name for probably render file ${srcFileUri}.`);
 
+    if (!fs.existsSync(srcFileUri.fsPath)) {
+      vscode.window.showWarningMessage(
+        Log.warn(`Manim Sideview: Source file "${srcFileUri.fsPath}" does not exist.`)
+      );
+      return;
+    }
+
     const contents = (await vscode.workspace.fs.readFile(srcFileUri))
       .toString()
       .replace(/\r|\n/g, "");
