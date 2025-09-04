@@ -374,8 +374,8 @@ export class ManimSideview {
     }
 
     // Check if manim path exists
-    if (!(await this.checkManimExists(manimPath))) {
-      if (await this.checkManimExists("manim")) {
+    if (!(await this.checkExecutableExists(manimPath))) {
+      if (await this.checkExecutableExists("manim")) {
         window.showWarningMessage(
           Log.warn(
             `Manim Sideview: Executable not found at ${manimPath}, but found executable on PATH...`
@@ -947,16 +947,16 @@ export class ManimSideview {
     };
   }
 
-  private async checkManimExists(manimPath: string): Promise<boolean> {
+  private async checkExecutableExists(path: string): Promise<boolean> {
     try {
       // Check if the provided path exists
-      if (fs.existsSync(manimPath) || fs.existsSync(manimPath + ".exe")) {
+      if (fs.existsSync(path) || fs.existsSync(path + ".exe")) {
         return true;
       }
 
       // Check if manim is on the PATH
       const checkCommand = process.platform === "win32" ? "where" : "which";
-      execSync(`${checkCommand} ${manimPath}`);
+      execSync(`${checkCommand} ${path}`);
       return true;
     } catch (error) {
       return false;
