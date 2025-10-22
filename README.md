@@ -3,6 +3,8 @@
 <img src="https://repository-images.githubusercontent.com/429329947/d3f3cf71-a491-47e0-a629-34e0a4b9051f" height="100%" width="300px">
 
 [![Extension Homepage](https://img.shields.io/badge/vscode-install%20Here-brightgreen?style=for-the-badge&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview) [![Extension Version](https://img.shields.io/visual-studio-marketplace/v/Rickaym.manim-sideview?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=Rickaym.manim-sideview) [![Discord](https://img.shields.io/discord/793047973751554088.svg?label=Join%20Extension%20Support&color=blue&style=for-the-badge&logo=discord)](https://discord.gg/UmnzdPgn6g) [![Extension% Homepage](https://img.shields.io/badge/open%20vsx-extension-782A90?style=for-the-badge&logo=eclipse)](https://open-vsx.org/extension/Rickaym/manim-sideview)
+[![Downloads](https://vsmarketplacebadges.dev/downloads/Rickaym.manim-sideview.svg?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=yusufdanis.hidden-character-detector) [![Rating](https://vsmarketplacebadges.dev/rating-short/Rickaym.manim-sideview.svg?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=yusufdanis.hidden-character-detector)
+
 
 A Visual Studio Code extension that enhances your experience with **[manim](https://github.com/ManimCommunity/manim)**, providing powerful features including gallery-based code snippet catalogs and live preview of videos and images with flexible configuration options.
 
