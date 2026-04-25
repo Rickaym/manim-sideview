@@ -331,6 +331,9 @@ export class ManimSideview {
 
   private async getManimPath() {
     let manimPath = path.normalize(getUserConfiguration("defaultManimPath"));
+    if (manimPath === ".") {
+      manimPath = "manim";
+    }
     let envName = null;
 
     Log.info(`Default manim path is found as "${manimPath}"`);
@@ -353,22 +356,20 @@ export class ManimSideview {
         }
 
         // Check if the environment path is a direct path to the Python executable
-        const normalizedPath = path.win32.normalize(env.folderUri.fsPath);
-        const isPythonPath = ["\\bin\\python", "\\Scripts\\python.exe"].some(
-          (execPath) => normalizedPath.endsWith(execPath)
-        );
+        const envPath = env.folderUri.fsPath;
+        const stats = fs.existsSync(envPath) ? fs.lstatSync(envPath) : undefined;
 
-        let pythonDir: string;
-        if (isPythonPath) {
-          pythonDir = path.dirname(env.folderUri.fsPath);
-          Log.info(`Using Python executable directory: ${pythonDir}`);
+        let pythonBinDir: string;
+        if (stats && !stats.isDirectory()) {
+          pythonBinDir = path.dirname(envPath);
+          Log.info(`Using Python executable's directory: ${pythonBinDir}`);
         } else {
-          pythonDir = path.join(env.folderUri.fsPath, bin);
+          pythonBinDir = path.join(envPath, bin);
         }
 
-        manimPath = path.join(pythonDir, manimPath);
+        manimPath = path.join(pythonBinDir, manimPath);
         Log.info(
-          `Resolved manim path: ${manimPath} (from environment: ${env.folderUri.fsPath})`
+          `Resolved manim path: ${manimPath} (from environment: ${envPath})`
         );
       }
     }
