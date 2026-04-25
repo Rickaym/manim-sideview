@@ -337,40 +337,51 @@ export class ManimSideview {
     let envName = null;
 
     Log.info(`Default manim path is found as "${manimPath}"`);
+
+    // The user pointed defaultManimPath at a directory (e.g. pasted a Scripts
+    // folder), append the executable name so we don't spawn the directory itself.
+    if (
+      path.isAbsolute(manimPath) &&
+      fs.existsSync(manimPath) &&
+      fs.statSync(manimPath).isDirectory()
+    ) {
+      manimPath = path.join(manimPath, "manim");
+      Log.info(`Configured manim path was a directory; resolved to "${manimPath}".`);
+    }
+
     if (!path.isAbsolute(manimPath)) {
       const env = await this.getPythonEnvironment();
       if (env) {
-        envName = env.name || "base";
+        envName = env.environment?.name || "base";
         Log.info(`Using python environment "${envName}" for manim.`);
 
-        let bin =
-          PYTHON_ENV_SCRIPTS_FOLDER[
-          process.platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER
-          ];
-
-        if (!bin) {
-          Log.error(
-            "Manim Sideview: Unsupported platform for python environment. Assuming linux directory."
-          );
-          bin = PYTHON_ENV_SCRIPTS_FOLDER["linux"];
+        // Prefer the canonical interpreter path from the Python extension API.
+        // Fall back to the env folder + platform bin dir only if the API doesn't
+        // expose an executable (rare: envs created without a python interpreter).
+        let pythonBinDir: string | undefined;
+        const executableUri = env.executable?.uri;
+        if (executableUri) {
+          pythonBinDir = path.dirname(executableUri.fsPath);
+          Log.info(`Using interpreter directory: ${pythonBinDir}`);
+        } else if (env.environment) {
+          let bin =
+            PYTHON_ENV_SCRIPTS_FOLDER[
+            process.platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER
+            ];
+          if (!bin) {
+            Log.error(
+              "Manim Sideview: Unsupported platform for python environment. Assuming linux directory."
+            );
+            bin = PYTHON_ENV_SCRIPTS_FOLDER["linux"];
+          }
+          pythonBinDir = path.join(env.environment.folderUri.fsPath, bin);
+          Log.info(`No interpreter URI; falling back to env folder: ${pythonBinDir}`);
         }
 
-        // Check if the environment path is a direct path to the Python executable
-        const envPath = env.folderUri.fsPath;
-        const stats = fs.existsSync(envPath) ? fs.lstatSync(envPath) : undefined;
-
-        let pythonBinDir: string;
-        if (stats && !stats.isDirectory()) {
-          pythonBinDir = path.dirname(envPath);
-          Log.info(`Using Python executable's directory: ${pythonBinDir}`);
-        } else {
-          pythonBinDir = path.join(envPath, bin);
+        if (pythonBinDir) {
+          manimPath = path.join(pythonBinDir, manimPath);
+          Log.info(`Resolved manim path: ${manimPath}`);
         }
-
-        manimPath = path.join(pythonBinDir, manimPath);
-        Log.info(
-          `Resolved manim path: ${manimPath} (from environment: ${envPath})`
-        );
       }
     }
 
@@ -445,12 +456,7 @@ export class ManimSideview {
     }
     const environmentPath =
       this.pythonApi.environments.getActiveEnvironmentPath();
-    const environment = await this.pythonApi.environments.resolveEnvironment(
-      environmentPath
-    );
-    if (environment) {
-      return environment.environment;
-    }
+    return this.pythonApi.environments.resolveEnvironment(environmentPath);
   }
 
   /**
@@ -978,9 +984,11 @@ export class ManimSideview {
 
   private async checkExecutableExists(path: string): Promise<boolean> {
     try {
-      // Check if the provided path exists
-      if (fs.existsSync(path) || fs.existsSync(path + ".exe")) {
-        return true;
+      // Check if the provided path exists and is a file (not a directory).
+      for (const candidate of [path, path + ".exe"]) {
+        if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+          return true;
+        }
       }
 
       // Check if manim is on the PATH
