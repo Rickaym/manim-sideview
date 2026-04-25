@@ -805,6 +805,34 @@ export class ManimSideview {
         `[${process.pid}] Render output is predicted as "${fileType === PlayableMediaType.Image ? "Image" : "Video"
         }".`
       );
+    } else {
+      // Probe both predicted paths on disk and pick whichever exists.
+      const predictedVideo = path.join(
+        job.config.srcRootFolder,
+        getVideoOutputPath(job.config)
+      );
+      const predictedImage = path.join(
+        job.config.srcRootFolder,
+        getImageOutputPath(job.config)
+      );
+      const videoMtime = fs.existsSync(predictedVideo)
+        ? fs.statSync(predictedVideo).mtimeMs
+        : undefined;
+      const imageMtime = fs.existsSync(predictedImage)
+        ? fs.statSync(predictedImage).mtimeMs
+        : undefined;
+      if (imageMtime !== undefined && (videoMtime === undefined || imageMtime >= videoMtime)) {
+        fileType = PlayableMediaType.Image;
+        imageName = path.basename(predictedImage);
+      } else if (videoMtime !== undefined) {
+        fileType = PlayableMediaType.Video;
+      }
+      if (fileType !== undefined) {
+        Log.info(
+          `[${process.pid}] Render output inferred from filesystem as "${fileType === PlayableMediaType.Image ? "Image" : "Video"
+          }".`
+        );
+      }
     }
 
     if (fileType === undefined) {
