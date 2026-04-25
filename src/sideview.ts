@@ -49,6 +49,11 @@ const PYTHON_ENV_SCRIPTS_FOLDER = {
 type MediaInfo = {
   fileType: number;
   imageName: string | undefined;
+  // Absolute path to the rendered file, when known either from manim's
+  // "File ready at ..." log line or from a filesystem probe. Preferred over
+  // recomputing the path from the static config, which ignores CLI overrides
+  // like -ql / -qm / -qh that change the output directory.
+  mediaPath?: string;
 };
 
 // a process will be killed if this message is seen
@@ -562,13 +567,19 @@ export class ManimSideview {
       config.sceneName,
       (mediaInfo) => {
         Log.info(`Running process for "${config.sceneName}" has finished.`);
-        const mediaPath =
-          mediaInfo.fileType === PlayableMediaType.Video
+        // Trust manim's actual output path (from its log or a filesystem probe)
+        // over the static recompute, which doesn't account for CLI flags like
+        // -ql / -qm that change the quality directory.
+        const resolvedPath =
+          mediaInfo.mediaPath ??
+          (mediaInfo.fileType === PlayableMediaType.Video
             ? getVideoOutputPath(config)
-            : getImageOutputPath(config, mediaInfo.imageName);
+            : getImageOutputPath(config, mediaInfo.imageName));
 
         const filePath = vscode.Uri.file(
-          path.join(config.srcRootFolder, mediaPath)
+          path.isAbsolute(resolvedPath)
+            ? resolvedPath
+            : path.join(config.srcRootFolder, resolvedPath)
         );
         Log.info(
           `Predicted output file path is "${filePath.fsPath}" for "${config.sceneName}".`
@@ -789,27 +800,33 @@ export class ManimSideview {
   ) {
     let fileType: number | undefined;
     let imageName: string | undefined;
+    let mediaPath: string | undefined;
     const job = this.jobManager.getActiveJob(srcPath)!;
     Log.info(`Attempting to determine the output file type for "${sceneName}".`);
 
     // the file output signifier
     const fileReSignifier = [...stdoutLogbook.matchAll(RE_FILE_READY)];
     if (fileReSignifier.length > 0) {
-      const fileIdentifier = fileReSignifier.find((m) =>
-        m.groups?.path.replace(/ |\r|\n/g, "").endsWith(".png")
+      // Prefer the last "File ready at" entry — for videos manim emits one per
+      // partial movie file plus a final entry for the merged output.
+      const cleanPath = (p: string) => p.replace(/ |\r|\n/g, "");
+      const imageEntry = fileReSignifier.find((m) =>
+        cleanPath(m.groups?.path ?? "").endsWith(".png")
       );
-      if (fileIdentifier) {
+      const fileIdentifier = imageEntry ?? fileReSignifier[fileReSignifier.length - 1];
+      const fullPath = cleanPath(fileIdentifier.groups?.path ?? "");
+      if (imageEntry) {
         fileType = PlayableMediaType.Image;
-        imageName = fileIdentifier.groups?.path
-          .replace(/ |\r|\n/g, "")
-          .split(/\\|\//g)
-          .pop();
+        imageName = fullPath.split(/\\|\//g).pop();
       } else {
         fileType = PlayableMediaType.Video;
       }
+      if (fullPath) {
+        mediaPath = fullPath;
+      }
       Log.info(
         `[${process.pid}] Render output is predicted as "${fileType === PlayableMediaType.Image ? "Image" : "Video"
-        }".`
+        }" at "${fullPath}".`
       );
     } else {
       // Probe both predicted paths on disk and pick whichever exists.
@@ -830,8 +847,10 @@ export class ManimSideview {
       if (imageMtime !== undefined && (videoMtime === undefined || imageMtime >= videoMtime)) {
         fileType = PlayableMediaType.Image;
         imageName = path.basename(predictedImage);
+        mediaPath = predictedImage;
       } else if (videoMtime !== undefined) {
         fileType = PlayableMediaType.Video;
+        mediaPath = predictedVideo;
       }
       if (fileType !== undefined) {
         Log.info(
@@ -867,7 +886,7 @@ export class ManimSideview {
     }
 
     Log.info(`File type is set to "${fileType}".`);
-    return { fileType: fileType || PlayableMediaType.Video, imageName };
+    return { fileType: fileType || PlayableMediaType.Video, imageName, mediaPath };
   }
 
   /**
