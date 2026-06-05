@@ -15,7 +15,7 @@
   "version": "0.3.1",
   "publisher": "Rickaym",
   "engines": {
-    "vscode": "^1.68.0"
+    "vscode": "^1.93.0"
   },
   "categories": [
     "Visualization",
@@ -36,8 +36,7 @@
     "onCommand:manim-sideview.syncMobjectGallery",
     "onCommand:manim-sideview.updateDefaultManimConfig",
     "onCommand:manim-sideview.showOutputChannel",
-    "onCommand:manim-sideview.showExtensionManimConfig",
-    "onCommand:manim-sideview.showManimExecTerminal"
+    "onCommand:manim-sideview.showExtensionManimConfig"
   ],
   "extensionDependencies": [
     "ms-python.python"
@@ -60,11 +59,6 @@
           "default": "false",
           "description": "Enable or disable the automatic running of a previously run file upon saving."
         },
-        "manim-sideview.focusOutputOnRun": {
-          "type": "boolean",
-          "default": "true",
-          "description": "Determine if the output panel should gain focus automatically upon running."
-        },
         "manim-sideview.previewShowProgressOnIdle": {
           "type": "boolean",
           "default": "true",
@@ -84,11 +78,6 @@
           "type": "boolean",
           "default": "true",
           "description": "Enable or disable continuous looping of the video preview."
-        },
-        "manim-sideview.outputToTerminal": {
-          "type": "boolean",
-          "default": "true",
-          "description": "Toggle between sending output to a terminal (true) or to an output channel (false)."
         },
         "manim-sideview.manimExecutableVersion": {
           "type": "string",
@@ -164,10 +153,6 @@
       {
         "command": "manim-sideview.showExtensionManimConfig",
         "title": "Manim: Show Internal Manim Config"
-      },
-      {
-        "command": "manim-sideview.showManimExecTerminal",
-        "title": "Manim: Show Internal Execution Terminal"
       }
     ],
     "keybindings": [
@@ -201,7 +186,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
-    "@types/vscode": "^1.68.0",
+    "@types/vscode": "^1.93.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "@vscode/test-cli": "^0.0.4",

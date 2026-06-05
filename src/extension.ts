@@ -1,12 +1,6 @@
 import * as path from "path";
 import * as vscode from "vscode";
-import {
-  getUserConfiguration,
-  DefaultTerminalName,
-  loadGlobals,
-  Log,
-  LOGGER,
-} from "./globals";
+import { getUserConfiguration, loadGlobals, Log, LOGGER } from "./globals";
 import { ManimSideview } from "./sideview";
 import { PythonExtension } from "@vscode/python-extension";
 
@@ -19,58 +13,43 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("manim-sideview.run", (...args) =>
-      sideview.cmdRun(...args)
+      sideview.cmdRun(...args),
     ),
     vscode.commands.registerCommand("manim-sideview.removeAllJobs", () =>
-      sideview.cmdRemoveAllJobs()
+      sideview.cmdRemoveAllJobs(),
     ),
     vscode.commands.registerCommand("manim-sideview.stop", () =>
-      sideview.cmdStop()
+      sideview.cmdStop(),
     ),
     vscode.commands.registerCommand(
       "manim-sideview.renderNewScene",
-      (...args) => sideview.cmdRenderNewScene(...args)
+      (...args) => sideview.cmdRenderNewScene(...args),
     ),
     vscode.commands.registerCommand("manim-sideview.removeCurrentJob", () =>
-      sideview.cmdRemoveJob()
+      sideview.cmdRemoveJob(),
     ),
     vscode.commands.registerCommand("manim-sideview.showMobjectGallery", () =>
-      sideview.gallery.show()
+      sideview.gallery.show(),
     ),
     vscode.commands.registerCommand("manim-sideview.syncMobjectGallery", () =>
-      sideview.gallery.synchronize(true)
+      sideview.gallery.synchronize(true),
     ),
     vscode.commands.registerCommand(
       "manim-sideview.updateDefaultManimConfig",
-      () => sideview.cmdUpdateDefaultManimConfig()
+      () => sideview.cmdUpdateDefaultManimConfig(),
     ),
     vscode.commands.registerCommand("manim-sideview.showOutputChannel", () =>
-      LOGGER.show(true)
+      LOGGER.show(true),
     ),
     vscode.commands.registerCommand(
       "manim-sideview.showExtensionManimConfig",
       () =>
         vscode.workspace
           .openTextDocument(
-            path.join(context.extensionPath, "./assets/local/manim.cfg.json")
+            path.join(context.extensionPath, "./assets/local/manim.cfg.json"),
           )
-          .then((doc) => vscode.window.showTextDocument(doc))
+          .then((doc) => vscode.window.showTextDocument(doc)),
     ),
-    vscode.commands.registerCommand(
-      "manim-sideview.showManimExecTerminal",
-      () => {
-        const cli = vscode.window.terminals.find(
-          (t) => t.name === DefaultTerminalName
-        );
-        if (cli) {
-          cli.show();
-        } else {
-          vscode.window.showErrorMessage(
-            "Manim Sideview: There is no internal execution terminal open."
-          );
-        }
-      }
-    )
   );
 
   vscode.workspace.onDidSaveTextDocument(
@@ -83,13 +62,13 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     },
     null,
-    context.subscriptions
+    context.subscriptions,
   );
 
   vscode.window.onDidChangeTextEditorSelection(
     (e) => sideview.auditTextEditorChange(e.textEditor),
     null,
-    context.subscriptions
+    context.subscriptions,
   );
 
   Log.info("Activated extension.");
