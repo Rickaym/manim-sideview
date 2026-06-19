@@ -139,7 +139,7 @@ export class MediaPlayer {
         getUserConfiguration("previewProgressColor")
       ),
       loop: getUserConfiguration("previewLooping") ? "loop" : "",
-      autoplay: getUserConfiguration("previewAutoPlay") ? "autoplay muted" : "",
+      autoplay: getUserConfiguration("previewAutoPlay") ? "autoplay" : "",
     });
     Log.info(`Playing media URI "${mediaUri.fsPath}"`);
 

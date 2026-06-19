@@ -53,6 +53,7 @@
         },
         "manim-sideview.commandLineArgs": {
           "type": "string",
+          "default": "--format mov",
           "description": "Input additional command line arguments for Manim. Refer to Manim documentation for options. Use the config file for quality args like 'ql'."
         },
         "manim-sideview.runOnSave": {
