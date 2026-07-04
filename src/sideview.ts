@@ -36,9 +36,14 @@ const RELEVANT_CONFIG_OPTIONS = [
   "video_dir",
   "images_dir",
 ];
+import {
+  parseMediaOutputFromLog,
+  probeMediaOnDisk,
+  baseName,
+} from "./mediaResolution";
+
 const RE_SCENE_CLASS = /class\s+(?<name>\w+)\([\w,\s.]*Scene\b[\w,\s]*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
-const RE_FILE_READY = /File\s*ready\s*at[^']*'(?<path>[^']*)'/g;
 
 const PYTHON_ENV_SCRIPTS_FOLDER = {
   win32: "Scripts",
@@ -892,56 +897,37 @@ export class ManimSideview {
     Log.info(`Attempting to determine the output file type for "${sceneName}".`);
 
     // the file output signifier
-    const fileReSignifier = [...stdoutLogbook.matchAll(RE_FILE_READY)];
-    if (fileReSignifier.length > 0) {
-      // Prefer the last "File ready at" entry — for videos manim emits one per
-      // partial movie file plus a final entry for the merged output.
-      const cleanPath = (p: string) => p.replace(/ |\r|\n/g, "");
-      const imageEntry = fileReSignifier.find((m) =>
-        cleanPath(m.groups?.path ?? "").endsWith(".png")
-      );
-      const fileIdentifier = imageEntry ?? fileReSignifier[fileReSignifier.length - 1];
-      const fullPath = cleanPath(fileIdentifier.groups?.path ?? "");
-      if (imageEntry) {
-        fileType = PlayableMediaType.Image;
-        imageName = fullPath.split(/\\|\//g).pop();
-      } else {
-        fileType = PlayableMediaType.Video;
+    const logged = parseMediaOutputFromLog(stdoutLogbook);
+    if (logged) {
+      fileType = logged.isImage
+        ? PlayableMediaType.Image
+        : PlayableMediaType.Video;
+      if (logged.isImage) {
+        imageName = baseName(logged.mediaPath);
       }
-      if (fullPath) {
-        mediaPath = fullPath;
+      if (logged.mediaPath) {
+        mediaPath = logged.mediaPath;
       }
       Log.info(
-        `[${process.pid}] Render output is predicted as "${fileType === PlayableMediaType.Image ? "Image" : "Video"
-        }" at "${fullPath}".`
+        `[${process.pid}] Render output is predicted as "${logged.isImage ? "Image" : "Video"
+        }" at "${logged.mediaPath}".`
       );
     } else {
       // Probe both predicted paths on disk and pick whichever exists.
-      const predictedVideo = path.join(
-        job.config.srcRootFolder,
-        getVideoOutputPath(job.config)
+      const probed = probeMediaOnDisk(
+        path.join(job.config.srcRootFolder, getVideoOutputPath(job.config)),
+        path.join(job.config.srcRootFolder, getImageOutputPath(job.config))
       );
-      const predictedImage = path.join(
-        job.config.srcRootFolder,
-        getImageOutputPath(job.config)
-      );
-      const videoMtime = fs.existsSync(predictedVideo)
-        ? fs.statSync(predictedVideo).mtimeMs
-        : undefined;
-      const imageMtime = fs.existsSync(predictedImage)
-        ? fs.statSync(predictedImage).mtimeMs
-        : undefined;
-      if (imageMtime !== undefined && (videoMtime === undefined || imageMtime >= videoMtime)) {
-        fileType = PlayableMediaType.Image;
-        imageName = path.basename(predictedImage);
-        mediaPath = predictedImage;
-      } else if (videoMtime !== undefined) {
-        fileType = PlayableMediaType.Video;
-        mediaPath = predictedVideo;
-      }
-      if (fileType !== undefined) {
+      if (probed) {
+        fileType = probed.isImage
+          ? PlayableMediaType.Image
+          : PlayableMediaType.Video;
+        if (probed.isImage) {
+          imageName = path.basename(probed.mediaPath);
+        }
+        mediaPath = probed.mediaPath;
         Log.info(
-          `[${process.pid}] Render output inferred from filesystem as "${fileType === PlayableMediaType.Image ? "Image" : "Video"
+          `[${process.pid}] Render output inferred from filesystem as "${probed.isImage ? "Image" : "Video"
           }".`
         );
       }
