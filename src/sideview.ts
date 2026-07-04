@@ -1024,10 +1024,10 @@ export class ManimSideview {
 
     for (const flag of RELEVANT_CONFIG_OPTIONS) {
       if (parsedConfig.hasKey(CONFIG_SECTION, flag)) {
-        manimConfig[flag as keyof ManimConfig] = parsedConfig.get(
-          CONFIG_SECTION,
-          flag
-        )!;
+        // trim to tolerate trailing whitespace, e.g. "low_quality " (#137)
+        manimConfig[flag as keyof ManimConfig] = parsedConfig
+          .get(CONFIG_SECTION, flag)!
+          .trim();
         Log.info(
           `Set flag "${flag}" to ${parsedConfig.get(CONFIG_SECTION, flag)}.`
         );
