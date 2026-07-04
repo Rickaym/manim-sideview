@@ -92,34 +92,47 @@ function quoteSpecialChars(text: string): string {
  * resolution; `conda-meta` at the prefix root is the marker all conda-style
  * managers share.
  *
+ * For non-conda installs, falls back to prepending the interpreter's bin
+ * directory when one is known, so tools installed next to manim (ffmpeg in
+ * venv environments) are found (#98).
+ *
  * @param manimExe absolute path to the manim executable being spawned
- * @returns an environment with activation paths injected, or undefined to
- * inherit the parent environment untouched (non-conda installs)
+ * @param binDir the interpreter's bin directory, if known
+ * @returns an environment with the needed paths injected, or undefined to
+ * inherit the parent environment untouched
  */
 function getActivationEnvironment(
-  manimExe: string
+  manimExe: string,
+  binDir?: string
 ): NodeJS.ProcessEnv | undefined {
-  if (!path.isAbsolute(manimExe)) {
-    return undefined;
-  }
-  // <prefix>/Scripts/manim.exe (win32) or <prefix>/bin/manim (unix)
-  const prefix = path.dirname(path.dirname(manimExe));
-  if (!fs.existsSync(path.join(prefix, "conda-meta"))) {
-    return undefined;
+  let prefix: string | undefined;
+  if (path.isAbsolute(manimExe)) {
+    // <prefix>/Scripts/manim.exe (win32) or <prefix>/bin/manim (unix)
+    const candidate = path.dirname(path.dirname(manimExe));
+    if (fs.existsSync(path.join(candidate, "conda-meta"))) {
+      prefix = candidate;
+    }
   }
 
-  // The same directories conda activation prepends to PATH, in its order.
-  const binDirs =
-    process.platform === "win32"
-      ? [
-          prefix,
-          path.join(prefix, "Library", "mingw-w64", "bin"),
-          path.join(prefix, "Library", "usr", "bin"),
-          path.join(prefix, "Library", "bin"),
-          path.join(prefix, "Scripts"),
-          path.join(prefix, "bin"),
-        ]
-      : [path.join(prefix, "bin")];
+  let binDirs: string[];
+  if (prefix) {
+    // The same directories conda activation prepends to PATH, in its order.
+    binDirs =
+      process.platform === "win32"
+        ? [
+            prefix,
+            path.join(prefix, "Library", "mingw-w64", "bin"),
+            path.join(prefix, "Library", "usr", "bin"),
+            path.join(prefix, "Library", "bin"),
+            path.join(prefix, "Scripts"),
+            path.join(prefix, "bin"),
+          ]
+        : [path.join(prefix, "bin")];
+  } else if (binDir) {
+    binDirs = [binDir];
+  } else {
+    return undefined;
+  }
 
   const env: NodeJS.ProcessEnv = { ...process.env };
   // On Windows the inherited key may be spelled "Path"; reuse it to avoid
@@ -128,10 +141,12 @@ function getActivationEnvironment(
     Object.keys(env).find((key) => key.toUpperCase() === "PATH") || "PATH";
   env[pathKey] =
     binDirs.join(path.delimiter) + path.delimiter + (env[pathKey] || "");
-  env.CONDA_PREFIX = prefix;
-  Log.info(
-    `Detected conda-style environment at "${prefix}"; spawning manim with activation paths injected.`
-  );
+  if (prefix) {
+    env.CONDA_PREFIX = prefix;
+    Log.info(
+      `Detected conda-style environment at "${prefix}"; spawning manim with activation paths injected.`
+    );
+  }
   return env;
 }
 
@@ -397,6 +412,7 @@ export class ManimSideview {
       manimPath = "manim";
     }
     let envName = null;
+    let pythonBinDir: string | undefined;
 
     Log.info(`Default manim path is found as "${manimPath}"`);
 
@@ -420,7 +436,6 @@ export class ManimSideview {
         // Prefer the canonical interpreter path from the Python extension API.
         // Fall back to the env folder + platform bin dir only if the API doesn't
         // expose an executable (rare: envs created without a python interpreter).
-        let pythonBinDir: string | undefined;
         const executableUri = env.executable?.uri;
         if (executableUri) {
           pythonBinDir = path.dirname(executableUri.fsPath);
@@ -471,7 +486,13 @@ export class ManimSideview {
         throw Error(msg);
       }
     }
-    return { manim: manimPath, envName };
+
+    // An absolute manim path implies its siblings (ffmpeg on conda/venv
+    // installs) live in the same folder; expose it for the spawn PATH (#98).
+    if (!pythonBinDir && path.isAbsolute(manimPath)) {
+      pythonBinDir = path.dirname(manimPath);
+    }
+    return { manim: manimPath, envName, binDir: pythonBinDir };
   }
 
   async cmdUpdateDefaultManimConfig() {
@@ -623,6 +644,7 @@ export class ManimSideview {
       manim.manim,
       args,
       cwd,
+      manim.binDir,
       config.srcPath,
       config.sceneName,
       (mediaInfo) => {
@@ -711,6 +733,7 @@ export class ManimSideview {
     command: string,
     args: string[],
     cwd: string,
+    binDir: string | undefined,
     srcPath: string,
     sceneName: string,
     onProcessClose: (m: MediaInfo) => void
@@ -719,7 +742,7 @@ export class ManimSideview {
     const process = spawn(command, args, {
       cwd: cwd,
       shell: false,
-      env: getActivationEnvironment(command),
+      env: getActivationEnvironment(command, binDir),
     });
     const job = this.jobManager.getActiveJob(srcPath);
 
