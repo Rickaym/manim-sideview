@@ -196,7 +196,9 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "test:unit": "npm run compile-tests && node --test out/test/unit/",
+    "test:contract": "npm run compile-tests && node scripts/contract-test.js"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",
