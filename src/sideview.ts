@@ -36,7 +36,7 @@ const RELEVANT_CONFIG_OPTIONS = [
   "video_dir",
   "images_dir",
 ];
-const RE_SCENE_CLASS = /class\s+(?<name>\w+)\([\w,\s.]*\bScene\b[\w,\s]*\):/g;
+const RE_SCENE_CLASS = /class\s+(?<name>\w+)\([\w,\s.]*Scene\b[\w,\s]*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
 const RE_FILE_READY = /File\s*ready\s*at[^']*'(?<path>[^']*)'/g;
 
