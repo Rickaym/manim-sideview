@@ -1,6 +1,6 @@
 # Testing
 
-Three tiers, from fastest to most end-to-end. Fixtures for all tiers live
+Four tiers, from fastest to most end-to-end. Fixtures for all tiers live
 in `src/test/fixtures/`.
 
 ## 1. Unit tests (no manim, no VSCode)
@@ -28,7 +28,34 @@ on. Cases: video render with `-ql`, image render, silent logs under
 `verbosity = WARNING` (disk probe), and a `manim.cfg` with trailing
 whitespace in the quality value.
 
-## 3. Manual checks (Extension Development Host)
+## 3. Integration tests (real manim, real VSCode)
+
+```
+npm run test:integration
+```
+
+Downloads a real VSCode build via `@vscode/test-cli`, activates the
+extension inside it, and drives renders end to end through
+`vscode.commands.executeCommand("manim-sideview.run", uri, false, sceneName)`.
+The third argument is a scene-name hook: when given, `cmdRun` uses it
+directly instead of showing the quick pick, so headless runs never block
+on UI. This is the tier that catches activation bugs and command wiring
+that the lower tiers cannot see.
+
+The suite (`src/test/suite/`, mocha tdd) copies fixtures into a temp
+workspace (`.vscode-test.mjs` opens it as the workspace folder), asserts
+on the `RenderResult` returned by the run command, and covers: activation
+plus command registration with ms-python.python absent, a `-ql` video
+render via `commandLineArgs`, an image render, the silent-log disk probe
+(#139), and a custom `media_dir`.
+
+Requirements: a display or `xvfb-run -a npm run test:integration`, and a
+manim executable, taken from `MANIM_BIN` (absolute path) or the PATH. If
+no manim is found, the render tests skip with a message and only the
+activation test runs. The suite syncs `manim-sideview.manimExecutableVersion`
+to the detected manim version automatically.
+
+## 4. Manual checks (Extension Development Host)
 
 Press F5 in this repo, then in the dev host window open the fixture folder
 listed per row. All fixtures render in under a minute at low quality.
@@ -45,5 +72,8 @@ listed per row. All fixtures render in under a minute at low quality.
 ## CI
 
 `.github/workflows/ci.yml` runs lint, both compile targets, and the unit
-tests on every push and pull request, and the contract tests against a real
-pip-installed manim on ubuntu.
+tests on every push and pull request, the contract tests against a real
+pip-installed manim on ubuntu, and the integration tests in a downloaded
+VSCode under xvfb (`integration` job). The integration job intentionally
+does not install ms-python.python, which exercises the activation path
+that tolerates a missing python extension.
