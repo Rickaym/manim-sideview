@@ -31,6 +31,7 @@ import {
   baseName,
 } from "./mediaResolution";
 import { buildSpawnEnv } from "./spawnEnv";
+import { findManimConfigPath, resolveSceneFileArg } from "./runRoot";
 
 const CONFIG_SECTION = "CLI";
 const RELEVANT_CONFIG_OPTIONS = [
@@ -172,8 +173,17 @@ export class ManimSideview {
       activeJob = this.jobManager.getActiveJob(document.fileName);
     }
 
+    // when enabled and the file sits inside a workspace folder, manim runs
+    // from that folder instead of the file's own directory
+    const workspaceRoot = getUserConfiguration<boolean>("runFromWorkspaceRoot")
+      ? vscode.workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
+      : undefined;
+
     // configuration is reloaded every run
-    let manimConfig = await this.getManimConfigFile(document.uri.fsPath);
+    let manimConfig = await this.getManimConfigFile(
+      document.uri.fsPath,
+      workspaceRoot
+    );
     let isConfFile: boolean;
 
     if (manimConfig) {
@@ -197,6 +207,10 @@ export class ManimSideview {
       // if there is an active job simply resume
       activeJob.config.manimConfig = manimConfig;
       activeJob.config.isUsingConfFile = isConfFile;
+      // keep the run root in sync in case the setting changed between runs
+      activeJob.config.srcRootFolder =
+        workspaceRoot ?? path.dirname(document.uri.fsPath);
+      activeJob.config.usesWorkspaceRoot = !!workspaceRoot;
       currentRunningConfig = activeJob.config;
     } else {
       const newSceneName = await this.getRenderSceneName(document.uri);
@@ -211,7 +225,8 @@ export class ManimSideview {
         document,
         newSceneName,
         isConfFile,
-        manimConfig
+        manimConfig,
+        workspaceRoot
       );
     }
 
@@ -585,7 +600,7 @@ export class ManimSideview {
     this.jobManager.addJob(config, PlayableMediaType.Video);
 
     const args: string[] = [
-      config.srcPath,
+      resolveSceneFileArg(config.srcPath, cwd, !!config.usesWorkspaceRoot),
       ...(config.isUsingConfFile ? [] : this.getPreferenceArgs()),
       config.sceneName.trim(),
     ];
@@ -940,11 +955,14 @@ export class ManimSideview {
    * @returns ManimConfig | undefined
    */
   private async getManimConfigFile(
-    srcfilePath: string
+    srcfilePath: string,
+    runRoot?: string
   ): Promise<ManimConfig | undefined> {
-    const filePath = this.manimConfPath
-      ? this.manimConfPath
-      : path.join(srcfilePath, "../manim.cfg");
+    const filePath = findManimConfigPath(
+      this.manimConfPath,
+      srcfilePath,
+      runRoot
+    );
 
     if (!fs.existsSync(filePath)) {
       return;
@@ -1000,16 +1018,18 @@ export class ManimSideview {
     document: vscode.TextDocument,
     sceneName: string,
     isUsingCfgFile: boolean,
-    manimConfig: ManimConfig
+    manimConfig: ManimConfig,
+    workspaceRoot?: string
   ): RunningConfig {
     const srcPath = document.uri.fsPath;
     Log.info(`Creating a new running configuration for file "${srcPath}"`);
 
     const moduleName = path.basename(srcPath).slice(0, -3);
-    const root = path.dirname(document.uri.fsPath);
+    const root = workspaceRoot ?? path.dirname(document.uri.fsPath);
 
     return {
       srcRootFolder: root,
+      usesWorkspaceRoot: !!workspaceRoot,
       srcPath: srcPath,
       moduleName: moduleName,
       isUsingConfFile: isUsingCfgFile,

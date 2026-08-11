@@ -79,6 +79,8 @@ export function getDefaultConfig() {
  * document: the vscode.TextDocument for the Python file
  * isUsingCfgFile: whether if this is running using a configuration file
  * manimConfig: manim config tied to the running config
+ * usesWorkspaceRoot: whether srcRootFolder is the workspace folder rather
+ * than the file's own directory (runFromWorkspaceRoot setting)
  */
 export type RunningConfig = {
   srcPath: string;
@@ -88,6 +90,7 @@ export type RunningConfig = {
   document: vscode.TextDocument;
   isUsingConfFile: boolean;
   manimConfig: ManimConfig;
+  usesWorkspaceRoot?: boolean;
 };
 
 export function getVideoOutputPath(
