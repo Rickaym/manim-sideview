@@ -395,7 +395,6 @@ window.addEventListener("message", (e) => {
         // but explicitly calling play ensures it tries if allowed.
         video.play().catch((err) => console.log("Autoplay prevented:", err)); // Play new video (browser might block)
         // Reset state for new video
-        video.loop = message.loop; // Assuming loop state comes from extension
         setPlaybackSpeed(1); // Reset speed
         updatePlayPauseIcon();
         updateVolumeIcon();
