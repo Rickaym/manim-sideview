@@ -108,4 +108,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   Log.info("Activated extension.");
+
+  // Exposed for integration tests; not part of the public extension API.
+  return { sideview };
 }
