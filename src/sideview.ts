@@ -25,6 +25,11 @@ import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 import { PythonExtension } from "@vscode/python-extension";
 import { window } from "vscode";
+import {
+  parseMediaOutputFromLog,
+  probeMediaOnDisk,
+  baseName,
+} from "./mediaResolution";
 
 const CONFIG_SECTION = "CLI";
 const RELEVANT_CONFIG_OPTIONS = [
@@ -36,9 +41,9 @@ const RELEVANT_CONFIG_OPTIONS = [
   "video_dir",
   "images_dir",
 ];
+
 const RE_SCENE_CLASS = /class\s+(?<name>\w+)\([\w,\s.]*Scene\b[\w,\s]*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
-const RE_FILE_READY = /File\s*ready\s*at[^']*'(?<path>[^']*)'/g;
 
 const PYTHON_ENV_SCRIPTS_FOLDER = {
   win32: "Scripts",
@@ -92,34 +97,47 @@ function quoteSpecialChars(text: string): string {
  * resolution; `conda-meta` at the prefix root is the marker all conda-style
  * managers share.
  *
+ * For non-conda installs, falls back to prepending the interpreter's bin
+ * directory when one is known, so tools installed next to manim (ffmpeg in
+ * venv environments) are found (#98).
+ *
  * @param manimExe absolute path to the manim executable being spawned
- * @returns an environment with activation paths injected, or undefined to
- * inherit the parent environment untouched (non-conda installs)
+ * @param binDir the interpreter's bin directory, if known
+ * @returns an environment with the needed paths injected, or undefined to
+ * inherit the parent environment untouched
  */
 function getActivationEnvironment(
-  manimExe: string
+  manimExe: string,
+  binDir?: string
 ): NodeJS.ProcessEnv | undefined {
-  if (!path.isAbsolute(manimExe)) {
-    return undefined;
-  }
-  // <prefix>/Scripts/manim.exe (win32) or <prefix>/bin/manim (unix)
-  const prefix = path.dirname(path.dirname(manimExe));
-  if (!fs.existsSync(path.join(prefix, "conda-meta"))) {
-    return undefined;
+  let prefix: string | undefined;
+  if (path.isAbsolute(manimExe)) {
+    // <prefix>/Scripts/manim.exe (win32) or <prefix>/bin/manim (unix)
+    const candidate = path.dirname(path.dirname(manimExe));
+    if (fs.existsSync(path.join(candidate, "conda-meta"))) {
+      prefix = candidate;
+    }
   }
 
-  // The same directories conda activation prepends to PATH, in its order.
-  const binDirs =
-    process.platform === "win32"
-      ? [
-          prefix,
-          path.join(prefix, "Library", "mingw-w64", "bin"),
-          path.join(prefix, "Library", "usr", "bin"),
-          path.join(prefix, "Library", "bin"),
-          path.join(prefix, "Scripts"),
-          path.join(prefix, "bin"),
-        ]
-      : [path.join(prefix, "bin")];
+  let binDirs: string[];
+  if (prefix) {
+    // The same directories conda activation prepends to PATH, in its order.
+    binDirs =
+      process.platform === "win32"
+        ? [
+            prefix,
+            path.join(prefix, "Library", "mingw-w64", "bin"),
+            path.join(prefix, "Library", "usr", "bin"),
+            path.join(prefix, "Library", "bin"),
+            path.join(prefix, "Scripts"),
+            path.join(prefix, "bin"),
+          ]
+        : [path.join(prefix, "bin")];
+  } else if (binDir) {
+    binDirs = [binDir];
+  } else {
+    return undefined;
+  }
 
   const env: NodeJS.ProcessEnv = { ...process.env };
   // On Windows the inherited key may be spelled "Path"; reuse it to avoid
@@ -128,10 +146,12 @@ function getActivationEnvironment(
     Object.keys(env).find((key) => key.toUpperCase() === "PATH") || "PATH";
   env[pathKey] =
     binDirs.join(path.delimiter) + path.delimiter + (env[pathKey] || "");
-  env.CONDA_PREFIX = prefix;
-  Log.info(
-    `Detected conda-style environment at "${prefix}"; spawning manim with activation paths injected.`
-  );
+  if (prefix) {
+    env.CONDA_PREFIX = prefix;
+    Log.info(
+      `Detected conda-style environment at "${prefix}"; spawning manim with activation paths injected.`
+    );
+  }
   return env;
 }
 
@@ -397,6 +417,7 @@ export class ManimSideview {
       manimPath = "manim";
     }
     let envName = null;
+    let pythonBinDir: string | undefined;
 
     Log.info(`Default manim path is found as "${manimPath}"`);
 
@@ -420,7 +441,6 @@ export class ManimSideview {
         // Prefer the canonical interpreter path from the Python extension API.
         // Fall back to the env folder + platform bin dir only if the API doesn't
         // expose an executable (rare: envs created without a python interpreter).
-        let pythonBinDir: string | undefined;
         const executableUri = env.executable?.uri;
         if (executableUri) {
           pythonBinDir = path.dirname(executableUri.fsPath);
@@ -471,7 +491,13 @@ export class ManimSideview {
         throw Error(msg);
       }
     }
-    return { manim: manimPath, envName };
+
+    // An absolute manim path implies its siblings (ffmpeg on conda/venv
+    // installs) live in the same folder; expose it for the spawn PATH (#98).
+    if (!pythonBinDir && path.isAbsolute(manimPath)) {
+      pythonBinDir = path.dirname(manimPath);
+    }
+    return { manim: manimPath, envName, binDir: pythonBinDir };
   }
 
   async cmdUpdateDefaultManimConfig() {
@@ -623,6 +649,7 @@ export class ManimSideview {
       manim.manim,
       args,
       cwd,
+      manim.binDir,
       config.srcPath,
       config.sceneName,
       (mediaInfo) => {
@@ -711,6 +738,7 @@ export class ManimSideview {
     command: string,
     args: string[],
     cwd: string,
+    binDir: string | undefined,
     srcPath: string,
     sceneName: string,
     onProcessClose: (m: MediaInfo) => void
@@ -719,7 +747,7 @@ export class ManimSideview {
     const process = spawn(command, args, {
       cwd: cwd,
       shell: false,
-      env: getActivationEnvironment(command),
+      env: getActivationEnvironment(command, binDir),
     });
     const job = this.jobManager.getActiveJob(srcPath);
 
@@ -869,56 +897,37 @@ export class ManimSideview {
     Log.info(`Attempting to determine the output file type for "${sceneName}".`);
 
     // the file output signifier
-    const fileReSignifier = [...stdoutLogbook.matchAll(RE_FILE_READY)];
-    if (fileReSignifier.length > 0) {
-      // Prefer the last "File ready at" entry — for videos manim emits one per
-      // partial movie file plus a final entry for the merged output.
-      const cleanPath = (p: string) => p.replace(/ |\r|\n/g, "");
-      const imageEntry = fileReSignifier.find((m) =>
-        cleanPath(m.groups?.path ?? "").endsWith(".png")
-      );
-      const fileIdentifier = imageEntry ?? fileReSignifier[fileReSignifier.length - 1];
-      const fullPath = cleanPath(fileIdentifier.groups?.path ?? "");
-      if (imageEntry) {
-        fileType = PlayableMediaType.Image;
-        imageName = fullPath.split(/\\|\//g).pop();
-      } else {
-        fileType = PlayableMediaType.Video;
+    const logged = parseMediaOutputFromLog(stdoutLogbook);
+    if (logged) {
+      fileType = logged.isImage
+        ? PlayableMediaType.Image
+        : PlayableMediaType.Video;
+      if (logged.isImage) {
+        imageName = baseName(logged.mediaPath);
       }
-      if (fullPath) {
-        mediaPath = fullPath;
+      if (logged.mediaPath) {
+        mediaPath = logged.mediaPath;
       }
       Log.info(
-        `[${process.pid}] Render output is predicted as "${fileType === PlayableMediaType.Image ? "Image" : "Video"
-        }" at "${fullPath}".`
+        `[${process.pid}] Render output is predicted as "${logged.isImage ? "Image" : "Video"
+        }" at "${logged.mediaPath}".`
       );
     } else {
       // Probe both predicted paths on disk and pick whichever exists.
-      const predictedVideo = path.join(
-        job.config.srcRootFolder,
-        getVideoOutputPath(job.config)
+      const probed = probeMediaOnDisk(
+        path.join(job.config.srcRootFolder, getVideoOutputPath(job.config)),
+        path.join(job.config.srcRootFolder, getImageOutputPath(job.config))
       );
-      const predictedImage = path.join(
-        job.config.srcRootFolder,
-        getImageOutputPath(job.config)
-      );
-      const videoMtime = fs.existsSync(predictedVideo)
-        ? fs.statSync(predictedVideo).mtimeMs
-        : undefined;
-      const imageMtime = fs.existsSync(predictedImage)
-        ? fs.statSync(predictedImage).mtimeMs
-        : undefined;
-      if (imageMtime !== undefined && (videoMtime === undefined || imageMtime >= videoMtime)) {
-        fileType = PlayableMediaType.Image;
-        imageName = path.basename(predictedImage);
-        mediaPath = predictedImage;
-      } else if (videoMtime !== undefined) {
-        fileType = PlayableMediaType.Video;
-        mediaPath = predictedVideo;
-      }
-      if (fileType !== undefined) {
+      if (probed) {
+        fileType = probed.isImage
+          ? PlayableMediaType.Image
+          : PlayableMediaType.Video;
+        if (probed.isImage) {
+          imageName = path.basename(probed.mediaPath);
+        }
+        mediaPath = probed.mediaPath;
         Log.info(
-          `[${process.pid}] Render output inferred from filesystem as "${fileType === PlayableMediaType.Image ? "Image" : "Video"
+          `[${process.pid}] Render output inferred from filesystem as "${probed.isImage ? "Image" : "Video"
           }".`
         );
       }
@@ -1024,10 +1033,10 @@ export class ManimSideview {
 
     for (const flag of RELEVANT_CONFIG_OPTIONS) {
       if (parsedConfig.hasKey(CONFIG_SECTION, flag)) {
-        manimConfig[flag as keyof ManimConfig] = parsedConfig.get(
-          CONFIG_SECTION,
-          flag
-        )!;
+        // trim to tolerate trailing whitespace, e.g. "low_quality " (#137)
+        manimConfig[flag as keyof ManimConfig] = parsedConfig
+          .get(CONFIG_SECTION, flag)!
+          .trim();
         Log.info(
           `Set flag "${flag}" to ${parsedConfig.get(CONFIG_SECTION, flag)}.`
         );
