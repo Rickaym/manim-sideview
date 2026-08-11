@@ -32,6 +32,19 @@ errors:
 - The interpreter's bin directory is placed on the spawned process PATH so
   tools installed alongside manim, like ffmpeg in conda or venv environments,
   are found even when they are not on the global PATH (#98)
+- Conda-style environments (conda, mamba, micromamba, pixi) are now activated
+  when spawning manim: the standard activation directories are prepended to
+  PATH and CONDA_PREFIX is set. This fixes instant render failures on Windows
+  with exit code 3228369023 (0xC06D007F), where native libraries such as
+  numpy's BLAS could not be loaded from an un-activated environment (#146)
+
+### Scene detection
+
+- Scene classes with multiple base classes are now detected, such as
+  `class MyScene(Slide, Scene)` used by manim-slides, as well as dotted base
+  names like `manim.Scene`. Base classes merely prefixed with "Scene" (e.g.
+  `SceneBase`) are no longer treated as scenes; a base must end in `Scene`.
+  Thanks to @dkgs2000 (#143)
 
 ### Fixes
 
@@ -40,3 +53,9 @@ errors:
 - The source file is checked for existence before rendering
 - The default `manimExecutableVersion` was bumped from `v0.16.0.post0` to
   `v0.19.0` so image filename prediction matches current manim releases
+
+### Internal
+
+- New CI pipeline: lint, unit tests, contract tests rendering real scenes
+  against manim 0.17, 0.18, and 0.19+, and a production vsix build on every
+  push and pull request (#142, #147)
