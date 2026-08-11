@@ -60,7 +60,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: npm ci
-      # manimpango has no linux wheels; it builds against pango headers
-      - run: sudo apt-get update && sudo apt-get install -y libpango1.0-dev pkg-config
+      # manimpango has no linux wheels; it builds against pango headers.
+      # ffmpeg is needed by manim <= 0.18, which shells out to it (0.19+
+      # bundles pyav)
+      - run: sudo apt-get update && sudo apt-get install -y libpango1.0-dev pkg-config ffmpeg
       - run: pip install "${{ matrix.manim }}"
       - run: npm run test:contract
