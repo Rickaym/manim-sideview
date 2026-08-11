@@ -30,6 +30,7 @@ import {
   probeMediaOnDisk,
   baseName,
 } from "./mediaResolution";
+import { buildSpawnEnv } from "./spawnEnv";
 
 const CONFIG_SECTION = "CLI";
 const RELEVANT_CONFIG_OPTIONS = [
@@ -84,75 +85,19 @@ function quoteSpecialChars(text: string): string {
 }
 
 /**
- * Builds the environment for spawning manim from a conda-style environment
- * (conda, mamba, micromamba, pixi).
- *
- * Such environments are not self-contained on Windows: native libraries live
- * in directories (e.g. `<prefix>\Library\bin`) that only join PATH during
- * activation. Spawning the bare executable without activation crashes the
- * process at the OS loader level (exit code 0xC06D007F) with no traceback the
- * moment a delay-loaded DLL such as numpy's BLAS is first called.
- *
- * Prepending the activation directories to PATH is sufficient to fix DLL
- * resolution; `conda-meta` at the prefix root is the marker all conda-style
- * managers share.
- *
- * For non-conda installs, falls back to prepending the interpreter's bin
- * directory when one is known, so tools installed next to manim (ffmpeg in
- * venv environments) are found (#98).
- *
- * @param manimExe absolute path to the manim executable being spawned
- * @param binDir the interpreter's bin directory, if known
- * @returns an environment with the needed paths injected, or undefined to
- * inherit the parent environment untouched
+ * Wraps the pure spawn-env builder (see spawnEnv.ts) with logging.
  */
 function getActivationEnvironment(
   manimExe: string,
   binDir?: string
 ): NodeJS.ProcessEnv | undefined {
-  let prefix: string | undefined;
-  if (path.isAbsolute(manimExe)) {
-    // <prefix>/Scripts/manim.exe (win32) or <prefix>/bin/manim (unix)
-    const candidate = path.dirname(path.dirname(manimExe));
-    if (fs.existsSync(path.join(candidate, "conda-meta"))) {
-      prefix = candidate;
-    }
-  }
-
-  let binDirs: string[];
-  if (prefix) {
-    // The same directories conda activation prepends to PATH, in its order.
-    binDirs =
-      process.platform === "win32"
-        ? [
-            prefix,
-            path.join(prefix, "Library", "mingw-w64", "bin"),
-            path.join(prefix, "Library", "usr", "bin"),
-            path.join(prefix, "Library", "bin"),
-            path.join(prefix, "Scripts"),
-            path.join(prefix, "bin"),
-          ]
-        : [path.join(prefix, "bin")];
-  } else if (binDir) {
-    binDirs = [binDir];
-  } else {
-    return undefined;
-  }
-
-  const env: NodeJS.ProcessEnv = { ...process.env };
-  // On Windows the inherited key may be spelled "Path"; reuse it to avoid
-  // handing the child duplicate PATH variables differing only in case.
-  const pathKey =
-    Object.keys(env).find((key) => key.toUpperCase() === "PATH") || "PATH";
-  env[pathKey] =
-    binDirs.join(path.delimiter) + path.delimiter + (env[pathKey] || "");
-  if (prefix) {
-    env.CONDA_PREFIX = prefix;
+  const built = buildSpawnEnv(manimExe, binDir);
+  if (built?.condaPrefix) {
     Log.info(
-      `Detected conda-style environment at "${prefix}"; spawning manim with activation paths injected.`
+      `Detected conda-style environment at "${built.condaPrefix}"; spawning manim with activation paths injected.`
     );
   }
-  return env;
+  return built?.env;
 }
 
 export class ManimSideview {
