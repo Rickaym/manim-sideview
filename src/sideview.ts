@@ -30,7 +30,11 @@ import {
   probeMediaOnDisk,
   baseName,
 } from "./mediaResolution";
-import { buildSpawnEnv } from "./spawnEnv";
+import {
+  buildSpawnEnv,
+  PYTHON_ENV_SCRIPTS_FOLDER,
+  resolveManimNextToInterpreter,
+} from "./spawnEnv";
 
 const CONFIG_SECTION = "CLI";
 const RELEVANT_CONFIG_OPTIONS = [
@@ -45,12 +49,6 @@ const RELEVANT_CONFIG_OPTIONS = [
 
 const RE_SCENE_CLASS = /class\s+(?<name>\w+)\([\w,\s.]*Scene\b[\w,\s]*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
-
-const PYTHON_ENV_SCRIPTS_FOLDER = {
-  win32: "Scripts",
-  darwin: "bin",
-  linux: "bin",
-};
 
 type MediaInfo = {
   fileType: number;
@@ -406,7 +404,14 @@ export class ManimSideview {
         }
 
         if (pythonBinDir) {
-          manimPath = path.join(pythonBinDir, manimPath);
+          // Conda-style envs on Windows keep python.exe at the prefix root
+          // but manim.exe under Scripts; probe both (#127, #133).
+          const resolved = resolveManimNextToInterpreter(
+            pythonBinDir,
+            manimPath
+          );
+          manimPath = resolved.manim;
+          pythonBinDir = resolved.binDir;
           Log.info(`Resolved manim path: ${manimPath}`);
         }
       }
