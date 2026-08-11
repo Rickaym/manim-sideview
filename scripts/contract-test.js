@@ -127,7 +127,7 @@ function check(name, fn) {
   check("silent logs: disk probe finds the rendered image", () => {
     // predicted names mirror globals.getImageOutputPath with the real version
     const versionTag = (version.stdout.trim() || version.stderr.trim())
-      .match(/v[\d.]+(\.post\d+)?/)?.[0];
+      .match(/v\d+(\.\d+)*(\.post\d+)?/)?.[0];
     assert.ok(versionTag, "could not parse manim version");
     const predictedImage = path.join(
       cwd,

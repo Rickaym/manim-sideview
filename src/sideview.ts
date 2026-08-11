@@ -25,6 +25,11 @@ import { Gallery } from "./gallery";
 import { ManimPseudoTerm } from "./pseudoTerm";
 import { PythonExtension } from "@vscode/python-extension";
 import { window } from "vscode";
+import {
+  parseMediaOutputFromLog,
+  probeMediaOnDisk,
+  baseName,
+} from "./mediaResolution";
 
 const CONFIG_SECTION = "CLI";
 const RELEVANT_CONFIG_OPTIONS = [
@@ -36,11 +41,6 @@ const RELEVANT_CONFIG_OPTIONS = [
   "video_dir",
   "images_dir",
 ];
-import {
-  parseMediaOutputFromLog,
-  probeMediaOnDisk,
-  baseName,
-} from "./mediaResolution";
 
 const RE_SCENE_CLASS = /class\s+(?<name>\w+)\([\w,\s.]*Scene\b[\w,\s]*\):/g;
 const RE_CFG_OPTIONS = /(\w+)\s?:\s?([^ ]*)/g;
