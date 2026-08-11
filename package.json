@@ -39,9 +39,6 @@
     "onCommand:manim-sideview.showExtensionManimConfig",
     "onCommand:manim-sideview.showManimExecTerminal"
   ],
-  "extensionDependencies": [
-    "ms-python.python"
-  ],
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
@@ -197,6 +194,8 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "vscode-test",
+    "pretest:integration": "npm run compile-tests && npm run compile",
+    "test:integration": "vscode-test",
     "test:unit": "npm run compile-tests && node --test out/test/unit/",
     "test:contract": "npm run compile-tests && node scripts/contract-test.js"
   },
