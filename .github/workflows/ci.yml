@@ -19,8 +19,37 @@ jobs:
       - run: npm run compile
       - run: npm run test:unit
 
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # proves the production webpack bundle builds and packs into a vsix
+      - run: npx @vscode/vsce package --out manim-sideview.vsix
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: manim-sideview.vsix
+
   contract:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # power users pin old manim versions; the log format the extension
+          # parses must hold across all of them
+          - manim: "manim==0.17.3"
+            python: "3.11"
+          - manim: "manim==0.18.1"
+            python: "3.11"
+          - manim: "manim>=0.19"
+            python: "3.12"
+    name: contract (${{ matrix.manim }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,9 +58,11 @@ jobs:
           cache: npm
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
       - run: npm ci
-      # manimpango has no linux wheels; it builds against pango headers
-      - run: sudo apt-get update && sudo apt-get install -y libpango1.0-dev pkg-config
-      - run: pip install "manim>=0.19"
+      # manimpango has no linux wheels; it builds against pango headers.
+      # ffmpeg is needed by manim <= 0.18, which shells out to it (0.19+
+      # bundles pyav)
+      - run: sudo apt-get update && sudo apt-get install -y libpango1.0-dev pkg-config ffmpeg
+      - run: pip install "${{ matrix.manim }}"
       - run: npm run test:contract
