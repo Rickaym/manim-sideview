@@ -229,5 +229,64 @@ function check(name, fn) {
   fs.rmSync(cwd, { recursive: true, force: true });
 }
 
+// 6. run from workspace root: scene in a subfolder, root manim.cfg with a
+// custom media_dir and silent logs; the probe rooted at the project root
+// must find the output under the ROOT media dir, not the subfolder
+{
+  const cwd = freshDir("wsroot");
+  fs.mkdirSync(path.join(cwd, "src"));
+  fs.copyFileSync(
+    path.join(FIXTURES, "issues", "workspace_root_run", "manim.cfg"),
+    path.join(cwd, "manim.cfg")
+  );
+  fs.copyFileSync(
+    path.join(FIXTURES, "issues", "workspace_root_run", "src", "scene.py"),
+    path.join(cwd, "src", "scene.py")
+  );
+  const render = run(["-ql", path.join("src", "scene.py"), "ImageScene"], cwd);
+  const logbook = render.stdout + render.stderr;
+
+  check("workspace root: render succeeds with silent logs", () => {
+    assert.strictEqual(render.status, 0, `manim exited ${render.status}:\n${logbook}`);
+    assert.strictEqual(parseMediaOutputFromLog(logbook), null);
+  });
+
+  check("workspace root: disk probe finds the image under the root media dir", () => {
+    const versionTag = (version.stdout.trim() || version.stderr.trim())
+      .match(/v\d+(\.\d+)*(\.post\d+)?/)?.[0];
+    assert.ok(versionTag, "could not parse manim version");
+    // predictions join srcRootFolder (= project root) with the media_dir
+    // template, mirroring how the extension probes when the feature is on
+    const predictedImage = path.join(
+      cwd,
+      "out_root",
+      "images",
+      "scene",
+      `ImageScene_ManimCE_${versionTag}.png`
+    );
+    const predictedVideo = path.join(
+      cwd,
+      "out_root",
+      "videos",
+      "scene",
+      "480p15",
+      "ImageScene.mp4"
+    );
+    const probed = probeMediaOnDisk(predictedVideo, predictedImage);
+    assert.ok(
+      probed,
+      `probe found nothing; tree: ${JSON.stringify(
+        fs.readdirSync(cwd, { recursive: true })
+      )}`
+    );
+    assert.strictEqual(probed.isImage, true);
+    assert.ok(
+      !fs.existsSync(path.join(cwd, "src", "out_root")),
+      "media dir leaked into the source subfolder"
+    );
+  });
+  fs.rmSync(cwd, { recursive: true, force: true });
+}
+
 console.log(failures === 0 ? "\nCONTRACT TESTS PASSED" : `\n${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

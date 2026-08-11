@@ -25,8 +25,9 @@ binary with `MANIM_BIN=/path/to/manim`) in a temp directory and feeds the
 live output through the extension's actual resolution code. This catches
 drift in manim's "File ready at" log format, which path prediction relies
 on. Cases: video render with `-ql`, image render, silent logs under
-`verbosity = WARNING` (disk probe), and a `manim.cfg` with trailing
-whitespace in the quality value.
+`verbosity = WARNING` (disk probe), a `manim.cfg` with trailing
+whitespace in the quality value, and a subfolder scene rendered from the
+project root with a root-level `manim.cfg` (run-from-workspace-root).
 
 ## 3. Manual checks (Extension Development Host)
 
@@ -39,6 +40,7 @@ listed per row. All fixtures render in under a minute at low quality.
 | In-file resolution override (#115) | Open `src/test/fixtures/issues/115_custom_resolution/`, render `scene.py` scene `VerticalScene` | 1080x1920 video previews |
 | Silent logs, image output (#139) | Open `src/test/fixtures/issues/139_low_verbosity/`, render `scene.py` scene `ImageScene`; set `manim-sideview.manimExecutableVersion` to your manim version if not v0.19.0 | image previews, no stale-video preview, no error |
 | Trailing whitespace in cfg (#137) | Open `src/test/fixtures/issues/137_trailing_space/`, render `scene.py` scene `VideoScene` | renders normally, no "quality is invalid" error |
+| Run from workspace root | Open `src/test/fixtures/issues/workspace_root_run/` as the workspace folder, enable `manim-sideview.runFromWorkspaceRoot`, render `src/scene.py` scene `ImageScene`; set `manim-sideview.manimExecutableVersion` to your manim version if not v0.19.0 | root `manim.cfg` is picked up, image lands in `out_root/` at the workspace root (not inside `src/`), preview works |
 | Env-local ffmpeg (#98) | conda or venv with ffmpeg installed inside it and not on the global PATH; set `manim-sideview.defaultManimPath` to that env's `bin/manim` | no pydub ffmpeg warning, render completes |
 | Scripts directory as manim path (#127, #133) | Windows: set `manim-sideview.defaultManimPath` to a `Scripts` directory containing manim.exe | manim resolved inside the directory, render runs |
 
