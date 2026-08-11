@@ -103,7 +103,7 @@ function getActivationEnvironment(
 export class ManimSideview {
   constructor(
     public readonly ctx: vscode.ExtensionContext,
-    public readonly pythonApi: PythonExtension
+    public readonly pythonApi: PythonExtension | undefined
   ) {
     this.ctx = ctx;
     this.pythonApi = pythonApi;
@@ -487,7 +487,7 @@ export class ManimSideview {
   }
 
   private async getPythonEnvironment() {
-    if (!this.pythonApi.environments) {
+    if (!this.pythonApi?.environments) {
       return;
     }
     const environmentPath =
