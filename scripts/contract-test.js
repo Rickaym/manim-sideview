@@ -179,5 +179,55 @@ function check(name, fn) {
   fs.rmSync(cwd, { recursive: true, force: true });
 }
 
+// 5. custom media_dir + silent logs: the disk probe must respect media_dir
+{
+  const cwd = freshDir("mediadir");
+  fs.copyFileSync(
+    path.join(FIXTURES, "issues", "custom_media_dir", "scene.py"),
+    path.join(cwd, "scene.py")
+  );
+  fs.copyFileSync(
+    path.join(FIXTURES, "issues", "custom_media_dir", "manim.cfg"),
+    path.join(cwd, "manim.cfg")
+  );
+  const render = run(["-ql", "scene.py", "ImageScene"], cwd);
+  const logbook = render.stdout + render.stderr;
+
+  check("custom media_dir: render succeeds with silent logs", () => {
+    assert.strictEqual(render.status, 0, `manim exited ${render.status}:\n${logbook}`);
+    assert.strictEqual(parseMediaOutputFromLog(logbook), null);
+  });
+
+  check("custom media_dir: disk probe finds the image under out_custom", () => {
+    const versionTag = (version.stdout.trim() || version.stderr.trim())
+      .match(/v\d+(\.\d+)*(\.post\d+)?/)?.[0];
+    assert.ok(versionTag, "could not parse manim version");
+    const predictedImage = path.join(
+      cwd,
+      "out_custom",
+      "images",
+      "scene",
+      `ImageScene_ManimCE_${versionTag}.png`
+    );
+    const predictedVideo = path.join(
+      cwd,
+      "out_custom",
+      "videos",
+      "scene",
+      "480p15",
+      "ImageScene.mp4"
+    );
+    const probed = probeMediaOnDisk(predictedVideo, predictedImage);
+    assert.ok(
+      probed,
+      `probe found nothing; tree: ${JSON.stringify(
+        fs.readdirSync(cwd, { recursive: true })
+      )}`
+    );
+    assert.strictEqual(probed.isImage, true);
+  });
+  fs.rmSync(cwd, { recursive: true, force: true });
+}
+
 console.log(failures === 0 ? "\nCONTRACT TESTS PASSED" : `\n${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

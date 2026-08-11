@@ -109,6 +109,19 @@ test("an unknown quality value throws (issue #137 pre-trim behavior)", () => {
   });
 });
 
+test("custom media_dir is honored in both predicted paths", () => {
+  settings["manimExecutableVersion"] = "v0.19.0";
+  const config = mkConfig({ media_dir: "out_custom" });
+  assert.strictEqual(
+    globals.getVideoOutputPath(config),
+    path.join("out_custom", "videos", "main", "1080p60", "Demo.mp4")
+  );
+  assert.strictEqual(
+    globals.getImageOutputPath(config, undefined, ".png"),
+    path.join("out_custom", "images", "main", "Demo_ManimCE_v0.19.0.png")
+  );
+});
+
 test("image path uses the configured manim version (issue #139 fallback)", () => {
   settings["manimExecutableVersion"] = "v0.19.0";
   assert.strictEqual(
