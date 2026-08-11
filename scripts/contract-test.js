@@ -229,5 +229,49 @@ function check(name, fn) {
   fs.rmSync(cwd, { recursive: true, force: true });
 }
 
+// 6. opengl renderer via commandLineArgs-style flags (issue #97).
+// Needs a GL context, so it only runs when OPENGL_CONTRACT=1 (CI provides
+// xvfb and mesa for this leg).
+if (process.env.OPENGL_CONTRACT === "1") {
+  const cwd = freshDir("opengl");
+  fs.copyFileSync(
+    path.join(FIXTURES, "scenes", "video_scene.py"),
+    path.join(cwd, "scene.py")
+  );
+  const render = run(
+    ["--renderer=opengl", "--write_to_movie", "-ql", "scene.py", "VideoScene"],
+    cwd
+  );
+  const logbook = render.stdout + render.stderr;
+
+  check("opengl: renders and the output path resolves", () => {
+    assert.strictEqual(render.status, 0, `manim exited ${render.status}:\n${logbook}`);
+    const parsed = parseMediaOutputFromLog(logbook);
+    if (parsed) {
+      assert.ok(
+        fs.existsSync(parsed.mediaPath),
+        `parsed path does not exist: ${parsed.mediaPath}`
+      );
+    } else {
+      // opengl may log differently; the disk probe fallback must still work
+      const predictedVideo = path.join(
+        cwd,
+        "media",
+        "videos",
+        "scene",
+        "480p15",
+        "VideoScene.mp4"
+      );
+      assert.ok(
+        fs.existsSync(predictedVideo),
+        `no File ready log and no file at ${predictedVideo}; logs:\n${logbook}`
+      );
+    }
+  });
+  fs.rmSync(cwd, { recursive: true, force: true });
+} else {
+  console.log("[SKIP] opengl renderer (set OPENGL_CONTRACT=1 to enable)");
+}
+
 console.log(failures === 0 ? "\nCONTRACT TESTS PASSED" : `\n${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

@@ -49,7 +49,11 @@ jobs:
             python: "3.11"
           - manim: "manim>=0.19"
             python: "3.12"
-    name: contract (${{ matrix.manim }})
+          # opengl renderer leg (issue #97): needs a GL context via xvfb/mesa
+          - manim: "manim>=0.19"
+            python: "3.12"
+            opengl: true
+    name: contract (${{ matrix.manim }}${{ matrix.opengl && ', opengl' || '' }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -64,5 +68,12 @@ jobs:
       # ffmpeg is needed by manim <= 0.18, which shells out to it (0.19+
       # bundles pyav)
       - run: sudo apt-get update && sudo apt-get install -y libpango1.0-dev pkg-config ffmpeg
+      - if: matrix.opengl
+        run: sudo apt-get install -y xvfb libgl1 libegl1 libglu1-mesa
       - run: pip install "${{ matrix.manim }}"
-      - run: npm run test:contract
+      - if: '!matrix.opengl'
+        run: npm run test:contract
+      - if: matrix.opengl
+        run: xvfb-run -a npm run test:contract
+        env:
+          OPENGL_CONTRACT: "1"
