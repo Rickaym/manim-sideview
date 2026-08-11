@@ -20,6 +20,57 @@ import * as path from "path";
  * venv environments) are found (#98).
  */
 
+export const PYTHON_ENV_SCRIPTS_FOLDER = {
+  win32: "Scripts",
+  darwin: "bin",
+  linux: "bin",
+};
+
+const executableFileExists = (p: string): boolean => {
+  try {
+    return fs.existsSync(p) && fs.statSync(p).isFile();
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Locate manim relative to the python interpreter's directory. On Windows,
+ * conda-style environments (conda, mamba, pixi) place python.exe at the env
+ * prefix root while entry-point executables like manim.exe live under
+ * `<prefix>\Scripts`, so the interpreter's directory alone is not enough.
+ * Probes the interpreter directory first, then its scripts subfolder.
+ * Returns the resolved path and the directory it lives in; when neither
+ * candidate exists, returns the root candidate unchanged so callers keep
+ * their existing not-found handling.
+ */
+export function resolveManimNextToInterpreter(
+  interpreterDir: string,
+  manimName: string,
+  platform: NodeJS.Platform = process.platform,
+  exists: (p: string) => boolean = executableFileExists
+): { manim: string; binDir: string } {
+  // Mirror checkExecutableExists, which probes both the bare name and .exe.
+  const executableExists = (p: string) => exists(p) || exists(p + ".exe");
+
+  const rootCandidate = path.join(interpreterDir, manimName);
+  if (executableExists(rootCandidate)) {
+    return { manim: rootCandidate, binDir: interpreterDir };
+  }
+
+  const scriptsFolder =
+    PYTHON_ENV_SCRIPTS_FOLDER[
+      platform as keyof typeof PYTHON_ENV_SCRIPTS_FOLDER
+    ] || PYTHON_ENV_SCRIPTS_FOLDER["linux"];
+  const scriptsDir = path.join(interpreterDir, scriptsFolder);
+  const scriptsCandidate = path.join(scriptsDir, manimName);
+  if (executableExists(scriptsCandidate)) {
+    return { manim: scriptsCandidate, binDir: scriptsDir };
+  }
+
+  return { manim: rootCandidate, binDir: interpreterDir };
+}
+
 export type SpawnEnvDeps = {
   platform: NodeJS.Platform;
   baseEnv: NodeJS.ProcessEnv;
