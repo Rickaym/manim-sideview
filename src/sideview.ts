@@ -78,6 +78,63 @@ function quoteSpecialChars(text: string): string {
   return text;
 }
 
+/**
+ * Builds the environment for spawning manim from a conda-style environment
+ * (conda, mamba, micromamba, pixi).
+ *
+ * Such environments are not self-contained on Windows: native libraries live
+ * in directories (e.g. `<prefix>\Library\bin`) that only join PATH during
+ * activation. Spawning the bare executable without activation crashes the
+ * process at the OS loader level (exit code 0xC06D007F) with no traceback the
+ * moment a delay-loaded DLL such as numpy's BLAS is first called.
+ *
+ * Prepending the activation directories to PATH is sufficient to fix DLL
+ * resolution; `conda-meta` at the prefix root is the marker all conda-style
+ * managers share.
+ *
+ * @param manimExe absolute path to the manim executable being spawned
+ * @returns an environment with activation paths injected, or undefined to
+ * inherit the parent environment untouched (non-conda installs)
+ */
+function getActivationEnvironment(
+  manimExe: string
+): NodeJS.ProcessEnv | undefined {
+  if (!path.isAbsolute(manimExe)) {
+    return undefined;
+  }
+  // <prefix>/Scripts/manim.exe (win32) or <prefix>/bin/manim (unix)
+  const prefix = path.dirname(path.dirname(manimExe));
+  if (!fs.existsSync(path.join(prefix, "conda-meta"))) {
+    return undefined;
+  }
+
+  // The same directories conda activation prepends to PATH, in its order.
+  const binDirs =
+    process.platform === "win32"
+      ? [
+          prefix,
+          path.join(prefix, "Library", "mingw-w64", "bin"),
+          path.join(prefix, "Library", "usr", "bin"),
+          path.join(prefix, "Library", "bin"),
+          path.join(prefix, "Scripts"),
+          path.join(prefix, "bin"),
+        ]
+      : [path.join(prefix, "bin")];
+
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  // On Windows the inherited key may be spelled "Path"; reuse it to avoid
+  // handing the child duplicate PATH variables differing only in case.
+  const pathKey =
+    Object.keys(env).find((key) => key.toUpperCase() === "PATH") || "PATH";
+  env[pathKey] =
+    binDirs.join(path.delimiter) + path.delimiter + (env[pathKey] || "");
+  env.CONDA_PREFIX = prefix;
+  Log.info(
+    `Detected conda-style environment at "${prefix}"; spawning manim with activation paths injected.`
+  );
+  return env;
+}
+
 export class ManimSideview {
   constructor(
     public readonly ctx: vscode.ExtensionContext,
@@ -423,7 +480,10 @@ export class ManimSideview {
         "Manim Sideview: Preparing to sync fallback manim configurations..."
       )
     );
-    const process = spawn((await this.getManimPath()).manim, ["cfg", "show"]);
+    const manimPath = (await this.getManimPath()).manim;
+    const process = spawn(manimPath, ["cfg", "show"], {
+      env: getActivationEnvironment(manimPath),
+    });
 
     let fullStdout = "";
     process.stdout.on("data", function (data: string) {
@@ -656,7 +716,11 @@ export class ManimSideview {
     onProcessClose: (m: MediaInfo) => void
   ) {
     const startTime = new Date();
-    const process = spawn(command, args, { cwd: cwd, shell: false });
+    const process = spawn(command, args, {
+      cwd: cwd,
+      shell: false,
+      env: getActivationEnvironment(command),
+    });
     const job = this.jobManager.getActiveJob(srcPath);
 
     // String representation of the command process
