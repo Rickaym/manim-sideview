@@ -12,10 +12,11 @@ export type ResolvedMedia = {
   mediaPath: string;
 };
 
-// manim wraps long paths across lines inside the quotes; strip the
-// wrapping whitespace to recover the real path
+// manim's rich console wraps long paths across lines inside the quotes,
+// indenting the continuation. Strip only newline-adjacent whitespace so
+// genuine spaces inside the path survive (e.g. "Manim Projects").
 function cleanPath(p: string): string {
-  return p.replace(/ |\r|\n/g, "");
+  return p.replace(/[ \t]*\r?\n[ \t]*/g, "");
 }
 
 /**

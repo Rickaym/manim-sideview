@@ -37,6 +37,26 @@ test("recovers a path wrapped across log lines (issue #132 shape)", () => {
   );
 });
 
+test("preserves genuine spaces in paths while unwrapping (0.4.1 regression)", () => {
+  const result = parseMediaOutputFromLog(loadLog("wrapped_spaced_path.log"));
+  assert.ok(result);
+  assert.strictEqual(
+    result.mediaPath,
+    "C:\\Users\\Jake Smith\\manim_projects\\media\\videos\\scene\\480p15\\Demo Scene.mp4"
+  );
+});
+
+test("single-line path with spaces is untouched", () => {
+  const result = parseMediaOutputFromLog(
+    "INFO  File ready at '/proj/My Scenes/media/videos/main/480p15/Demo.mp4'"
+  );
+  assert.ok(result);
+  assert.strictEqual(
+    result.mediaPath,
+    "/proj/My Scenes/media/videos/main/480p15/Demo.mp4"
+  );
+});
+
 test("prefers the merged output over partial movie files", () => {
   const result = parseMediaOutputFromLog(loadLog("partials_then_final.log"));
   assert.ok(result);
