@@ -54,6 +54,33 @@ function check(name, fn) {
   }
 }
 
+// 0. render inside a directory containing a space: the wrapped log path
+// must reconstruct with the space intact (0.4.1 regression, issue #136)
+{
+  const cwd = path.join(freshDir("spaced"), "my scenes");
+  fs.mkdirSync(cwd);
+  fs.copyFileSync(
+    path.join(FIXTURES, "scenes", "video_scene.py"),
+    path.join(cwd, "scene.py")
+  );
+  const render = run(["-ql", "scene.py", "VideoScene"], cwd);
+  const logbook = render.stdout + render.stderr;
+
+  check("spaced path: parsed log path exists on disk", () => {
+    const parsed = parseMediaOutputFromLog(logbook);
+    assert.ok(parsed, `no File ready entry found in:\n${logbook}`);
+    assert.ok(
+      fs.existsSync(parsed.mediaPath),
+      `parsed path does not exist: ${parsed.mediaPath}`
+    );
+    assert.ok(
+      parsed.mediaPath.includes("my scenes"),
+      `space was stripped from: ${parsed.mediaPath}`
+    );
+  });
+  fs.rmSync(path.dirname(cwd), { recursive: true, force: true });
+}
+
 // 1. video render: the logged path must parse and exist
 {
   const cwd = freshDir("video");

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+- Fixed output paths containing spaces failing to resolve (#136)
+
 ## 0.4.1
 
 - Repackaged 0.4.0: the published vsix accidentally bundled local development
