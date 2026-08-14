@@ -60,6 +60,13 @@ type MediaInfo = {
   mediaPath?: string;
 };
 
+// Returned by cmdRun so callers (tests, automation) can observe the render
+// outcome without going through the UI.
+export type RenderResult = {
+  mediaType: number;
+  outputPath: string;
+};
+
 // a process will be killed if this message is seen
 const KILL_MSG =
   "Choose number corresponding to desired scene/arguments.\r\n(Use comma separated list for multiple entries)\r\nChoice(s):  ";
@@ -134,8 +141,14 @@ export class ManimSideview {
    * @param srcPath path to the src file, if undefined, the active text document is used
    * @param autoRun denotes whether if this call is from
    * an automated runner like RunOnSave
+   * @param sceneName when given, used directly instead of prompting the
+   * user with a quick pick; lets tests and automation drive a render
    */
-  async cmdRun(srcPath?: vscode.Uri | string, autoRun?: boolean) {
+  async cmdRun(
+    srcPath?: vscode.Uri | string,
+    autoRun?: boolean,
+    sceneName?: string
+  ): Promise<RenderResult | undefined> {
     let activeJob = srcPath
       ? this.jobManager.getActiveJob(
         typeof srcPath === "string" ? srcPath : srcPath.fsPath
@@ -195,9 +208,13 @@ export class ManimSideview {
       // if there is an active job simply resume
       activeJob.config.manimConfig = manimConfig;
       activeJob.config.isUsingConfFile = isConfFile;
+      if (sceneName) {
+        activeJob.config.sceneName = sceneName;
+      }
       currentRunningConfig = activeJob.config;
     } else {
-      const newSceneName = await this.getRenderSceneName(document.uri);
+      const newSceneName =
+        sceneName ?? (await this.getRenderSceneName(document.uri));
       if (!newSceneName) {
         return;
       }
@@ -213,7 +230,7 @@ export class ManimSideview {
       );
     }
 
-    this.render(currentRunningConfig);
+    return this.render(currentRunningConfig);
   }
 
   async cmdStop() {
@@ -563,7 +580,9 @@ export class ManimSideview {
    *
    * @param config the running configuration
    */
-  private async render(config: RunningConfig) {
+  private async render(
+    config: RunningConfig
+  ): Promise<RenderResult | undefined> {
     Log.info(
       "Attempting to render via the running configuration " +
       JSON.stringify(config, null, 4) +
@@ -595,83 +614,87 @@ export class ManimSideview {
       config.sceneName.trim(),
     ];
 
-    this.spawnManimProcess(
+    const mediaInfo = await this.spawnManimProcess(
       manim.manim,
       args,
       cwd,
       manim.binDir,
       config.srcPath,
-      config.sceneName,
-      (mediaInfo) => {
-        Log.info(`Running process for "${config.sceneName}" has finished.`);
-        // Trust manim's actual output path (from its log or a filesystem probe)
-        // over the static recompute, which doesn't account for CLI flags like
-        // -ql / -qm that change the quality directory.
-        const resolvedPath =
-          mediaInfo.mediaPath ??
-          (mediaInfo.fileType === PlayableMediaType.Video
-            ? getVideoOutputPath(config)
-            : getImageOutputPath(config, mediaInfo.imageName));
-
-        const filePath = vscode.Uri.file(
-          path.isAbsolute(resolvedPath)
-            ? resolvedPath
-            : path.join(config.srcRootFolder, resolvedPath)
-        );
-        Log.info(
-          `Predicted output file path is "${filePath.fsPath}" for "${config.sceneName}".`
-        );
-
-        if (!fs.existsSync(filePath.fsPath)) {
-          vscode.window
-            .showErrorMessage(
-              Log.error(
-                `Manim Sideview: Predicted output file does not exist at "${filePath.fsPath}"` +
-                " Make sure that the designated video directories are reflected" +
-                " in the extension log."
-              ),
-              "Show Log"
-            )
-            .then((value?: String) =>
-              value === "Show Log"
-                ? vscode.commands.executeCommand(
-                  "manim-sideview.showOutputChannel"
-                )
-                : null
-            );
-          throw new Error(
-            "Manim Sideview: Predicted output file does not exist."
-          );
-        }
-
-        if (getUserConfiguration("preview")) {
-          // we'll open a side view
-          this.mediaPlayer.playMedia(filePath, config, mediaInfo.fileType);
-        }
-
-        // we'll execute the post render terminal command if it exists
-        this.executeTerminalCommand(
-          filePath.fsPath,
-          config.srcPath,
-          config.sceneName,
-          cwd
-        );
-
-        const job = this.jobManager.getActiveJob(config.srcPath);
-        if (job) {
-          this.jobManager.setActive(job);
-        } else {
-          Log.info(
-            `New job added for "${config.srcPath}" as ${JSON.stringify(
-              config,
-              null,
-              4
-            )}`
-          );
-          this.jobManager.addJob(config, mediaInfo.fileType);
-        }
-      }
+      config.sceneName
     );
+    if (!mediaInfo) {
+      return;
+    }
+
+    Log.info(`Running process for "${config.sceneName}" has finished.`);
+    // Trust manim's actual output path (from its log or a filesystem probe)
+    // over the static recompute, which doesn't account for CLI flags like
+    // -ql / -qm that change the quality directory.
+    const resolvedPath =
+      mediaInfo.mediaPath ??
+      (mediaInfo.fileType === PlayableMediaType.Video
+        ? getVideoOutputPath(config)
+        : getImageOutputPath(config, mediaInfo.imageName));
+
+    const filePath = vscode.Uri.file(
+      path.isAbsolute(resolvedPath)
+        ? resolvedPath
+        : path.join(config.srcRootFolder, resolvedPath)
+    );
+    Log.info(
+      `Predicted output file path is "${filePath.fsPath}" for "${config.sceneName}".`
+    );
+
+    if (!fs.existsSync(filePath.fsPath)) {
+      vscode.window
+        .showErrorMessage(
+          Log.error(
+            `Manim Sideview: Predicted output file does not exist at "${filePath.fsPath}"` +
+            " Make sure that the designated video directories are reflected" +
+            " in the extension log."
+          ),
+          "Show Log"
+        )
+        .then((value?: String) =>
+          value === "Show Log"
+            ? vscode.commands.executeCommand(
+              "manim-sideview.showOutputChannel"
+            )
+            : null
+        );
+      throw new Error(
+        "Manim Sideview: Predicted output file does not exist."
+      );
+    }
+
+    if (getUserConfiguration("preview")) {
+      // we'll open a side view
+      this.mediaPlayer.playMedia(filePath, config, mediaInfo.fileType);
+    }
+
+    // we'll execute the post render terminal command if it exists
+    this.executeTerminalCommand(
+      filePath.fsPath,
+      config.srcPath,
+      config.sceneName,
+      cwd
+    );
+
+    const job = this.jobManager.getActiveJob(config.srcPath);
+    if (job) {
+      this.jobManager.setActive(job);
+    } else {
+      Log.info(
+        `New job added for "${config.srcPath}" as ${JSON.stringify(
+          config,
+          null,
+          4
+        )}`
+      );
+      this.jobManager.addJob(config, mediaInfo.fileType);
+    }
+
+    return { mediaType: mediaInfo.fileType, outputPath: filePath.fsPath };
   }
 
   /**
@@ -682,16 +705,29 @@ export class ManimSideview {
    * @param args arguments for the command
    * @param cwd the current working directory
    * @param config the running configuration
-   * @returns
+   * @returns the media info on success, undefined on failure or termination
    */
-  private async spawnManimProcess(
+  private spawnManimProcess(
+    command: string,
+    args: string[],
+    cwd: string,
+    binDir: string | undefined,
+    srcPath: string,
+    sceneName: string
+  ): Promise<MediaInfo | undefined> {
+    return new Promise((resolve) => {
+      this.doSpawnManimProcess(command, args, cwd, binDir, srcPath, sceneName, resolve);
+    });
+  }
+
+  private doSpawnManimProcess(
     command: string,
     args: string[],
     cwd: string,
     binDir: string | undefined,
     srcPath: string,
     sceneName: string,
-    onProcessClose: (m: MediaInfo) => void
+    onProcessClose: (m: MediaInfo | undefined) => void
   ) {
     const startTime = new Date();
     const process = spawn(command, args, {
@@ -811,16 +847,21 @@ export class ManimSideview {
         if (isMainProcess) {
           this.jobManager.setError(job);
         }
+        onProcessClose(undefined);
         return;
       }
 
-      const mediaInfo = await this.getMediaFileInfo(
-        stdoutLogbook,
-        srcPath,
-        sceneName
-      );
-
-      onProcessClose(mediaInfo);
+      try {
+        const mediaInfo = await this.getMediaFileInfo(
+          stdoutLogbook,
+          srcPath,
+          sceneName
+        );
+        onProcessClose(mediaInfo);
+      } catch (e) {
+        Log.error(`Failed to determine media output: ${e}`);
+        onProcessClose(undefined);
+      }
     });
 
     Log.info(

@@ -77,3 +77,27 @@ jobs:
         run: xvfb-run -a npm run test:contract
         env:
           OPENGL_CONTRACT: "1"
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - run: sudo apt-get update && sudo apt-get install -y libpango1.0-dev pkg-config ffmpeg
+      - run: pip install "manim>=0.19"
+      # the downloaded VSCode build; keyed loosely on the engines range
+      - uses: actions/cache@v4
+        with:
+          path: .vscode-test
+          key: vscode-test-${{ runner.os }}-stable
+      # ms-python.python is intentionally NOT installed: this exercises the
+      # activation path that tolerates a missing python extension. The manim
+      # path is absolute, so interpreter resolution is never needed.
+      - run: MANIM_BIN=$(which manim) xvfb-run -a npm run test:integration
