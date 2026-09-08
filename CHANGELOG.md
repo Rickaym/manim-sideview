@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.3
+
+- Fixed the preview staying blank when `media_dir` points outside the
+  project folder (#159)
+
 ## 0.4.2
 
 - Fixed output paths containing spaces failing to resolve (#136)
