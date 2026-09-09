@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.3
+
+- Fixed the preview staying blank when `media_dir` points outside the
+  project folder (#159)
+
+## 0.4.2
+
+- Fixed output paths containing spaces failing to resolve (#136)
+
+## 0.4.1
+
+- Repackaged 0.4.0: the published vsix accidentally bundled local development
+  files, inflating its size. No functional changes.
+
 ## 0.4.0
 
 ### Output path resolution

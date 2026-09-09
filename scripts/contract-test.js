@@ -54,6 +54,33 @@ function check(name, fn) {
   }
 }
 
+// 0. render inside a directory containing a space: the wrapped log path
+// must reconstruct with the space intact (0.4.1 regression, issue #136)
+{
+  const cwd = path.join(freshDir("spaced"), "my scenes");
+  fs.mkdirSync(cwd);
+  fs.copyFileSync(
+    path.join(FIXTURES, "scenes", "video_scene.py"),
+    path.join(cwd, "scene.py")
+  );
+  const render = run(["-ql", "scene.py", "VideoScene"], cwd);
+  const logbook = render.stdout + render.stderr;
+
+  check("spaced path: parsed log path exists on disk", () => {
+    const parsed = parseMediaOutputFromLog(logbook);
+    assert.ok(parsed, `no File ready entry found in:\n${logbook}`);
+    assert.ok(
+      fs.existsSync(parsed.mediaPath),
+      `parsed path does not exist: ${parsed.mediaPath}`
+    );
+    assert.ok(
+      parsed.mediaPath.includes("my scenes"),
+      `space was stripped from: ${parsed.mediaPath}`
+    );
+  });
+  fs.rmSync(path.dirname(cwd), { recursive: true, force: true });
+}
+
 // 1. video render: the logged path must parse and exist
 {
   const cwd = freshDir("video");
@@ -229,7 +256,51 @@ function check(name, fn) {
   fs.rmSync(cwd, { recursive: true, force: true });
 }
 
-// 6. run from workspace root: scene in a subfolder, root manim.cfg with a
+// 6. opengl renderer via commandLineArgs-style flags (issue #97).
+// Needs a GL context, so it only runs when OPENGL_CONTRACT=1 (CI provides
+// xvfb and mesa for this leg).
+if (process.env.OPENGL_CONTRACT === "1") {
+  const cwd = freshDir("opengl");
+  fs.copyFileSync(
+    path.join(FIXTURES, "scenes", "video_scene.py"),
+    path.join(cwd, "scene.py")
+  );
+  const render = run(
+    ["--renderer=opengl", "--write_to_movie", "-ql", "scene.py", "VideoScene"],
+    cwd
+  );
+  const logbook = render.stdout + render.stderr;
+
+  check("opengl: renders and the output path resolves", () => {
+    assert.strictEqual(render.status, 0, `manim exited ${render.status}:\n${logbook}`);
+    const parsed = parseMediaOutputFromLog(logbook);
+    if (parsed) {
+      assert.ok(
+        fs.existsSync(parsed.mediaPath),
+        `parsed path does not exist: ${parsed.mediaPath}`
+      );
+    } else {
+      // opengl may log differently; the disk probe fallback must still work
+      const predictedVideo = path.join(
+        cwd,
+        "media",
+        "videos",
+        "scene",
+        "480p15",
+        "VideoScene.mp4"
+      );
+      assert.ok(
+        fs.existsSync(predictedVideo),
+        `no File ready log and no file at ${predictedVideo}; logs:\n${logbook}`
+      );
+    }
+  });
+  fs.rmSync(cwd, { recursive: true, force: true });
+} else {
+  console.log("[SKIP] opengl renderer (set OPENGL_CONTRACT=1 to enable)");
+}
+
+// 7. run from workspace root: scene in a subfolder, root manim.cfg with a
 // custom media_dir and silent logs; the probe rooted at the project root
 // must find the output under the ROOT media dir, not the subfolder
 {

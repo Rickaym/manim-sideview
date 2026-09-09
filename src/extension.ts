@@ -12,9 +12,24 @@ import { PythonExtension } from "@vscode/python-extension";
 
 export async function activate(context: vscode.ExtensionContext) {
   Log.info("Activating extension.");
-  await loadGlobals(context);
 
-  const pythonApi: PythonExtension = await PythonExtension.api();
+  try {
+    await loadGlobals(context);
+  } catch (e) {
+    vscode.window.showErrorMessage(
+      `Manim Sideview: Failed to load extension globals. ${e}`
+    );
+  }
+
+  let pythonApi: PythonExtension | undefined;
+  try {
+    pythonApi = await PythonExtension.api();
+  } catch (e) {
+    Log.warn(
+      "Python extension unavailable; interpreter-based manim resolution disabled" +
+        ` - set an absolute defaultManimPath or put manim on PATH. (${e})`
+    );
+  }
   const sideview = new ManimSideview(context, pythonApi);
 
   context.subscriptions.push(

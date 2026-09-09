@@ -1,3 +1,4 @@
+import * as path from "path";
 import * as vscode from "vscode";
 import {
   BASE_PROGRESS_BAR_COLOR,
@@ -6,6 +7,7 @@ import {
   Log,
   RunningConfig,
 } from "./globals";
+import { isCoveredByRoots, mediaResourceRoots } from "./resourceRoots";
 import { TemplateEngine } from "./templateEngine";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -56,12 +58,30 @@ export class MediaPlayer {
     return `${webveiw.asWebviewUri(uri).toString()}?t=${new Date().getTime()}`;
   }
 
+  /**
+   * Widens an existing webview's local resource roots so it can load media
+   * rendered outside the folders it was created with.
+   */
+  allowMediaRoot(webview: vscode.Webview, mediaUri: vscode.Uri) {
+    const roots = webview.options.localResourceRoots ?? [];
+    const mediaDir = path.dirname(mediaUri.fsPath);
+    if (isCoveredByRoots(roots.map((uri) => uri.fsPath), mediaDir)) {
+      return;
+    }
+    Log.info(`Allowing webview access to media folder "${mediaDir}".`);
+    webview.options = {
+      ...webview.options,
+      localResourceRoots: [...roots, vscode.Uri.file(mediaDir)],
+    };
+  }
+
   async playMedia(
     mediaUri: vscode.Uri,
     config: RunningConfig,
     mediaType: number
   ) {
     if (this.recentMediaPanel) {
+      this.allowMediaRoot(this.recentMediaPanel.webview, mediaUri);
       const resource = this.asCacheBreakingWebviewUri(
         this.recentMediaPanel.webview,
         mediaUri
@@ -85,9 +105,8 @@ export class MediaPlayer {
       },
       {
         localResourceRoots: [
-          vscode.Uri.joinPath(
-            vscode.Uri.file(config.document.uri.fsPath),
-            "../"
+          ...mediaResourceRoots(config.srcRootFolder, mediaUri.fsPath).map(
+            (dir) => vscode.Uri.file(dir)
           ),
           this.extensionUri,
         ],

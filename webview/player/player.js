@@ -43,6 +43,8 @@ const sourceFileDisplay = document.getElementById("source-file");
 let isVideoMode = !videoPlayer.hidden;
 let controlsTimeout;
 let wasPausedBeforeSeek = false;
+// Tracks whether the user has explicitly set mute or volume themselves.
+let userTouchedVolume = false;
 
 // --- Helper Functions ---
 
@@ -111,10 +113,21 @@ function showControls() {
   controlsContainer.classList.add("visible");
 }
 
+// The video starts "autoplay muted" to satisfy the autoplay policy.
+// Unmute on the first real user interaction unless the user muted it.
+function unmuteOnFirstInteraction() {
+  if (!isVideoMode || userTouchedVolume) return;
+  if (video.muted) {
+    video.muted = false;
+    updateVolumeIcon();
+  }
+}
+
 // --- Core Functionality ---
 
 function togglePlayPause() {
   if (!isVideoMode) return;
+  unmuteOnFirstInteraction();
   if (video.paused) {
     video.play();
   } else {
@@ -135,6 +148,7 @@ function skip(duration) {
 
 function toggleMute() {
   if (!isVideoMode) return;
+  userTouchedVolume = true;
   video.muted = !video.muted;
   if (!video.muted && video.volume === 0) {
     // Unmuting but volume was 0
@@ -286,6 +300,7 @@ playPauseButton.addEventListener("click", togglePlayPause);
 volumeButton.addEventListener("click", toggleMute);
 volumeSlider.addEventListener("input", (e) => {
   if (!isVideoMode) return;
+  userTouchedVolume = true;
   video.volume = e.target.value;
   video.muted = video.volume === 0; // Mute if slider dragged to 0
   updateVolumeIcon(); // Update icon immediately
