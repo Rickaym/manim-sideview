@@ -60,6 +60,11 @@
           "default": "false",
           "description": "Enable or disable the automatic running of a previously run file upon saving."
         },
+        "manim-sideview.runFromWorkspaceRoot": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run Manim from the workspace folder containing the file instead of the file's own directory. A manim.cfg at the workspace root then applies to every scene, the media folder is generated at the root, and relative paths inside scenes resolve from the root."
+        },
         "manim-sideview.focusOutputOnRun": {
           "type": "boolean",
           "default": "true",
